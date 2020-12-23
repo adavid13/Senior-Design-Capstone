@@ -1,0 +1,24 @@
+High level git concept (not adding and committing):
+
+
+step 0 (make sure you're up to date):
+git fetch origin
+
+step 1 (create a new branch for your own work):
+git checkout -b temp
+
+step 2 (save your work in cloud):
+git push origin temp
+
+step 3 (squash insignificant commits and make commit history easy to read)
+git rebase -i master
+
+p.s. after step 3, when you save your work it may be behind the remote, so to overwrite the remote use:
+git push origin temp -f
+
+step 4 (merge master to your branch in case master has changed):
+git merge master
+
+step 5 (update master branch):
+Go to your branch on gitlab, and click "Create merge request"
+Ask someone to approve your merge request
