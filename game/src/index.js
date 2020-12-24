@@ -1,22 +1,18 @@
 import Phaser from 'phaser';
 import logoImg from './assets/logo.png';
 
-class MyGame extends Phaser.Scene
-{
-    constructor ()
-    {
+class MyGame extends Phaser.Scene {
+    constructor() {
         super();
     }
 
-    preload ()
-    {
+    preload() {
         this.load.image('logo', logoImg);
     }
-      
-    create ()
-    {
+
+    create() {
         const logo = this.add.image(400, 150, 'logo');
-      
+
         this.tweens.add({
             targets: logo,
             y: 450,
