@@ -4,21 +4,16 @@ module.exports = {
     node: true,
     es6: true,
   },
-  extends: ['eslint:recommended'],
+  extends: ['plugin:prettier/recommended'],
   plugins: ['prettier'],
   rules: {
-    'prettier/prettier': [
-      'warn',
-      {
-        semi: true,
-        singleQuote: true,
-        tabWidth: 2,
-        endOfLine: 'auto',
-      },
-    ],
+    'prettier/prettier': 'error',
     'comma-dangle': ['error', 'only-multiline'],
     'linebreak-style': ['error', 'unix'],
     'no-param-reassign': [2, { props: false }],
   },
   parser: '@babel/eslint-parser',
+  parserOptions: {
+    sourceType: 'module',
+  },
 };

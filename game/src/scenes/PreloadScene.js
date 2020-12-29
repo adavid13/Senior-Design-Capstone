@@ -1,11 +1,10 @@
 import Phaser from 'phaser';
-import AssetManifest from '../utils/AssetManifest';
+import AssetManifest from '../AssetManifest';
 import { Constants } from '../utils/constants';
 
 const sceneConfig = {
   key: Constants.Scenes.PRELOAD,
 };
-
 export default class PreloadScene extends Phaser.Scene {
   graphics;
   newGraphics;
@@ -34,10 +33,7 @@ export default class PreloadScene extends Phaser.Scene {
 
     AssetManifest.images.forEach((image) => {
       if (image.loadOnStart) {
-        this.load.image(
-          image.name.split('.')[0],
-          `./assets/images/${image.name}`
-        );
+        this.load.image(image.name, image.path);
       }
     });
 
@@ -54,7 +50,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.loadingText.setText('Loading: ' + (percentage * 100).toFixed(2) + '%');
   };
 
-  complete() {
-    //this.scene.start(GAME);
-  }
+  complete = () => {
+    this.scene.start(Constants.Scenes.TITLE);
+  };
 }
