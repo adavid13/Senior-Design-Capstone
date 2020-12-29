@@ -1,2 +1,7 @@
 __pycache__/
 *.py[cod]
+ChexyAgent.egg-info
+build
+dist
+instance
+ChexyAgentenv

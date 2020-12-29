@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve ChexyAgent
+After=network.target
+
+[Service]
+User=engg4000
+Group=www-data
+WorkingDirectory=/home/engg4000/ChexyAgent
+Environment="PATH=/home/engg4000/ChexyAgent/ChexyAgentenv/bin"
+ExecStart=/home/engg4000/ChexyAgent/ChexyAgentenv/bin/gunicorn --workers 3 --bind unix:ChexyAgent.sock -m 007 wsgi:app
+
+[Install]
+WantedBy=multi-user.target
