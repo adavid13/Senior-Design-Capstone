@@ -5,14 +5,12 @@ export default class ButtonContainer extends Phaser.GameObjects.Container {
   button;
   text;
 
-  constructor(scene, x, y, texture, tint = oxffffff) {
+  constructor(scene, x, y, texture, tint = 0xffffff) {
     super(scene, x, y);
     this.scene = scene;
 
     this.button = new Button(scene, 0, 0, texture, tint);
-    this.text = this.scene.add
-      .text(0, 0, 'Button', { color: 'black' })
-      .setOrigin(0.5, 0.5);
+    this.text = this.scene.add.text(0, 0, 'Button', { color: 'black' }).setOrigin(0.5, 0.5);
 
     this.add(this.button);
     this.add(this.text);
@@ -88,11 +86,8 @@ export default class ButtonContainer extends Phaser.GameObjects.Container {
   }
 }
 
-Phaser.GameObjects.GameObjectFactory.register(
-  'buttonContainer',
+Phaser.GameObjects.GameObjectFactory.register('buttonContainer',
   function (x, y, key, tint = 0xffffff) {
-    return this.displayList.add(
-      new ButtonContainer(this.scene, x, y, key, tint)
-    );
+    return this.displayList.add(new ButtonContainer(this.scene, x, y, key, tint));
   }
 );

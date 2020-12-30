@@ -9,4 +9,15 @@ export const Constants = {
     GAMEUI: 'GAMEUI',
     GAME: 'GAME',
   },
+
+  Difficulty: {
+    BEGINNER: 'BEGINNER',
+    INTERMEDIATE: 'INTERMEDIATE',
+    ADVANCED: 'ADVANCED',
+  },
+
+  World: {
+    WIDTH: 3000,
+    HEIGHT: 2800,
+  },
 };

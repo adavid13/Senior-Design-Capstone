@@ -15,21 +15,35 @@ export default class PreloadScene extends Phaser.Scene {
   }
 
   preload() {
+    this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor('#69696c');
+    const centerX = this.scale.width / 2;
+    const centerY = this.scale.height / 2;
+    const barWidth = 400;
+    const barHeight = 50;
+
     this.graphics = this.add.graphics();
     this.newGraphics = this.add.graphics();
-    const progressBar = new Phaser.Geom.Rectangle(200, 200, 400, 50);
-    const progressBarFill = new Phaser.Geom.Rectangle(205, 205, 290, 40);
+    const progressBar = new Phaser.Geom.Rectangle(centerX - barWidth / 2, centerY - barHeight / 2, barWidth, barHeight);
+    const progressBarFill = new Phaser.Geom.Rectangle(
+      centerX - barWidth / 2 + 5,
+      centerY - barHeight / 2 + 5,
+      barWidth - 10,
+      barHeight - 10
+    );
 
     this.graphics.fillStyle(0xffffff, 1);
     this.graphics.fillRectShape(progressBar);
 
-    this.newGraphics.fillStyle(0x3587e2, 1);
+    this.newGraphics.fillStyle(0x7f8a78, 1);
     this.newGraphics.fillRectShape(progressBarFill);
 
-    this.loadingText = this.add.text(250, 260, 'Loading: ', {
-      fontSize: '32px',
-      fill: '#FFF',
-    });
+    this.loadingText = this.add
+      .text(centerX, centerY - 60, 'Loading: ', {
+        fontSize: '32px',
+        fontStyle: 'bold',
+        fill: '#ffda82',
+      })
+      .setOrigin(0.5);
 
     AssetManifest.images.forEach((image) => {
       if (image.loadOnStart) {
@@ -51,10 +65,20 @@ export default class PreloadScene extends Phaser.Scene {
   }
 
   updateProgress = (percentage) => {
+    const centerX = this.scale.width / 2;
+    const centerY = this.scale.height / 2;
+    const barWidth = 400;
+    const barHeight = 50;
+
     this.newGraphics.clear();
-    this.newGraphics.fillStyle(0x3587e2, 1);
+    this.newGraphics.fillStyle(0x7f8a78, 1);
     this.newGraphics.fillRectShape(
-      new Phaser.Geom.Rectangle(205, 205, percentage * 390, 40)
+      new Phaser.Geom.Rectangle(
+        centerX - barWidth / 2 + 5,
+        centerY - barHeight / 2 + 5,
+        percentage * (barWidth - 10),
+        barHeight - 10
+      )
     );
     this.loadingText.setText('Loading: ' + (percentage * 100).toFixed(2) + '%');
   };

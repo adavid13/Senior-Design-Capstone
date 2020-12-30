@@ -4,12 +4,13 @@ module.exports = {
     node: true,
     es6: true,
   },
-  extends: ['plugin:prettier/recommended'],
-  plugins: ['prettier'],
+  extends: ['eslint:recommended'],
   rules: {
-    'prettier/prettier': 'error',
     'comma-dangle': ['error', 'only-multiline'],
+    'no-dupe-class-members': 'off',
     'no-param-reassign': [2, { props: false }],
+    'max-len': ['error', { code: 250, ignoreUrls: true }],
+    'no-unused-vars': ['error', { vars: 'all', args: 'none', ignoreRestSiblings: false }],
   },
   parser: '@babel/eslint-parser',
   parserOptions: {

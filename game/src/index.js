@@ -9,6 +9,7 @@ import GameScene from './scenes/GameScene';
 import GameUIScene from './scenes/GameUIScene';
 import ExampleScene from './scenes/ExampleScene';
 
+/*eslint no-unused-vars: "off"*/
 import ButtonContainer from './components/ui/ButtonContainer';
 
 const config = {
@@ -25,16 +26,7 @@ const config = {
       },
     ],
   },
-  scene: [
-    PreloadScene,
-    TitleScene,
-    OptionsScene,
-    CreditsScene,
-    DifficultyScene,
-    GameScene,
-    GameUIScene,
-    ExampleScene,
-  ],
+  scene: [PreloadScene, TitleScene, OptionsScene, CreditsScene, DifficultyScene, GameScene, GameUIScene, ExampleScene],
 };
 
 const game = new Phaser.Game(config);

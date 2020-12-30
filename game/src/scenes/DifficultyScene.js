@@ -11,42 +11,35 @@ export default class DifficultyScene extends Phaser.Scene {
   }
 
   create() {
-    this.titleText = this.add.text(
-      this.scale.width / 2,
-      this.scale.height / 3,
-      'Select the difficulty',
-      { fontSize: '64px', fill: '#fff' }
-    );
+    this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor('#69696c');
+    this.titleText = this.add.text(this.scale.width / 2, this.scale.height / 3, 'Select the difficulty', {
+      fontSize: '64px',
+      fill: '#fff',
+    });
     this.titleText.setOrigin(0.5);
 
-    this.btnBeginner = this.createButton(
-      this.scale.width / 4,
-      this.scale.height / 2,
-      'Beginner'
-    );
+    this.btnBeginner = this.createButton(this.scale.width / 4, this.scale.height / 2, 'Beginner');
 
     this.btnBeginner.onClick().subscribe(() => {
-      this.startScene(Constants.Scenes.GAME);
+      this.startScene(Constants.Scenes.GAME, {
+        difficulty: Constants.Difficulty.BEGINNER,
+      });
     });
 
-    this.btnIntermediate = this.createButton(
-      this.scale.width / 2,
-      this.scale.height / 2,
-      'Intermediate'
-    );
+    this.btnIntermediate = this.createButton(this.scale.width / 2, this.scale.height / 2, 'Intermediate');
 
     this.btnIntermediate.onClick().subscribe(() => {
-      this.startScene(Constants.Scenes.GAME);
+      this.startScene(Constants.Scenes.GAME, {
+        difficulty: Constants.Difficulty.INTERMEDIATE,
+      });
     });
 
-    this.btnAdvanced = this.createButton(
-      (this.scale.width * 3) / 4,
-      this.scale.height / 2,
-      'Advanced'
-    );
+    this.btnAdvanced = this.createButton((this.scale.width * 3) / 4, this.scale.height / 2, 'Advanced');
 
     this.btnAdvanced.onClick().subscribe(() => {
-      this.startScene(Constants.Scenes.GAME);
+      this.startScene(Constants.Scenes.GAME, {
+        difficulty: Constants.Difficulty.ADVANCED,
+      });
     });
   }
 
@@ -58,7 +51,7 @@ export default class DifficultyScene extends Phaser.Scene {
       .setText(text);
   }
 
-  startScene(targetScene) {
-    this.scene.start(targetScene);
+  startScene(targetScene, params) {
+    this.scene.start(targetScene, params);
   }
 }

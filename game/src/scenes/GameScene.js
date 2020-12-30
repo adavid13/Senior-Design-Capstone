@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import GameBoard from '../components/GameBoard';
+import GameBoardModel from '../components/model/GameBoardModel';
 import { Constants } from '../utils/constants';
 
 const sceneConfig = {
@@ -10,84 +12,42 @@ export default class GameScene extends Phaser.Scene {
     super(sceneConfig);
   }
 
-  init() {
+  init(initParams) {
     this.scene.launch(Constants.Scenes.GAMEUI);
+    this.difficulty = initParams.difficulty;
   }
 
   preload() {}
 
   create() {
-    const print = this.add.text(0, 0, 'Click any tile');
-    const staggeraxis = 'x';
-    const staggerindex = 'odd';
-    const RADIUS = 8;
-    const board = this.rexBoard.add
-      .board({
-        grid: {
-          gridType: 'hexagonGrid',
-          x: 0,
-          y: 0,
-          size: 60,
-          staggeraxis,
-          staggerindex,
-        },
-      })
-      .setInteractive()
-      .on('tiledown', (pointer, tileXY) => {
-        print.text = `${tileXY.x},${tileXY.y}`;
-      });
-    const tileXYArray = board.fit(
-      this.rexBoard.hexagonMap.hexagon(board, RADIUS)
-    );
-
-    this.centerCamera(board, tileXYArray, RADIUS);
-
-    const graphics = this.add.graphics({
-      lineStyle: {
-        width: 1,
-        color: 0xffffff,
-        alpha: 1,
+    const boardConfig = {
+      grid: {
+        gridType: 'hexagonGrid',
+        x: 300,
+        y: 300,
+        size: 60,
+        staggeraxis: 'x',
+        staggerindex: 'odd',
       },
-    });
+      radius: 12,
+    };
 
-    const grasslandKeys = [
-      'grassland0',
-      'grassland2',
-      'grassland2',
-      'grassland3',
-    ];
+    const boardModel = new GameBoardModel(boardConfig, this.difficulty);
+    const board = new GameBoard(this, boardModel);
+    board.initHexBoard();
+    // const print = this.add.text(0, 0, 'Click any tile');
 
-    let tileXY = {};
-    let worldXY = {};
-    for (const i in tileXYArray) {
-      tileXY = tileXYArray[i];
-      graphics.strokePoints(
-        board.getGridPoints(tileXY.x, tileXY.y, true),
-        true
-      );
-      worldXY = board.tileXYToWorldXY(tileXY.x, tileXY.y);
-      this.add
-        .image(
-          worldXY.x,
-          worldXY.y,
-          grasslandKeys[Math.floor(Math.random() * 4)],
-          Math.floor(Math.random() * 10)
-        )
-        .setScale(0.625);
-      this.add
-        .text(worldXY.x, worldXY.y, `${tileXY.x},${tileXY.y}`)
-        .setOrigin(0.5);
-    }
+    this.cameras.main.setBounds(0, 0, Constants.World.WIDTH, Constants.World.HEIGHT);
+    // this.physics.world.setBounds(0, 0, 4000, 4000);
+    this.centerCamera(board, boardModel);
   }
 
   update() {
     if (this.game.input.activePointer.isDown) {
       if (this.game.origDragPoint) {
         // move the camera by the amount the mouse has moved since last update
-        this.cameras.main.scrollX +=
-          this.game.origDragPoint.x - this.game.input.activePointer.position.x;
-        this.cameras.main.scrollY +=
-          this.game.origDragPoint.y - this.game.input.activePointer.position.y;
+        this.cameras.main.scrollX += this.game.origDragPoint.x - this.game.input.activePointer.position.x;
+        this.cameras.main.scrollY += this.game.origDragPoint.y - this.game.input.activePointer.position.y;
       } // set new drag origin to current position
       this.game.origDragPoint = this.game.input.activePointer.position.clone();
     } else {
@@ -95,13 +55,7 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  centerCamera(board, tileXYArray, radius) {
-    for (const i in tileXYArray) {
-      const tileXY = tileXYArray[i];
-      if (tileXY.x === radius && tileXY.y === radius) {
-        const worldXY = board.tileXYToWorldXY(tileXY.x, tileXY.y);
-        this.cameras.main.centerOn(worldXY.x, worldXY.y);
-      }
-    }
+  centerCamera(board, boardModel) {
+    this.cameras.main.centerOn(Constants.World.WIDTH / 2, Constants.World.HEIGHT / 2);
   }
 }
