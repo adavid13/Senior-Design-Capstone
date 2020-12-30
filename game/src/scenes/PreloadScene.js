@@ -37,6 +37,15 @@ export default class PreloadScene extends Phaser.Scene {
       }
     });
 
+    AssetManifest.spritesheets.forEach((spritesheet) => {
+      if (spritesheet.loadOnStart) {
+        this.load.spritesheet(spritesheet.name, spritesheet.path, {
+          frameWidth: spritesheet.frameWidth,
+          frameHeight: spritesheet.frameHeight,
+        });
+      }
+    });
+
     this.load.on('progress', this.updateProgress);
     this.load.on('complete', this.complete);
   }

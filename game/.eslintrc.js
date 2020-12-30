@@ -9,7 +9,6 @@ module.exports = {
   rules: {
     'prettier/prettier': 'error',
     'comma-dangle': ['error', 'only-multiline'],
-    'linebreak-style': ['error', 'unix'],
     'no-param-reassign': [2, { props: false }],
   },
   parser: '@babel/eslint-parser',

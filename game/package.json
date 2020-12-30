@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint --fix ./",
     "build": "webpack --config webpack/prod.js --mode production",
-    "start": "webpack serve --config webpack/base.js --mode development --open 'Google Chrome'"
+    "start": "webpack serve --config webpack/base.js --mode development"
   },
   "repository": {
     "type": "git",
