@@ -20,6 +20,21 @@ const assetManifest = {
       path: './assets/ui/buttonLong_blue.png',
       loadOnStart: true,
     },
+    {
+      name: 'humanKing',
+      path: './assets/characters/human_king.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'animalKing',
+      path: './assets/characters/pig_king.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'monsterKing',
+      path: './assets/characters/skeleton_king.png',
+      loadOnStart: true,
+    },
   ],
   spritesheets: [
     {

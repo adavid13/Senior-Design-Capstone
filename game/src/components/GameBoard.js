@@ -11,10 +11,6 @@ export default class GameBoard extends Board {
     this.scene.add.existing(this);
     this.tileXYArray = this.fit(this.scene.rexBoard.hexagonMap.hexagon(this, this.model.getRadius()));
 
-    this.scene.add.image(0, 0, 'gamebg').setOrigin(0, 0);
-    this.scene.add.image(2034, 0, 'gamebg').setOrigin(0, 0);
-    this.scene.add.image(0, 1758, 'gamebg').setOrigin(0, 0);
-    this.scene.add.image(2034, 1758, 'gamebg').setOrigin(0, 0);
     this.tileOutline = this.scene.add.graphics({
       lineStyle: { width: 1, color: 0xffffff, alpha: 1 },
     });
@@ -38,7 +34,7 @@ export default class GameBoard extends Board {
     }
 
     this.setInteractive().on('tiledown', (pointer, tileXY) => {
-      // print.text = `${tileXY.x},${tileXY.y}`;
+      // console.log(`${tileXY.x},${tileXY.y}`);
     });
 
     return this;
