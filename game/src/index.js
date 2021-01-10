@@ -1,74 +1,37 @@
 import Phaser from 'phaser';
 import BoardPlugin from 'phaser3-rex-plugins/plugins/board-plugin';
+import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 import PreloadScene from './scenes/PreloadScene';
+import TitleScene from './scenes/TitleScene';
+import OptionsScene from './scenes/OptionsScene';
+import CreditsScene from './scenes/CreditsScene';
+import DifficultyScene from './scenes/DifficultyScene';
+import GameScene from './scenes/GameScene';
+import GameUIScene from './scenes/GameUIScene';
 import ExampleScene from './scenes/ExampleScene';
 
-class MyGame extends Phaser.Scene {
-  constructor() {
-    super();
-  }
-
-  preload() {}
-
-  create() {
-    const print = this.add.text(0, 0, 'Click any tile');
-    const staggeraxis = 'y';
-    const staggerindex = 'odd';
-    const board = this.rexBoard.add
-      .board({
-        grid: {
-          gridType: 'hexagonGrid',
-          x: 60,
-          y: 60,
-          size: 30,
-          staggeraxis,
-          staggerindex,
-        },
-      })
-      .setInteractive()
-      .on('tiledown', (pointer, tileXY) => {
-        print.text = `${tileXY.x},${tileXY.y}`;
-      });
-
-    const tileXYArray = board.fit(this.rexBoard.hexagonMap.hexagon(board, 4));
-    const graphics = this.add.graphics({
-      lineStyle: {
-        width: 1,
-        color: 0xffffff,
-        alpha: 1,
-      },
-    });
-    let tileXY = {};
-    let worldXY = {};
-    for (const i in tileXYArray) {
-      tileXY = tileXYArray[i];
-      graphics.strokePoints(
-        board.getGridPoints(tileXY.x, tileXY.y, true),
-        true
-      );
-      worldXY = board.tileXYToWorldXY(tileXY.x, tileXY.y);
-      this.add
-        .text(worldXY.x, worldXY.y, `${tileXY.x},${tileXY.y}`)
-        .setOrigin(0.5);
-    }
-  }
-}
+/*eslint no-unused-vars: "off"*/
+import ButtonContainer from './components/ui/ButtonContainer';
 
 const config = {
   type: Phaser.AUTO,
-  parent: 'phaser-example',
-  width: 800,
-  height: 600,
+  parent: 'phaser',
+  width: 1024,
+  height: 768,
   plugins: {
     scene: [
       {
         key: 'rexBoard',
         plugin: BoardPlugin,
         mapping: 'rexBoard',
+      }, {
+        key: 'rexUI',
+        plugin: RexUIPlugin,
+        mapping: 'rexUI'
       },
     ],
   },
-  scene: [ExampleScene, PreloadScene, MyGame],
+  scene: [PreloadScene, TitleScene, OptionsScene, CreditsScene, DifficultyScene, GameScene, GameUIScene, ExampleScene],
 };
 
-new Phaser.Game(config);
+const game = new Phaser.Game(config);

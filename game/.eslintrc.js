@@ -5,20 +5,15 @@ module.exports = {
     es6: true,
   },
   extends: ['eslint:recommended'],
-  plugins: ['prettier'],
   rules: {
-    'prettier/prettier': [
-      'warn',
-      {
-        semi: true,
-        singleQuote: true,
-        tabWidth: 2,
-        endOfLine: 'auto',
-      },
-    ],
     'comma-dangle': ['error', 'only-multiline'],
-    'linebreak-style': ['error', 'unix'],
+    'no-dupe-class-members': 'off',
     'no-param-reassign': [2, { props: false }],
+    'max-len': ['error', { code: 250, ignoreUrls: true }],
+    'no-unused-vars': ['error', { vars: 'all', args: 'none', ignoreRestSiblings: false }],
   },
   parser: '@babel/eslint-parser',
+  parserOptions: {
+    sourceType: 'module',
+  },
 };

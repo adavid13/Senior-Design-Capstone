@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint --fix ./",
     "build": "webpack --config webpack/prod.js --mode production",
-    "start": "webpack serve --config webpack/base.js --mode development --open 'Google Chrome'"
+    "start": "webpack serve --config webpack/base.js --mode development"
   },
   "repository": {
     "type": "git",
@@ -40,7 +40,10 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
-    "phaser": "^3.50.0",
-    "phaser3-rex-plugins": "^1.1.35"
+    "@dagrejs/graphlib": "^2.1.4",
+    "phaser": "~3.51.0",
+    "phaser3-rex-plugins": "^1.1.36",
+    "rxjs": "^6.6.3",
+    "uuid": "^8.3.2"
   }
 }
