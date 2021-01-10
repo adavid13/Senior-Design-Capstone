@@ -40,8 +40,10 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
-    "phaser": "3.24.1",
-    "phaser3-rex-plugins": "^1.1.35",
-    "rxjs": "^6.6.3"
+    "@dagrejs/graphlib": "^2.1.4",
+    "phaser": "~3.51.0",
+    "phaser3-rex-plugins": "^1.1.36",
+    "rxjs": "^6.6.3",
+    "uuid": "^8.3.2"
   }
 }

@@ -20,4 +20,30 @@ export const Constants = {
     WIDTH: 3000,
     HEIGHT: 2800,
   },
+
+  Faction: {
+    HUMAN: 'HUMAN',
+    ANIMAL: 'ANIMAL',
+    MONSTER: 'MONSTER'
+  },
+
+  Pieces: {
+    KING: 'KING',
+    STEALTH: 'STEALTH',
+    KNIGHT: 'KNIGHT',
+    BARBARIAN: 'BARBARIAN',
+    MAGE: 'MAGE'
+  },
+
+  PlayerType: {
+    HUMAN: 'HUMAN',
+    AI: 'AI'
+  },
+
+  GameState: {
+    READY: 'READY',
+    PIECE_MOVING: 'PIECE_MOVING',
+    PIECE_SELECTION: 'PIECE_SELECTION',
+  }
+  
 };

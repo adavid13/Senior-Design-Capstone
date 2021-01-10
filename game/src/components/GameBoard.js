@@ -1,13 +1,15 @@
 import { Board } from 'phaser3-rex-plugins/plugins/board-components.js';
+import graphlib, { Graph } from '@dagrejs/graphlib';
+import BoardPiece from './BoardPiece';
 
 export default class GameBoard extends Board {
-  constructor(scene, boardModel) {
-    super(scene, boardModel.getGridConfig());
+  constructor(scene, model) {
+    super(scene, model.getGridConfig());
     this.scene = scene;
-    this.model = boardModel;
+    this.model = model;
   }
 
-  initHexBoard() {
+  inititialize() {
     this.scene.add.existing(this);
     this.tileXYArray = this.fit(this.scene.rexBoard.hexagonMap.hexagon(this, this.model.getRadius()));
 
@@ -34,7 +36,6 @@ export default class GameBoard extends Board {
     }
 
     this.setInteractive().on('tiledown', (pointer, tileXY) => {
-      // console.log(`${tileXY.x},${tileXY.y}`);
     });
 
     return this;
@@ -46,5 +47,26 @@ export default class GameBoard extends Board {
 
   displayTileOutline(display) {
     this.tileOutline.setVisible(display);
+  }
+
+  arePiecesConnected() {
+    const graph = new Graph({ directed: false });
+    const pieces = this.getAllChess().filter(chess => chess instanceof BoardPiece);
+
+    // Add nodes
+    pieces.forEach(piece => {
+      graph.setNode(piece.rexChess.$uid);
+    });
+
+    // Add vertices
+    pieces.forEach(piece => {
+      const neighbors = this.getNeighborChess(piece, null);
+      neighbors.forEach(neighbor => {
+        if (!graph.hasEdge(piece.rexChess.$uid, neighbor.rexChess.$uid))
+          graph.setEdge(piece.rexChess.$uid, neighbor.rexChess.$uid);
+      })
+    });
+
+    return graphlib.alg.components(graph).length == 1;
   }
 }

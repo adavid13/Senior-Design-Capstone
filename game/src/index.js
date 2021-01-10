@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import BoardPlugin from 'phaser3-rex-plugins/plugins/board-plugin';
+import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 import PreloadScene from './scenes/PreloadScene';
 import TitleScene from './scenes/TitleScene';
 import OptionsScene from './scenes/OptionsScene';
@@ -23,6 +24,10 @@ const config = {
         key: 'rexBoard',
         plugin: BoardPlugin,
         mapping: 'rexBoard',
+      }, {
+        key: 'rexUI',
+        plugin: RexUIPlugin,
+        mapping: 'rexUI'
       },
     ],
   },

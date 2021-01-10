@@ -3,30 +3,30 @@ import BoardPiece from './BoardPiece';
 
 function getTexture(faction) {
   if (faction === Constants.Faction.ANIMAL) {
-    return 'animalKing';
+    return 'animalKnight';
   } else if(faction === Constants.Faction.HUMAN) {
-    return 'humanKing';
+    return 'humanKnight';
   } else {
-    return 'monsterKing';
+    return 'monsterKnight';
   }
 }
 
 function getDisplayName(faction) {
   if (faction === Constants.Faction.ANIMAL) {
-    return 'Pig King';
+    return 'Horse';
   } else if(faction === Constants.Faction.HUMAN) {
-    return 'King';
+    return 'Knight';
   } else {
-    return 'Skeleton King';
+    return 'Witch';
   } 
 }
 
-export default class KingPiece extends BoardPiece {
+export default class KnightPiece extends BoardPiece {
   constructor(board, tileXY, faction) {
     super(board, tileXY, getTexture(faction));
-    this.movingPoints = 1;
+    this.movingPoints = 22;
     this.faction = faction;
-    this.type = Constants.Pieces.KING;
+    this.type = Constants.Pieces.KNIGHT;
     this._displayName = getDisplayName(faction);
   }
 }

@@ -35,6 +35,66 @@ const assetManifest = {
       path: './assets/characters/skeleton_king.png',
       loadOnStart: true,
     },
+    {
+      name: 'humanKnight',
+      path: './assets/characters/human_knight.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'animalKnight',
+      path: './assets/characters/horse.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'monsterKnight',
+      path: './assets/characters/witch.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'humanStealth',
+      path: './assets/characters/rogue.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'animalStealth',
+      path: './assets/characters/mouse.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'monsterStealth',
+      path: './assets/characters/ghost.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'humanMage',
+      path: './assets/characters/mage.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'animalMage',
+      path: './assets/characters/snake.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'monsterMage',
+      path: './assets/characters/warlock.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'humanBarbarian',
+      path: './assets/characters/barbarian.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'animalBarbarian',
+      path: './assets/characters/boar.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'monsterBarbarian',
+      path: './assets/characters/orc.png',
+      loadOnStart: true,
+    }
   ],
   spritesheets: [
     {
