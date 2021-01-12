@@ -1,8 +1,19 @@
 import { Constants } from '../../utils/constants';
 
 export default class GameBoardModel {
-  constructor(config, difficulty, players) {
-    this.config = config;
+  constructor(difficulty, players) {
+    this.config = {
+      grid: {
+        gridType: 'hexagonGrid',
+        x: 300,
+        y: 300,
+        size: 60,
+        staggeraxis: 'x',
+        staggerindex: 'odd',
+      },
+      radius: 12,
+    };
+
     this.difficulty = difficulty;
     this.players = players;  
   }

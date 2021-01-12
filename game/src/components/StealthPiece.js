@@ -1,4 +1,6 @@
 import { Constants } from '../utils/constants';
+import { verifyBoardContinuityOnMove, findFreeTileAtDirection } from '../utils/boardUtils';
+import { getAllNeighborsOfTileXY, getAllPiecesAtTileXY } from '../utils/piecesUtils';
 import MoveableMarker from './MoveableMarker';
 import BoardPiece from './BoardPiece';
 
@@ -51,19 +53,16 @@ export default class StealthPiece  extends BoardPiece {
    */ 
   showMoveableArea() {
     this.hideMoveableArea();
-    const board = this.rexChess.board;
+    const { board, tileXYZ } = this.rexChess;
     const tileXYArray = [];
-    const neighbors = board.tileXYArrayToChessArray(board.getNeighborTileXY(this.rexChess.tileXYZ, null)).filter(piece => piece.rexChess.tileXYZ.z === 'pathfinderLayer');
+    const neighbors = getAllNeighborsOfTileXY(board, tileXYZ)
+      .filter(piece => piece.rexChess.tileXYZ.z === 'pathfinderLayer');
+
     for (const neighbor of neighbors) {
       const direction = board.directionBetween(this, neighbor);
-      let tileXYZ = neighbor.rexChess.tileXYZ;
-      let nextNeighbor = board.getNeighborChess(neighbor, direction);
-      while (nextNeighbor) {
-        tileXYZ = nextNeighbor.rexChess.tileXYZ;
-        nextNeighbor = board.getNeighborChess(nextNeighbor, direction);
-      }
-      const destinationTile = board.getNeighborTileXY(tileXYZ, direction);
-      if (this.isBoardContinuous(this, { x: destinationTile.x, y: destinationTile.y })) {
+      const destinationTile = findFreeTileAtDirection(board, tileXYZ, direction);
+      if (verifyBoardContinuityOnMove(this, destinationTile)) {
+        // Keep duplicates out of the array
         if (!tileXYArray.find(tileXY => tileXY.x === destinationTile.x && tileXY.y === destinationTile.y)) {
           tileXYArray.push({ ...destinationTile, cost: 1 });
         }
@@ -97,11 +96,8 @@ export default class StealthPiece  extends BoardPiece {
   reorderTiles(gameObject) {
     const board = gameObject.rexChess.board;
 
-    // On previous tile, send piece back to base layer
-    const previousTileXYZ = gameObject.previousTileXYZ;
-    const previousTilePieces = board
-      .tileXYToChessArray(previousTileXYZ.x, previousTileXYZ.y)
-      .filter((piece) => piece instanceof BoardPiece);
+    // On previous tile, send pieces back to base layer
+    const previousTilePieces = getAllPiecesAtTileXY(board, gameObject.previousTileXYZ, null);
     const pieceAtBaseLayer = previousTilePieces.find(piece => piece.rexChess.tileXYZ.z === 'pathfinderLayer');
     if (previousTilePieces.length > 0 && !pieceAtBaseLayer){
       previousTilePieces[0].rexChess.setTileZ('pathfinderLayer');

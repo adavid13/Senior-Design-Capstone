@@ -42,13 +42,15 @@ export default class GameScene extends Phaser.Scene {
   }
 
   update() {
-    if (this.game.input.activePointer.isDown) {
-      if (this.game.origDragPoint) {
+    let { origDragPoint } = this.game;
+    const { activePointer } = this.game.input;
+    if (activePointer.isDown) {
+      if (origDragPoint) {
         // move the camera by the amount the mouse has moved since last update
-        this.cameras.main.scrollX += this.game.origDragPoint.x - this.game.input.activePointer.position.x;
-        this.cameras.main.scrollY += this.game.origDragPoint.y - this.game.input.activePointer.position.y;
+        this.cameras.main.scrollX += origDragPoint.x - activePointer.position.x;
+        this.cameras.main.scrollY += origDragPoint.y - activePointer.position.y;
       } // set new drag origin to current position
-      this.game.origDragPoint = this.game.input.activePointer.position.clone();
+      this.game.origDragPoint = activePointer.position.clone();
     } else {
       this.game.origDragPoint = null;
     }
@@ -80,19 +82,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   createBoard(players) {
-    const boardConfig = {
-      grid: {
-        gridType: 'hexagonGrid',
-        x: 300,
-        y: 300,
-        size: 60,
-        staggeraxis: 'x',
-        staggerindex: 'odd',
-      },
-      radius: 12,
-    };
-
-    const model = new GameBoardModel(boardConfig, this.difficulty, players);
+    const model = new GameBoardModel(this.difficulty, players);
     const board = new GameBoard(this, model);
     board.inititialize();
     return board;
