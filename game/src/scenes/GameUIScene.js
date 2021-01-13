@@ -12,9 +12,9 @@ export default class GameUIScene extends Phaser.Scene {
 
   create() {
     this.btnMenu = this.add
-      .buttonContainer(100, 30, 'btnBlue', 0xffffff)
+      .buttonContainer(100, 30, 'btnBlue', Constants.Color.WHITE)
       .setDownTexture('btnBluePressed')
-      .setOverTint(0xffad00)
+      .setOverTint(Constants.Color.ORANGE)
       .setText('Main Menu');
 
     this.btnMenu.onClick().subscribe(() => {

@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
 import MoveableMarker from './MoveableMarker';
+import { Events } from './EventCenter';
 import { Constants } from '../utils/constants';
 import { verifyBoardContinuityOnMove, canPieceSlideToTile } from '../utils/boardUtils';
 import { getAllPiecesAtTileXY, getAllNeighborsOfTileXY } from '../utils/piecesUtils';
 
 export default class BoardPiece extends Phaser.GameObjects.Image {
-  constructor(board, tileXY, texture) {
+  constructor(board, player, tileXY, texture) {
     const scene = board.scene;
     const worldXY = board.tileXYToWorldXY(tileXY.x, tileXY.y);
     super(scene, worldXY.x, worldXY.y, texture);
@@ -13,20 +14,25 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
     this.reposition = this.reposition.bind(this);
     this.setOrigin(0.5);
     this.setScale(0.45);
-    this.setDepth(5);
+    this.setDepth(Constants.GameObjectDepth.PIECE);
     scene.add.existing(this);
     board.addChess(this, tileXY.x, tileXY.y, 'pathfinderLayer');
 
     // add behaviors
     this.createPathfinder(scene);
     this.moveTo = scene.rexBoard.add.moveTo(this, { speed: 200 });
-    this.moveTo.on('complete', this.reorderTiles, this);
+    this.moveTo.on('complete', (gameObject) => {
+      this.reorderTiles(gameObject);
+    }, this);
 
     // private members
+    this.player = player;
     this.movingPoints = 1;
     this.markers = [];
     this._displayName = 'BoardPiece';
     this.canOverlap = false;
+
+    Events.emit('piece-added', this);
   }
 
   set displayName(name) {
@@ -35,6 +41,14 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
 
   get displayName() {
     return this._displayName;
+  }
+
+  getPreviousTileXYZ() {
+    return this.previousTileXYZ;
+  }
+
+  getPlayer() {
+    return this.player;
   }
 
   createPathfinder(scene) {
@@ -120,6 +134,7 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
   moveAlongPath(path) {
     if (path.length === 0) {
       this.showMoveableArea();
+      Events.emit('piece-moved', this);
       const scene = this.rexChess.board.scene;
       scene.setState(Constants.GameState.READY);
       return;
@@ -146,7 +161,7 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
     const previousTilePieces = getAllPiecesAtTileXY(board, gameObject.previousTileXYZ, null);
     const pieceAtBaseLayer = previousTilePieces.find(piece => piece.rexChess.tileXYZ.z === 'pathfinderLayer');
     if (previousTilePieces.length > 0 && !pieceAtBaseLayer){
-      previousTilePieces[0].rexChess.setTileZ('pathfinderLayer');
+      previousTilePieces[previousTilePieces.length - 1].rexChess.setTileZ('pathfinderLayer');
     }
 
     // On destination tile, send piece back to base layer if it was not occupied
@@ -171,7 +186,7 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
    * such that the piece at the top of the stack will be more prominent.
    */ 
   reposition(piecesInTile) {
-    piecesInTile.forEach(piece => piece.setDepth(5));
+    piecesInTile.forEach(piece => piece.setDepth(Constants.GameObjectDepth.PIECE));
 
     if (piecesInTile.length == 1) {
       piecesInTile[0].setOrigin(0.5);
@@ -203,7 +218,7 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
 
   topOfStackPositioning(piecesInTile, index) {
     piecesInTile[index].setOrigin(0.5, 0.95);
-    piecesInTile[index].setDepth(4);
+    piecesInTile[index].setDepth(Constants.GameObjectDepth.PIECE_BACK);
     piecesInTile[index].setScale(0.45);
   }
 }

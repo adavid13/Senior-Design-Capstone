@@ -11,7 +11,7 @@ export default class TitleScene extends Phaser.Scene {
   }
 
   create() {
-    this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor('#69696c');
+    this.cameras.main.backgroundColor = Phaser.Display.Color.IntegerToColor(Constants.Color.GREY);
 
     this.add.image(this.scale.width / 2, this.scale.height / 4, 'logo').setScale(0.3);
 
@@ -44,9 +44,9 @@ export default class TitleScene extends Phaser.Scene {
 
   createButton(x, y, text) {
     return this.add
-      .buttonContainer(x, y, 'btnBlue', 0xffffff)
+      .buttonContainer(x, y, 'btnBlue', Constants.Color.WHITE)
       .setDownTexture('btnBluePressed')
-      .setOverTint(0xffad00)
+      .setOverTint(Constants.Color.ORANGE)
       .setText(text);
   }
 

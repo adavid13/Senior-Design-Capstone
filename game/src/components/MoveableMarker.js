@@ -1,15 +1,14 @@
 import { Shape } from 'phaser3-rex-plugins/plugins/board-components.js';
-
-const COLOR2_DARK = 0xa00037;
+import { Constants } from '../utils/constants'; 
 
 export default class MoveableMarker extends Shape {
   constructor(chess, tileXY) {
     const board = chess.rexChess.board;
     const scene = board.scene;
-    super(board, tileXY.x, tileXY.y, 'markerLayer', COLOR2_DARK);
+    super(board, tileXY.x, tileXY.y, 'markerLayer', Constants.Color.DARK_RED);
     scene.add.existing(this);
     this.setScale(0.5);
-    this.setDepth(6);
+    this.setDepth(Constants.GameObjectDepth.MARKER);
     this.chess = chess;
     this.tileXY = tileXY;
   }

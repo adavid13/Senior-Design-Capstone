@@ -31,10 +31,10 @@ export default class PreloadScene extends Phaser.Scene {
       barHeight - 10
     );
 
-    this.graphics.fillStyle(0xffffff, 1);
+    this.graphics.fillStyle(Constants.Color.WHITE, 1);
     this.graphics.fillRectShape(progressBar);
 
-    this.newGraphics.fillStyle(0x7f8a78, 1);
+    this.newGraphics.fillStyle(Constants.Color.GREEN_DARK, 1);
     this.newGraphics.fillRectShape(progressBarFill);
 
     this.loadingText = this.add
@@ -71,7 +71,7 @@ export default class PreloadScene extends Phaser.Scene {
     const barHeight = 50;
 
     this.newGraphics.clear();
-    this.newGraphics.fillStyle(0x7f8a78, 1);
+    this.newGraphics.fillStyle(Constants.Color.GREEN_DARK, 1);
     this.newGraphics.fillRectShape(
       new Phaser.Geom.Rectangle(
         centerX - barWidth / 2 + 5,

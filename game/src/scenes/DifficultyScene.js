@@ -45,9 +45,9 @@ export default class DifficultyScene extends Phaser.Scene {
 
   createButton(x, y, text) {
     return this.add
-      .buttonContainer(x, y, 'btnBlue', 0xffffff)
+      .buttonContainer(x, y, 'btnBlue', Constants.Color.WHITE)
       .setDownTexture('btnBluePressed')
-      .setOverTint(0xffad00)
+      .setOverTint(Constants.Color.ORANGE)
       .setText(text);
   }
 

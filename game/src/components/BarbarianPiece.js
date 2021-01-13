@@ -25,8 +25,8 @@ function getDisplayName(faction) {
 }
 
 export default class BarbarianPiece extends BoardPiece {
-  constructor(board, tileXY, faction) {
-    super(board, tileXY, getTexture(faction));
+  constructor(board, player, tileXY, faction) {
+    super(board, player, tileXY, getTexture(faction));
     this.movingPoints = 3;
     this.faction = faction;
     this.type = Constants.Pieces.BARBARIAN;

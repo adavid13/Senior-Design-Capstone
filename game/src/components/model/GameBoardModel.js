@@ -18,6 +18,10 @@ export default class GameBoardModel {
     this.players = players;  
   }
 
+  getPlayers() {
+    return this.players;
+  }
+
   getGridConfig() {
     return this.config;
   }

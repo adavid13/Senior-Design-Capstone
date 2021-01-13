@@ -38,7 +38,7 @@ export default class PieceSelectionMenu extends Menu {
     };
     super(scene, config);
     scene.add.existing(this);
-    this.setDepth(10);
+    this.setDepth(Constants.GameObjectDepth.UI);
     this.on('button.over', function (button) {
       button.getElement('background').setStrokeStyle(1, 0xffffff);
     })

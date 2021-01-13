@@ -22,9 +22,9 @@ function getDisplayName(faction) {
 }
 
 export default class MagePiece  extends BoardPiece {
-  constructor(board, tileXY, faction) {
-    super(board, tileXY, getTexture(faction));
-    this.setDepth(4);
+  constructor(board, player, tileXY, faction) {
+    super(board, player, tileXY, getTexture(faction));
+    this.setDepth(Constants.GameObjectDepth.PIECE_BACK);
     this.movingPoints = 1;
     this.faction = faction;
     this.type = Constants.Pieces.MAGE;
