@@ -1,4 +1,6 @@
 import { Constants } from '../utils/constants';
+import { getAllNeighborsOfTileXY } from '../utils/piecesUtils';
+import { getAdjacentDirections, canPieceSlideToTile } from '../utils/boardUtils';
 import MoveableMarker from './MoveableMarker';
 import BoardPiece from './BoardPiece';
 
@@ -23,8 +25,8 @@ function getDisplayName(faction) {
 }
 
 export default class BarbarianPiece extends BoardPiece {
-  constructor(board, tileXY, faction) {
-    super(board, tileXY, getTexture(faction));
+  constructor(board, player, tileXY, faction) {
+    super(board, player, tileXY, getTexture(faction));
     this.movingPoints = 3;
     this.faction = faction;
     this.type = Constants.Pieces.BARBARIAN;
@@ -37,75 +39,73 @@ export default class BarbarianPiece extends BoardPiece {
    */ 
   showMoveableArea() {
     this.hideMoveableArea();
-    const destinationArray = this.findPath().destinationArray;
+    const destinationArray = this.findPath().map(path => path[path.length - 1]);
     for (let i = 0, cnt = destinationArray.length; i < cnt; i++) {
-      this.markers.push(new MoveableMarker(this, destinationArray[i]));
+      if (!this.markers.find(marker => {
+        const tileXY = marker.getTileXY();
+        return tileXY.x === destinationArray[i].x && tileXY.y === destinationArray[i].y;
+      })) {
+        this.markers.push(new MoveableMarker(this, destinationArray[i]));
+      }
     }
     return this;
   }
 
   findPath() {
     const board = this.rexChess.board;
-    const destinationArray = [];
     const paths = [];
     let costOneTiles = this.pathFinder.findArea(this.movingPoints).filter(tile => tile.cost === 1);
     costOneTiles = costOneTiles.map(costOneTile => ({ ...costOneTile, z:'pathfinderLayer' }));
     for (const costOneTile of costOneTiles) {
       const costTwoTiles = [];
-      const costOneTileNeighbors = board
-        .tileXYArrayToChessArray(board.getNeighborTileXY(costOneTile, null))
-        .filter(neighbor => neighbor instanceof BoardPiece && neighbor !== this);
+      const costOneTileNeighbors = getAllNeighborsOfTileXY(board, costOneTile)
+        .filter(neighbor => neighbor !== this);
       for (const costOneTileNeighbor of costOneTileNeighbors) {
         const moveDirection = board.directionBetween(costOneTile, costOneTileNeighbor);
-        const adjacentDirections = [((moveDirection - 1) % 6 + 6) % 6, (moveDirection + 1) % 6];
+        const adjacentDirections = getAdjacentDirections(moveDirection);
         adjacentDirections.forEach(dir => {
           let neighborAtDir = board.getNeighborChess(costOneTile, dir);
           const nextTile = board.getNeighborTileXY(costOneTile, dir);
-
-          const dirc = board.directionBetween(costOneTile, nextTile);
-          const adj = [((dirc - 1) % 6 + 6) % 6, (dirc + 1) % 6];
-          const neighborAtDir0 = board.getNeighborChess(costOneTile, adj[0]);
-          const neighborAtDir1 = board.getNeighborChess(costOneTile, adj[1]);
-          if (!(neighborAtDir0 && neighborAtDir0 !== this && neighborAtDir1 && neighborAtDir1 !== this)) {
+          if (canPieceSlideToTile(board, this, costOneTile, nextTile)) {
             // Check if tile is empty and is not the current costOneTile
-            if ((!neighborAtDir || !(neighborAtDir instanceof BoardPiece)) && (nextTile.x !== this.rexChess.tileXYZ.x || nextTile.y !== this.rexChess.tileXYZ.y) && !costTwoTiles.find(tile => tile.x === nextTile.x && tile.y === nextTile.y)) 
+            const isNextTileEmpty = !neighborAtDir || !(neighborAtDir instanceof BoardPiece);
+            const isCurrentTile = nextTile.x === this.rexChess.tileXYZ.x && nextTile.y === this.rexChess.tileXYZ.y;
+            const isDuplicate = costTwoTiles.find(tile => tile.x === nextTile.x && tile.y === nextTile.y)
+            if (isNextTileEmpty && !isCurrentTile && !isDuplicate) {
               costTwoTiles.push({ ...nextTile, z: 'pathfinderLayer' });
+            }
           }
         });
       }
       for (const costTwoTile of costTwoTiles) {
         const costThreeTiles = [];
-        const costTwoTileNeighbors = board
-          .tileXYArrayToChessArray(board.getNeighborTileXY(costTwoTile, null))
-          .filter(neighbor => neighbor instanceof BoardPiece && neighbor !== this);
+        const costTwoTileNeighbors = getAllNeighborsOfTileXY(board, costTwoTile)
+          .filter(neighbor => neighbor !== this);
         for (const costTwoTileNeighbor of costTwoTileNeighbors) {
           const moveDirection = board.directionBetween(costTwoTile, costTwoTileNeighbor);
-          const adjacentDirections = [((moveDirection - 1) % 6 + 6) % 6, (moveDirection + 1) % 6];
+          const adjacentDirections = getAdjacentDirections(moveDirection);
           adjacentDirections.forEach(dir => {
             let neighborAtDir = board.getNeighborChess(costTwoTile, dir)
             const nextTile = board.getNeighborTileXY(costTwoTile, dir);
-
-            const dirc = board.directionBetween(costTwoTile, nextTile);
-            const adj = [((dirc - 1) % 6 + 6) % 6, (dirc + 1) % 6];
-            const neighborAtDir0 = board.getNeighborChess(costTwoTile, adj[0]);
-            const neighborAtDir1 = board.getNeighborChess(costTwoTile, adj[1]);
-            if (!(neighborAtDir0 && neighborAtDir0 !== this && neighborAtDir1 && neighborAtDir1 !== this)) {
-              // Check if tile is empty and is not the current costOneTile
-              if ((!neighborAtDir || !(neighborAtDir instanceof BoardPiece)) && (nextTile.x !== costOneTile.x || nextTile.y !== costOneTile.y) && !costThreeTiles.find(tile => tile.x === nextTile.x && tile.y === nextTile.y)) {
+            if (canPieceSlideToTile(board, this, costTwoTile, nextTile)) {
+              // Check if tile is empty and is not the current costTwoTile
+              const isNextTileEmpty = !neighborAtDir || !(neighborAtDir instanceof BoardPiece);
+              const isCurrentTile = nextTile.x === costOneTile.x && nextTile.y === costOneTile.y;
+              const isDuplicate = costThreeTiles.find(tile => tile.x === nextTile.x && tile.y === nextTile.y);
+              if (isNextTileEmpty && !isCurrentTile && !isDuplicate) {
                 costThreeTiles.push(nextTile);
-                destinationArray.push(nextTile);
                 paths.push([ 
                   { x: costOneTile.x, y: costOneTile.y, cost: 1 },
                   { x: costTwoTile.x, y: costTwoTile.y, cost: 1 },
                   { x: nextTile.x, y: nextTile.y, cost: 1 }
                 ]);
-              }               
+              }
             }
           });
         }
       }
     }
-    return { destinationArray, paths };
+    return paths;
   }
 
   /**
@@ -115,11 +115,11 @@ export default class BarbarianPiece extends BoardPiece {
   moveToTile(destinationTile) {
     if (this.moveTo.isRunning) return false;
     this.previousTileXYZ = this.rexChess.tileXYZ;
-    const result = this.findPath(destinationTile);
+    const paths = this.findPath();
     this.rexChess.setTileZ(`pathfinderLayer-${this.rexChess.$uid}`);
-    for (let i = 0; i < result.paths.length; i++) {
-      if (result.paths[i][2].x === destinationTile.x && result.paths[i][2].y === destinationTile.y) {
-        this.moveAlongPath(result.paths[i]);
+    for (let i = 0; i < paths.length; i++) {
+      if (paths[i][2].x === destinationTile.x && paths[i][2].y === destinationTile.y) {
+        this.moveAlongPath(paths[i]);
         return true;
       }
     }

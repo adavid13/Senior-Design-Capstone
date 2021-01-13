@@ -42,13 +42,16 @@ export default class GameScene extends Phaser.Scene {
   }
 
   update() {
-    if (this.game.input.activePointer.isDown) {
-      if (this.game.origDragPoint) {
+    this.board.update();
+    let { origDragPoint } = this.game;
+    const { activePointer } = this.game.input;
+    if (activePointer.isDown) {
+      if (origDragPoint) {
         // move the camera by the amount the mouse has moved since last update
-        this.cameras.main.scrollX += this.game.origDragPoint.x - this.game.input.activePointer.position.x;
-        this.cameras.main.scrollY += this.game.origDragPoint.y - this.game.input.activePointer.position.y;
+        this.cameras.main.scrollX += origDragPoint.x - activePointer.position.x;
+        this.cameras.main.scrollY += origDragPoint.y - activePointer.position.y;
       } // set new drag origin to current position
-      this.game.origDragPoint = this.game.input.activePointer.position.clone();
+      this.game.origDragPoint = activePointer.position.clone();
     } else {
       this.game.origDragPoint = null;
     }
@@ -80,48 +83,38 @@ export default class GameScene extends Phaser.Scene {
   }
 
   createBoard(players) {
-    const boardConfig = {
-      grid: {
-        gridType: 'hexagonGrid',
-        x: 300,
-        y: 300,
-        size: 60,
-        staggeraxis: 'x',
-        staggerindex: 'odd',
-      },
-      radius: 12,
-    };
-
-    const model = new GameBoardModel(boardConfig, this.difficulty, players);
+    const model = new GameBoardModel(this.difficulty, players);
     const board = new GameBoard(this, model);
     board.inititialize();
     return board;
   }
 
   createPieces() {
-    this.chessA = new KingPiece(this.board, { x: 11, y: 15 }, Constants.Faction.HUMAN);
-    this.chessB = new BarbarianPiece(this.board, { x: 10, y: 15 }, Constants.Faction.HUMAN);
-    this.chessC = new BarbarianPiece(this.board, { x: 10, y: 14 }, Constants.Faction.HUMAN);
-    this.chessD = new MagePiece (this.board, { x: 12, y: 15 }, Constants.Faction.HUMAN);
-    this.chessE = new MagePiece (this.board, { x: 11, y: 13 }, Constants.Faction.HUMAN);
-    this.chessF = new StealthPiece(this.board, { x: 9, y: 14 }, Constants.Faction.HUMAN);
-    this.chessG = new StealthPiece(this.board, { x: 9, y: 15 }, Constants.Faction.HUMAN);
-    this.chessH = new StealthPiece(this.board, { x: 12, y: 14 }, Constants.Faction.HUMAN);
-    this.chessI = new KnightPiece(this.board, { x: 13, y: 14 }, Constants.Faction.HUMAN);
-    this.chessJ = new KnightPiece(this.board, { x: 9, y: 13 }, Constants.Faction.HUMAN);
-    this.chessK = new KnightPiece(this.board, { x: 11, y: 14 }, Constants.Faction.HUMAN);
+    const player1 = this.board.getModel().getPlayers()[0];
+    this.chessA = new KingPiece(this.board, player1, { x: 11, y: 15 }, Constants.Faction.HUMAN);
+    this.chessB = new BarbarianPiece(this.board, player1, { x: 10, y: 15 }, Constants.Faction.HUMAN);
+    this.chessC = new BarbarianPiece(this.board, player1, { x: 10, y: 14 }, Constants.Faction.HUMAN);
+    this.chessD = new MagePiece (this.board, player1, { x: 12, y: 15 }, Constants.Faction.HUMAN);
+    this.chessE = new MagePiece (this.board, player1, { x: 11, y: 13 }, Constants.Faction.HUMAN);
+    this.chessF = new StealthPiece(this.board, player1, { x: 9, y: 14 }, Constants.Faction.HUMAN);
+    this.chessG = new StealthPiece(this.board, player1, { x: 9, y: 15 }, Constants.Faction.HUMAN);
+    this.chessH = new StealthPiece(this.board, player1, { x: 12, y: 14 }, Constants.Faction.HUMAN);
+    this.chessI = new KnightPiece(this.board, player1, { x: 13, y: 14 }, Constants.Faction.HUMAN);
+    this.chessJ = new KnightPiece(this.board, player1, { x: 9, y: 13 }, Constants.Faction.HUMAN);
+    this.chessK = new KnightPiece(this.board, player1, { x: 11, y: 14 }, Constants.Faction.HUMAN);
 
-    this.chessL = new KingPiece(this.board, { x: 11, y: 11 }, Constants.Faction.MONSTER);
-    this.chessM = new BarbarianPiece(this.board, { x: 10, y: 11 }, Constants.Faction.MONSTER);
-    this.chessN = new BarbarianPiece(this.board, { x: 10, y: 12 }, Constants.Faction.MONSTER);
-    this.chessO = new MagePiece (this.board, { x: 9, y: 11 }, Constants.Faction.MONSTER);
-    this.chessP = new MagePiece (this.board, { x: 13, y: 12 }, Constants.Faction.MONSTER);
-    this.chessQ = new StealthPiece(this.board, { x: 11, y: 12 }, Constants.Faction.MONSTER);
-    this.chessR = new StealthPiece(this.board, { x: 14, y: 12 }, Constants.Faction.MONSTER);
-    this.chessS = new StealthPiece(this.board, { x: 13, y: 11 }, Constants.Faction.MONSTER);
-    this.chessT = new KnightPiece(this.board, { x: 11, y: 10 }, Constants.Faction.MONSTER);
-    this.chessU = new KnightPiece(this.board, { x: 12, y: 11 }, Constants.Faction.MONSTER);
-    this.chessV = new KnightPiece(this.board, { x: 12, y: 12 }, Constants.Faction.MONSTER);
+    const player2 = this.board.getModel().getPlayers()[1];
+    this.chessL = new KingPiece(this.board, player2, { x: 11, y: 11 }, Constants.Faction.MONSTER);
+    this.chessM = new BarbarianPiece(this.board, player2, { x: 10, y: 11 }, Constants.Faction.MONSTER);
+    this.chessN = new BarbarianPiece(this.board, player2, { x: 10, y: 12 }, Constants.Faction.MONSTER);
+    this.chessO = new MagePiece (this.board, player2, { x: 9, y: 11 }, Constants.Faction.MONSTER);
+    this.chessP = new MagePiece (this.board, player2, { x: 13, y: 12 }, Constants.Faction.MONSTER);
+    this.chessQ = new StealthPiece(this.board, player2, { x: 11, y: 12 }, Constants.Faction.MONSTER);
+    this.chessR = new StealthPiece(this.board, player2, { x: 14, y: 12 }, Constants.Faction.MONSTER);
+    this.chessS = new StealthPiece(this.board, player2, { x: 13, y: 11 }, Constants.Faction.MONSTER);
+    this.chessT = new KnightPiece(this.board, player2, { x: 11, y: 10 }, Constants.Faction.MONSTER);
+    this.chessU = new KnightPiece(this.board, player2, { x: 12, y: 11 }, Constants.Faction.MONSTER);
+    this.chessV = new KnightPiece(this.board, player2, { x: 12, y: 12 }, Constants.Faction.MONSTER);
   }
 
   setCamera() {
@@ -168,7 +161,7 @@ export default class GameScene extends Phaser.Scene {
           if (selectedObject instanceof BoardPiece) {
             this.clearSelection();
             this.selectedPiece = selectedObject;
-            this.selectedPiece.setTint(0xffff00);
+            this.selectedPiece.setTint(Constants.Color.YELLOW_HIGHLIGHT);
             this.selectedPiece.showMoveableArea();
           }
     
@@ -177,7 +170,7 @@ export default class GameScene extends Phaser.Scene {
             const targetTile = selectedObject.getTileXY();
             const parent = selectedObject.getParentPiece();
             if (!parent.moveToTile(targetTile)) return;
-            selectedObject.setFillStyle(0xff5c8d);
+            selectedObject.setFillStyle(Constants.Color.RED);
           }
           break;
         }

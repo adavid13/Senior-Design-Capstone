@@ -21,6 +21,35 @@ export const Constants = {
     HEIGHT: 2800,
   },
 
+  GameObjectDepth: {
+    GRID_TILE: 1,
+    GRID_OUTLINE: 2,
+    PIECE_BACK: 4,
+    PIECE: 5,
+    MARKER: 10,
+    GRID_DEBUG: 20,
+    UI: 30
+  },
+
+  Color: {
+    BLACK: 0x000000,
+    BLUE: 0x6FC9F9,
+    GREY: 0x69696c,
+    GREY_LIGHT: 0x909b97,
+    GREY_DARK: 0x748481,
+    BROWN_LIGHT: 0xd3baac,
+    BROWN_DARK: 0x867472,
+    GREEN_LIGHT: 0xdfdf86,
+    GREEN_MEDIUM: 0xb6bb7d,
+    GREEN_DARK: 0x7f8a78,
+    ORANGE: 0xffad00,
+    RED: 0xff777c,
+    DARK_RED: 0xa00037,
+    YELLOW: 0xffda82,
+    WHITE: 0xffffff,
+    YELLOW_HIGHLIGHT: 0xffff00,
+  },
+
   Faction: {
     HUMAN: 'HUMAN',
     ANIMAL: 'ANIMAL',
@@ -45,5 +74,4 @@ export const Constants = {
     PIECE_MOVING: 'PIECE_MOVING',
     PIECE_SELECTION: 'PIECE_SELECTION',
   }
-  
 };

@@ -1,33 +1,38 @@
 import Phaser from 'phaser';
-import graphlib, { Graph } from '@dagrejs/graphlib';
 import MoveableMarker from './MoveableMarker';
+import { Events } from './EventCenter';
 import { Constants } from '../utils/constants';
-// import { Constants } from '../utils/constants';
+import { verifyBoardContinuityOnMove, canPieceSlideToTile } from '../utils/boardUtils';
+import { getAllPiecesAtTileXY, getAllNeighborsOfTileXY } from '../utils/piecesUtils';
 
 export default class BoardPiece extends Phaser.GameObjects.Image {
-  constructor(board, tileXY, texture) {
+  constructor(board, player, tileXY, texture) {
     const scene = board.scene;
     const worldXY = board.tileXYToWorldXY(tileXY.x, tileXY.y);
     super(scene, worldXY.x, worldXY.y, texture);
 
-    this.isBoardContinuous = this.isBoardContinuous.bind(this);
     this.reposition = this.reposition.bind(this);
     this.setOrigin(0.5);
     this.setScale(0.45);
-    this.setDepth(5);
+    this.setDepth(Constants.GameObjectDepth.PIECE);
     scene.add.existing(this);
     board.addChess(this, tileXY.x, tileXY.y, 'pathfinderLayer');
 
     // add behaviors
     this.createPathfinder(scene);
     this.moveTo = scene.rexBoard.add.moveTo(this, { speed: 200 });
-    this.moveTo.on('complete', this.reorderTiles, this);
+    this.moveTo.on('complete', (gameObject) => {
+      this.reorderTiles(gameObject);
+    }, this);
 
     // private members
+    this.player = player;
     this.movingPoints = 1;
     this.markers = [];
     this._displayName = 'BoardPiece';
     this.canOverlap = false;
+
+    Events.emit('piece-added', this);
   }
 
   set displayName(name) {
@@ -36,6 +41,14 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
 
   get displayName() {
     return this._displayName;
+  }
+
+  getPreviousTileXYZ() {
+    return this.previousTileXYZ;
+  }
+
+  getPlayer() {
+    return this.player;
   }
 
   createPathfinder(scene) {
@@ -76,11 +89,9 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
   canSlide(piece, curTile, preTile, pathFinder) {
     const board = pathFinder.board;
   
-    const preNeighbors = board
-      .tileXYArrayToChessArray(board.getNeighborTileXY(preTile, null))
+    const preNeighbors = getAllNeighborsOfTileXY(board, preTile)
       .filter(neighbor => neighbor !== piece);
-    const curNeighbors = board
-      .tileXYArrayToChessArray(board.getNeighborTileXY(curTile, null))
+    const curNeighbors = getAllNeighborsOfTileXY(board, curTile)
       .filter(neighbor => neighbor !== piece);
   
     // Piece is currently in overlaping position, any movement is allowed
@@ -90,16 +101,11 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
   
     // Allow movement when destination tile is occupied, and piece can overlap
     if (piece.canOverlap && board.tileXYToChessArray(curTile.x, curTile.y).length > 0) {
-      return this.isBoardContinuous(piece, { x: curTile.x, y: curTile.y });
+      return verifyBoardContinuityOnMove(piece, { x: curTile.x, y: curTile.y });
     }
   
     // Verify if piece can physically slide to next tile
-    const moveDirection = board.directionBetween(preTile, curTile);
-    const adjacentDirections = [((moveDirection - 1) % 6 + 6) % 6, (moveDirection + 1) % 6];
-    const preTileXYZ = { x: preTile.x, y: preTile.y, z: 'pathfinderLayer' };
-    const neighborAtDir0 = board.getNeighborChess(preTileXYZ, adjacentDirections[0]);
-    const neighborAtDir1 = board.getNeighborChess(preTileXYZ, adjacentDirections[1]);
-    if (neighborAtDir0 && neighborAtDir0 !== piece && neighborAtDir1 && neighborAtDir1 !== piece)
+    if (!canPieceSlideToTile(board, piece, preTile, curTile)) 
       return false;
     
     /**
@@ -109,81 +115,11 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
     for (const preNeighbor of preNeighbors) {
       const commonNeighbor = curNeighbors.find(curNeighbor => curNeighbor === preNeighbor);
       if (commonNeighbor) {
-        return this.isBoardContinuous(piece, { x: curTile.x, y: curTile.y });
+        return verifyBoardContinuityOnMove(piece, { x: curTile.x, y: curTile.y });
       }
     }
 
     return false;
-  }
-
-  /**
-   * This function verifies if moving 'this' piece to location tileXY does not
-   * break the continuity of the board. All piece must be connected as a single
-   * graph component.
-   */
-  isBoardContinuous(piece, tileXY) {
-    let graph = this.createGraph(piece, piece.rexChess.board, tileXY);
-    if (graphlib.alg.components(graph).length > 1) return false;
-
-    graph = this.addPieceToGraph(piece, graph, piece.rexChess.board, tileXY);
-    return graphlib.alg.components(graph).length == 1;
-  }
-
-  /**
-   * This function create a graph, and places 'this' piece at the location
-   * in the arguments.
-   */ 
-  createGraph(sourcePiece, board, location) {
-    const graph = new Graph({ directed: false });
-    const pieces = board
-      .getAllChess()
-      .filter((chess) => chess instanceof BoardPiece && chess.rexChess.tileXYZ.z === 'pathfinderLayer' && chess !== sourcePiece);
-
-    // Add nodes
-    pieces.forEach((piece) => {
-      graph.setNode(piece.rexChess.$uid);
-    });
-
-    // Add vertices - omit edges to the piece being moved
-    pieces.forEach((piece) => {
-      const neighbors = board.getNeighborChess(piece, null);
-      neighbors.forEach((neighbor) => {
-        if (neighbor != sourcePiece && !graph.hasEdge(piece.rexChess.$uid, neighbor.rexChess.$uid))
-          graph.setEdge(piece.rexChess.$uid, neighbor.rexChess.$uid);
-      });
-    });
-
-    // Add Nodes and vertices to tiles occupying the same tile location
-    const sameTilePieces = board
-      .tileXYToChessArray(sourcePiece.rexChess.tileXYZ.x, sourcePiece.rexChess.tileXYZ.y)
-      .filter(piece => piece != sourcePiece && piece.rexChess.tileXYZ.z !== 'pathfinderLayer');
-    if (sameTilePieces.length > 0) {
-      sameTilePieces.forEach((piece) => {
-        graph.setNode(piece.rexChess.$uid);
-      });
-
-      sameTilePieces.forEach((piece) => {
-        const neighbors = board.getNeighborChess(sourcePiece, null);
-        neighbors.forEach((neighbor) => {
-          if (neighbor != sourcePiece && !graph.hasEdge(piece.rexChess.$uid, neighbor.rexChess.$uid))
-            graph.setEdge(piece.rexChess.$uid, neighbor.rexChess.$uid);
-        });
-      });
-    }
-    return graph;
-  }
-
-  addPieceToGraph(sourcePiece, graph, board, location) {
-    graph.setNode(sourcePiece.rexChess.$uid);
-    // Add vertices to piece being moved at new location
-    const neighborPieces = board.tileXYArrayToChessArray(board.getNeighborTileXY(location, null));
-    neighborPieces.forEach((neighbor) => {
-      if (neighbor != sourcePiece) {
-        if (!graph.hasEdge(sourcePiece.rexChess.$uid, neighbor.rexChess.$uid))
-          graph.setEdge(sourcePiece.rexChess.$uid, neighbor.rexChess.$uid);
-      }
-    });
-    return graph;
   }
 
   moveToTile(destinationTile) {
@@ -198,6 +134,7 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
   moveAlongPath(path) {
     if (path.length === 0) {
       this.showMoveableArea();
+      Events.emit('piece-moved', this);
       const scene = this.rexChess.board.scene;
       scene.setState(Constants.GameState.READY);
       return;
@@ -221,20 +158,15 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
     const board = gameObject.rexChess.board;
 
     // On previous tile, send piece back to base layer
-    const previousTileXYZ = gameObject.previousTileXYZ;
-    const previousTilePieces = board
-      .tileXYToChessArray(previousTileXYZ.x, previousTileXYZ.y)
-      .filter((piece) => piece instanceof BoardPiece);
+    const previousTilePieces = getAllPiecesAtTileXY(board, gameObject.previousTileXYZ, null);
     const pieceAtBaseLayer = previousTilePieces.find(piece => piece.rexChess.tileXYZ.z === 'pathfinderLayer');
     if (previousTilePieces.length > 0 && !pieceAtBaseLayer){
-      previousTilePieces[0].rexChess.setTileZ('pathfinderLayer');
+      previousTilePieces[previousTilePieces.length - 1].rexChess.setTileZ('pathfinderLayer');
     }
 
     // On destination tile, send piece back to base layer if it was not occupied
     const destinationTile = gameObject.rexChess.tileXYZ;
-    const destinationTilePieces = board
-      .tileXYToChessArray(destinationTile.x, destinationTile.y)
-      .filter((piece) => piece instanceof BoardPiece);
+    const destinationTilePieces = getAllPiecesAtTileXY(board, destinationTile, null);
     if (!board.contains(destinationTile.x, destinationTile.y, 'pathfinderLayer'))
       gameObject.rexChess.setTileZ('pathfinderLayer');
 
@@ -254,7 +186,7 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
    * such that the piece at the top of the stack will be more prominent.
    */ 
   reposition(piecesInTile) {
-    piecesInTile.forEach(piece => piece.setDepth(5));
+    piecesInTile.forEach(piece => piece.setDepth(Constants.GameObjectDepth.PIECE));
 
     if (piecesInTile.length == 1) {
       piecesInTile[0].setOrigin(0.5);
@@ -286,7 +218,7 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
 
   topOfStackPositioning(piecesInTile, index) {
     piecesInTile[index].setOrigin(0.5, 0.95);
-    piecesInTile[index].setDepth(4);
+    piecesInTile[index].setDepth(Constants.GameObjectDepth.PIECE_BACK);
     piecesInTile[index].setScale(0.45);
   }
 }
