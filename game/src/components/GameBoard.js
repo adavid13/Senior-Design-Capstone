@@ -40,13 +40,20 @@ export default class GameBoard extends Board {
       this.scene.add.text(worldXY.x, worldXY.y, `${tileXY.x},${tileXY.y}`).setOrigin(0.5);
     }
 
+    this.setInteractive();
+    this.addEvents();
+    return this;
+  }
+
+  addEvents() {
     Events.on('piece-moved', this.handleTileColorChange, this);
     Events.on('piece-added', this.handleTileColorChange, this);
+    this.on('destroy', this.clearEvents, this);
+  }
 
-    this.setInteractive().on('tiledown', (pointer, tileXY) => {
-    });
-
-    return this;
+  clearEvents() {
+    Events.removeAllListeners('piece-moved');
+    Events.removeAllListeners('piece-added');
   }
 
   handleTileColorChange(piece) {
@@ -74,7 +81,6 @@ export default class GameBoard extends Board {
         this.drawHexagon(this.tileOutline, prevPoints, Constants.Color.GREY);
       }
     }
-
   }
 
   drawHexagon(graphic, points, color) {
