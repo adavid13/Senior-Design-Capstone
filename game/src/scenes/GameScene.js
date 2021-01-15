@@ -11,6 +11,7 @@ import KnightPiece from '../components/KnightPiece';
 import MagePiece from '../components/MagePiece';
 import StealthPiece from '../components/StealthPiece';
 import BarbarianPiece from '../components/BarbarianPiece';
+import InteractionModel from '../components/model/InteractionModel';
 
 const sceneConfig = {
   key: Constants.Scenes.GAME,
@@ -20,7 +21,6 @@ const sceneConfig = {
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super(sceneConfig);
-    this.selectedPiece = undefined;
   }
 
   init(initParams) {
@@ -37,6 +37,8 @@ export default class GameScene extends Phaser.Scene {
     this.createPieces();
     this.setCamera();
     this.setEvents();
+
+    this.interactionModel = new InteractionModel(players);
     // this.selectionMenu = undefined;
     this.state = Constants.GameState.READY;
   }
@@ -160,17 +162,21 @@ export default class GameScene extends Phaser.Scene {
           
           if (selectedObject instanceof BoardPiece) {
             this.clearSelection();
-            this.selectedPiece = selectedObject;
-            this.selectedPiece.setTint(Constants.Color.YELLOW_HIGHLIGHT);
-            this.selectedPiece.showMoveableArea();
+            this.interactionModel.selectedPiece = selectedObject;
+            selectedObject.setTint(Constants.Color.YELLOW_HIGHLIGHT);
+            selectedObject.showMoveableArea();
           }
     
           if (selectedObject instanceof MoveableMarker) {
-            this.setState(Constants.GameState.PIECE_MOVING);
-            const targetTile = selectedObject.getTileXY();
-            const parent = selectedObject.getParentPiece();
-            if (!parent.moveToTile(targetTile)) return;
-            selectedObject.setFillStyle(Constants.Color.RED);
+            if (this.interactionModel.selectedPiece.getPlayer() === this.interactionModel.playerTurn) {
+              this.setState(Constants.GameState.PIECE_MOVING);
+              const targetTile = selectedObject.getTileXY();
+              const parent = selectedObject.getParentPiece();
+              if (!parent.moveToTile(targetTile)) return;
+              selectedObject.setFillStyle(Constants.Color.RED);
+              this.interactionModel.incrementTurn();
+              this.interactionModel.changePlayerTurn();
+            }
           }
           break;
         }
@@ -195,9 +201,10 @@ export default class GameScene extends Phaser.Scene {
 
 
   clearSelection() {
-    if (this.selectedPiece) {
-      this.selectedPiece.hideMoveableArea();
-      this.selectedPiece.clearTint();
+    const selectedPiece = this.interactionModel.selectedPiece;
+    if (selectedPiece) {
+      selectedPiece.hideMoveableArea();
+      selectedPiece.clearTint();
     }
   }
 }
