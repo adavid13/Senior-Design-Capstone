@@ -1,16 +1,12 @@
 import Phaser from 'phaser';
 import { Constants } from '../utils/constants';
+import { Events } from '../components/EventCenter';
 // import PieceSelectionMenu from '../components/ui/PieceSelectionMenu';
 import GameBoard from '../components/GameBoard';
 import GameBoardModel from '../components/model/GameBoardModel';
 import PlayerModel from '../components/model/PlayerModel';
 import MoveableMarker from '../components/MoveableMarker';
 import BoardPiece from '../components/BoardPiece';
-import KingPiece from '../components/KingPiece';
-import KnightPiece from '../components/KnightPiece';
-import MagePiece from '../components/MagePiece';
-import StealthPiece from '../components/StealthPiece';
-import BarbarianPiece from '../components/BarbarianPiece';
 import InteractionModel from '../components/model/InteractionModel';
 
 const sceneConfig = {
@@ -24,7 +20,6 @@ export default class GameScene extends Phaser.Scene {
   }
 
   init(initParams) {
-    this.scene.launch(Constants.Scenes.GAMEUI);
     this.difficulty = initParams.difficulty;
   }
 
@@ -32,19 +27,20 @@ export default class GameScene extends Phaser.Scene {
 
   create() {
     this.createBackground();
-    const players = this.createPlayers();
-    this.board = this.createBoard(players);
-    this.createPieces();
+    this.players = this.createPlayers();
+    this.board = this.createBoard(this.players);
+    this.interactionModel = new InteractionModel(this.players);
+    this.scene.launch(
+      Constants.Scenes.GAMEUI,
+      { players: this.players, board: this.board, interactionModel: this.interactionModel }
+    );
     this.setCamera();
     this.setEvents();
-
-    this.interactionModel = new InteractionModel(players);
-    // this.selectionMenu = undefined;
     this.state = Constants.GameState.READY;
+    this.input.setTopOnly(true);
   }
 
   update() {
-    this.board.update();
     let { origDragPoint } = this.game;
     const { activePointer } = this.game.input;
     if (activePointer.isDown) {
@@ -77,10 +73,17 @@ export default class GameScene extends Phaser.Scene {
     this.state = state;
   }
 
+  getInteractionModel() {
+    return this.interactionModel;
+  }
+
   getFaction() {
-    if (this.difficulty === Constants.Difficulty.BEGINNER) return Constants.Faction.ANIMAL;
-    else if (this.difficulty === Constants.Difficulty.INTERMEDIATE) return Constants.Faction.HUMAN;
-    else if (this.difficulty === Constants.Difficulty.ADVANCED) return Constants.Faction.MONSTER;
+    if (this.difficulty === Constants.Difficulty.BEGINNER)
+      return Constants.Faction.ANIMAL;
+    else if (this.difficulty === Constants.Difficulty.INTERMEDIATE)
+      return Constants.Faction.HUMAN;
+    else if (this.difficulty === Constants.Difficulty.ADVANCED)
+      return Constants.Faction.MONSTER;
     console.error('Invalid difficulty setting');
   }
 
@@ -89,34 +92,6 @@ export default class GameScene extends Phaser.Scene {
     const board = new GameBoard(this, model);
     board.inititialize();
     return board;
-  }
-
-  createPieces() {
-    const player1 = this.board.getModel().getPlayers()[0];
-    this.chessA = new KingPiece(this.board, player1, { x: 11, y: 15 }, Constants.Faction.HUMAN);
-    this.chessB = new BarbarianPiece(this.board, player1, { x: 10, y: 15 }, Constants.Faction.HUMAN);
-    this.chessC = new BarbarianPiece(this.board, player1, { x: 10, y: 14 }, Constants.Faction.HUMAN);
-    this.chessD = new MagePiece (this.board, player1, { x: 12, y: 15 }, Constants.Faction.HUMAN);
-    this.chessE = new MagePiece (this.board, player1, { x: 11, y: 13 }, Constants.Faction.HUMAN);
-    this.chessF = new StealthPiece(this.board, player1, { x: 9, y: 14 }, Constants.Faction.HUMAN);
-    this.chessG = new StealthPiece(this.board, player1, { x: 9, y: 15 }, Constants.Faction.HUMAN);
-    this.chessH = new StealthPiece(this.board, player1, { x: 12, y: 14 }, Constants.Faction.HUMAN);
-    this.chessI = new KnightPiece(this.board, player1, { x: 13, y: 14 }, Constants.Faction.HUMAN);
-    this.chessJ = new KnightPiece(this.board, player1, { x: 9, y: 13 }, Constants.Faction.HUMAN);
-    this.chessK = new KnightPiece(this.board, player1, { x: 11, y: 14 }, Constants.Faction.HUMAN);
-
-    const player2 = this.board.getModel().getPlayers()[1];
-    this.chessL = new KingPiece(this.board, player2, { x: 11, y: 11 }, Constants.Faction.MONSTER);
-    this.chessM = new BarbarianPiece(this.board, player2, { x: 10, y: 11 }, Constants.Faction.MONSTER);
-    this.chessN = new BarbarianPiece(this.board, player2, { x: 10, y: 12 }, Constants.Faction.MONSTER);
-    this.chessO = new MagePiece (this.board, player2, { x: 9, y: 11 }, Constants.Faction.MONSTER);
-    this.chessP = new MagePiece (this.board, player2, { x: 13, y: 12 }, Constants.Faction.MONSTER);
-    this.chessQ = new StealthPiece(this.board, player2, { x: 11, y: 12 }, Constants.Faction.MONSTER);
-    this.chessR = new StealthPiece(this.board, player2, { x: 14, y: 12 }, Constants.Faction.MONSTER);
-    this.chessS = new StealthPiece(this.board, player2, { x: 13, y: 11 }, Constants.Faction.MONSTER);
-    this.chessT = new KnightPiece(this.board, player2, { x: 11, y: 10 }, Constants.Faction.MONSTER);
-    this.chessU = new KnightPiece(this.board, player2, { x: 12, y: 11 }, Constants.Faction.MONSTER);
-    this.chessV = new KnightPiece(this.board, player2, { x: 12, y: 12 }, Constants.Faction.MONSTER);
   }
 
   setCamera() {
@@ -130,6 +105,7 @@ export default class GameScene extends Phaser.Scene {
         case Constants.GameState.READY: {
           const gameObjects = this.board.tileXYToChessArray(tileXY.x, tileXY.y);
           if (gameObjects.length === 0) {
+            Events.emit('piece-selected');
             this.clearSelection();
             return;
           }
@@ -141,53 +117,18 @@ export default class GameScene extends Phaser.Scene {
           if (marker) {
             selectedObject = marker;
           } else {
-            //if (pieces.length === 1)
-              selectedObject = pieces[pieces.length - 1];
-            // else {
-            //   if (!this.selectionMenu) {
-            //     this.selectionMenu = new PieceSelectionMenu(this, pointer.worldX, pointer.worldY, pieces, (selectedPiece) => {
-            //       this.selectionMenu.collapse();
-            //       this.selectionMenu = undefined;
-            //       this.clearSelection();
-            //       this.selectedPiece = selectedPiece;
-            //       this.selectedPiece.setTint(0xffff00);
-            //       this.selectedPiece.showMoveableArea();
-            //       this.state = Constants.GameState.READY;
-            //     }, this);
-            //   }
-            //   this.state = Constants.GameState.PIECE_SELECTION;
-            //   return;
-            // }
+            selectedObject = pieces[pieces.length - 1];
           }
           
           if (selectedObject instanceof BoardPiece) {
-            this.clearSelection();
-            this.interactionModel.selectedPiece = selectedObject;
-            selectedObject.setTint(Constants.Color.YELLOW_HIGHLIGHT);
-            selectedObject.showMoveableArea();
+            this.onPieceSelected(selectedObject);
           }
     
           if (selectedObject instanceof MoveableMarker) {
-            if (this.interactionModel.selectedPiece.getPlayer() === this.interactionModel.playerTurn) {
-              this.setState(Constants.GameState.PIECE_MOVING);
-              const targetTile = selectedObject.getTileXY();
-              const parent = selectedObject.getParentPiece();
-              if (!parent.moveToTile(targetTile)) return;
-              selectedObject.setFillStyle(Constants.Color.RED);
-              this.interactionModel.incrementTurn();
-              this.interactionModel.changePlayerTurn();
-            }
+            this.onMarkerSelected(selectedObject);
           }
           break;
         }
-        // case Constants.GameState.PIECE_SELECTION: {
-        //   if (this.selectionMenu && !this.selectionMenu.isInTouching({ x: pointer.worldX, y: pointer.worldY })) {
-        //     this.selectionMenu.collapse();
-        //     this.selectionMenu = undefined;
-        //     this.state = Constants.GameState.READY;
-        //   }
-        //   break;
-        // }
         default:
           break;
       }
@@ -196,9 +137,30 @@ export default class GameScene extends Phaser.Scene {
     this.board.on('kickout', function(chessToAdd, occupiedChess, tileXYZ){
       console.error('a piece was removed from the board model: ', occupiedChess, tileXYZ);
       occupiedChess.destroy();
-    })
+    });
+
+    Events.on('card-selected', this.clearSelection, this);
   }
 
+  onPieceSelected(selectedPiece) {
+    this.clearSelection();
+    this.interactionModel.selectedPiece = selectedPiece;
+    Events.emit('piece-selected');
+    selectedPiece.setTint(Constants.Color.YELLOW_HIGHLIGHT);
+    selectedPiece.showMoveableArea();
+  }
+
+  onMarkerSelected(selectedMarker) {
+    if (this.interactionModel.selectedPieceCanMove()) {
+      this.setState(Constants.GameState.PIECE_MOVING);
+      const targetTile = selectedMarker.getTileXY();
+      const piece = selectedMarker.getParentPiece();
+      if (!piece.moveToTile(targetTile)) return;
+      selectedMarker.setFillStyle(Constants.Color.RED);
+      this.interactionModel.incrementTurn();
+      this.interactionModel.changePlayerTurn();
+    }
+  }
 
   clearSelection() {
     const selectedPiece = this.interactionModel.selectedPiece;

@@ -1,36 +1,17 @@
 import { Constants } from '../utils/constants';
 import { verifyBoardContinuityOnMove, findFreeTileAtDirection } from '../utils/boardUtils';
-import { getAllNeighborsOfTileXY, getAllPiecesAtTileXY } from '../utils/piecesUtils';
+import { getAllNeighborsOfTileXY, getAllPiecesAtTileXY, getPieceTexture, getDisplayName } from '../utils/piecesUtils';
 import MoveableMarker from './MoveableMarker';
 import BoardPiece from './BoardPiece';
 
-function getTexture(faction) {
-  if (faction === Constants.Faction.ANIMAL) {
-    return 'animalStealth';
-  } else if(faction === Constants.Faction.HUMAN) {
-    return 'humanStealth';
-  } else {
-    return 'monsterStealth';
-  }
-}
-
-function getDisplayName(faction) {
-  if (faction === Constants.Faction.ANIMAL) {
-    return 'Mouse';
-  } else if(faction === Constants.Faction.HUMAN) {
-    return 'Rogue';
-  } else {
-    return 'Ghost';
-  } 
-}
-
 export default class StealthPiece  extends BoardPiece {
-  constructor(board, player, tileXY, faction) {
-    super(board, player, tileXY, getTexture(faction));
+  constructor({ board, player, tileXY, faction }) {
+    const type = Constants.Pieces.STEALTH;
+    super({ board, player, tileXY, texture: getPieceTexture(type, faction) });
     this.movingPoints = undefined;
     this.faction = faction;
-    this.type = Constants.Pieces.STEALTH;
-    this._displayName = getDisplayName(faction);
+    this.type = type;
+    this._displayName = getDisplayName(type, faction);
     this.canOverlap = true;
     this.pathFinder.occupiedTest = false;
   }
@@ -69,8 +50,9 @@ export default class StealthPiece  extends BoardPiece {
       }
     }
 
+    const fillColor = this.scene.getInteractionModel().playerTurn === this.player ? Constants.Color.DARK_RED : Constants.Color.GREY;
     for (let i = 0, cnt = tileXYArray.length; i < cnt; i++) {
-      this.markers.push(new MoveableMarker(this, tileXYArray[i]));
+      this.markers.push(new MoveableMarker(this, tileXYArray[i], fillColor));
     }
     return this;
   }

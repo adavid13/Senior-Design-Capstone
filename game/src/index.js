@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import BoardPlugin from 'phaser3-rex-plugins/plugins/board-plugin';
 import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
+import { Constants } from './utils/constants';
 import PreloadScene from './scenes/PreloadScene';
 import TitleScene from './scenes/TitleScene';
 import OptionsScene from './scenes/OptionsScene';
@@ -16,8 +17,8 @@ import ButtonContainer from './components/ui/ButtonContainer';
 const config = {
   type: Phaser.AUTO,
   parent: 'phaser',
-  width: 1024,
-  height: 768,
+  width: Constants.Window.WIDTH,
+  height: Constants.Window.HEIGHT,
   plugins: {
     scene: [
       {

@@ -6,6 +6,16 @@ const assetManifest = {
       loadOnStart: true,
     },
     {
+      name: 'border',
+      path: './assets/images/border.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'card',
+      path: './assets/images/card.png',
+      loadOnStart: true,
+    },
+    {
       name: 'gamebg',
       path: './assets/images/gamebg.png',
       loadOnStart: true,

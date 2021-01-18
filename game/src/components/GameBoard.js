@@ -3,7 +3,7 @@ import graphlib, { Graph } from '@dagrejs/graphlib';
 import BoardPiece from './BoardPiece';
 import { Events } from './EventCenter';
 import { scaleHexagonAtCenter } from '../utils/geometry';
-import { getAllPiecesAtTileXY } from '../utils/piecesUtils';
+import { getAllPieces, tileTouchesOpponentPiece, getAllPiecesAtTileXY } from '../utils/piecesUtils';
 import { Constants } from '../utils/constants'; 
 
 export default class GameBoard extends Board {
@@ -104,6 +104,42 @@ export default class GameBoard extends Board {
     this.tileOutline.setVisible(display);
   }
 
+  showInitialPlacementPositions(player) {
+    const piecesInBoard = getAllPieces(this);
+    const playerPieces = piecesInBoard.filter(piece => piece.getPlayer() === player);
+    if (playerPieces.length === 0) {
+      if (getAllPieces(this).length === 1) {
+        return this.getNeighborTileXY({ x: 12, y: 12 }, null);
+      } else {
+        return [{ x: 12, y: 12 }];
+      }
+    }
+
+    const allowedTiles = [];
+    const rejectedTiles= [];
+    for (const playerPiece of playerPieces) {
+      const neighborTiles = this.getNeighborTileXY(playerPiece.rexChess.tileXYZ, null);
+      for (const neighborTile of neighborTiles) {
+        // Tile was already rejected
+        if (rejectedTiles.some(rejectedTile => rejectedTile.x === neighborTile.x && rejectedTile.y === neighborTile.y)) {
+          continue;
+        }
+        if (getAllPiecesAtTileXY(this, neighborTile).length === 0) {
+          // Tile does not touch any of the opponents pieces
+          if (tileTouchesOpponentPiece(this, player, neighborTile)) {
+            rejectedTiles.push(neighborTile);
+          } else {
+            allowedTiles.push(neighborTile);
+            rejectedTiles.push(neighborTile);
+          }
+        } else {
+          rejectedTiles.push(neighborTile);
+        }
+      }
+    }
+    return allowedTiles;
+  }
+
   arePiecesConnected() {
     const graph = new Graph({ directed: false });
     const pieces = this.getAllChess().filter(chess => chess instanceof BoardPiece);
@@ -119,7 +155,7 @@ export default class GameBoard extends Board {
       neighbors.forEach(neighbor => {
         if (!graph.hasEdge(piece.rexChess.$uid, neighbor.rexChess.$uid))
           graph.setEdge(piece.rexChess.$uid, neighbor.rexChess.$uid);
-      })
+      });
     });
 
     return graphlib.alg.components(graph).length == 1;

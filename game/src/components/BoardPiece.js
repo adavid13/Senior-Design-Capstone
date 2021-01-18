@@ -6,7 +6,7 @@ import { verifyBoardContinuityOnMove, canPieceSlideToTile } from '../utils/board
 import { getAllPiecesAtTileXY, getAllNeighborsOfTileXY } from '../utils/piecesUtils';
 
 export default class BoardPiece extends Phaser.GameObjects.Image {
-  constructor(board, player, tileXY, texture) {
+  constructor({ board, player, tileXY, texture }) {
     const scene = board.scene;
     const worldXY = board.tileXYToWorldXY(tileXY.x, tileXY.y);
     super(scene, worldXY.x, worldXY.y, texture);
@@ -26,6 +26,7 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
     }, this);
 
     // private members
+    this.scene = scene;
     this.player = player;
     this.movingPoints = 1;
     this.markers = [];
@@ -68,8 +69,9 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
   showMoveableArea() {
     this.hideMoveableArea();
     let tileXYArray = this.pathFinder.findArea(this.movingPoints);
+    const fillColor = this.scene.getInteractionModel().playerTurn === this.player ? Constants.Color.DARK_RED : Constants.Color.GREY;
     for (let i = 0, cnt = tileXYArray.length; i < cnt; i++) {
-      this.markers.push(new MoveableMarker(this, tileXYArray[i]));
+      this.markers.push(new MoveableMarker(this, tileXYArray[i], fillColor));
     }
     return this;
   }

@@ -21,6 +21,11 @@ export const Constants = {
     HEIGHT: 2800,
   },
 
+  Window: {
+    WIDTH: 1024,
+    HEIGHT: 768,
+  },
+
   GameObjectDepth: {
     GRID_TILE: 1,
     GRID_OUTLINE: 2,

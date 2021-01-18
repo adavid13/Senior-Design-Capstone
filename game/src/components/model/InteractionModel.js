@@ -4,6 +4,7 @@ export default class InteractionModel {
   _selectedPiece;
   
   constructor(players) {
+    this._currentTurn = 0;
     this._players = players;
     this._playerTurn = 0;
   }
@@ -30,5 +31,9 @@ export default class InteractionModel {
 
   incrementTurn() {
     this._currentTurn += 1;
+  }
+  
+  selectedPieceCanMove() {
+    return this.selectedPiece.getPlayer() === this.playerTurn;
   }
 }
