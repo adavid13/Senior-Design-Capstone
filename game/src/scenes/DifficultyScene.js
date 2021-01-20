@@ -21,7 +21,7 @@ export default class DifficultyScene extends Phaser.Scene {
     this.btnBeginner = this.createButton(this.scale.width / 4, this.scale.height / 2, 'Beginner');
 
     this.btnBeginner.onClick().subscribe(() => {
-      this.startScene(Constants.Scenes.GAME, {
+      this.startScene(Constants.Scenes.CONTROLLER, {
         difficulty: Constants.Difficulty.BEGINNER,
       });
     });
@@ -29,7 +29,7 @@ export default class DifficultyScene extends Phaser.Scene {
     this.btnIntermediate = this.createButton(this.scale.width / 2, this.scale.height / 2, 'Intermediate');
 
     this.btnIntermediate.onClick().subscribe(() => {
-      this.startScene(Constants.Scenes.GAME, {
+      this.startScene(Constants.Scenes.CONTROLLER, {
         difficulty: Constants.Difficulty.INTERMEDIATE,
       });
     });
@@ -37,7 +37,7 @@ export default class DifficultyScene extends Phaser.Scene {
     this.btnAdvanced = this.createButton((this.scale.width * 3) / 4, this.scale.height / 2, 'Advanced');
 
     this.btnAdvanced.onClick().subscribe(() => {
-      this.startScene(Constants.Scenes.GAME, {
+      this.startScene(Constants.Scenes.CONTROLLER, {
         difficulty: Constants.Difficulty.ADVANCED,
       });
     });

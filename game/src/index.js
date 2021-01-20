@@ -9,6 +9,7 @@ import CreditsScene from './scenes/CreditsScene';
 import DifficultyScene from './scenes/DifficultyScene';
 import GameScene from './scenes/GameScene';
 import GameUIScene from './scenes/GameUIScene';
+import GameControllerScene from './scenes/GameControllerScene';
 import ExampleScene from './scenes/ExampleScene';
 
 /*eslint no-unused-vars: "off"*/
@@ -32,7 +33,7 @@ const config = {
       },
     ],
   },
-  scene: [PreloadScene, TitleScene, OptionsScene, CreditsScene, DifficultyScene, GameScene, GameUIScene, ExampleScene],
+  scene: [PreloadScene, TitleScene, OptionsScene, CreditsScene, DifficultyScene, GameControllerScene, GameScene, GameUIScene, ExampleScene],
 };
 
 const game = new Phaser.Game(config);

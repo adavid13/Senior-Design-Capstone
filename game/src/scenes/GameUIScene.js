@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import { Events } from '../components/EventCenter';
 import Card from '../components/ui/Card';
-import PlacementMarker from '../components/PlacementMarker';
 import { Constants } from '../utils/constants';
 
 const sceneConfig = {
@@ -17,6 +16,10 @@ export default class GameUIScene extends Phaser.Scene {
     this.players = initParams.players;
     this.board = initParams.board;
     this.interactionModel = initParams.interactionModel;
+    this.onMenuClick = initParams.onMenuClick;
+    this.onUndoClick = initParams.onUndoClick;
+    this.onEndTurnClick = initParams.onEndTurnClick;
+    this.onPieceSelection = initParams.onPieceSelection;
   }
 
   create() {
@@ -24,14 +27,25 @@ export default class GameUIScene extends Phaser.Scene {
     this.pieces = [];
     this.markers = [];
     this.selectedCard = undefined;
-    this.handleCardSelection = this.handleCardSelection.bind(this);
-    this.handlePiecePlacement = this.handlePiecePlacement.bind(this);
     
     this.createMenuButton();
+    this.createEndTurnButton();
+    this.createUndoButton();
+    this.createTextBackground();
+    this.createTurnText();
+
     this.createPlayerOverlay();
     this.populatePlayerHand();
 
-    Events.on('piece-selected', this.clearSelection, this);
+    this.animateEndTurn();
+
+    Events.on('piece-added', () => {
+      this.enableButtons(true);
+    }, this);
+
+    Events.on('piece-moved', () => {
+      this.enableButtons(this.interactionModel.commands.length > 0);
+    }, this);
   }
 
   createMenuButton() {
@@ -41,9 +55,52 @@ export default class GameUIScene extends Phaser.Scene {
       .setOverTint(Constants.Color.ORANGE)
       .setText('Main Menu');
 
-    this.btnMenu.onClick().subscribe(() => {
-      this.startScene(Constants.Scenes.TITLE);
+    this.btnMenu.onClick().subscribe(this.onMenuClick);
+  }
+
+  createEndTurnButton() {
+    this.btnEndTurn = this.add
+      .buttonContainer(Constants.Window.WIDTH - 110, Constants.Window.HEIGHT - 30, 'btnBlue', Constants.Color.WHITE)
+      .setDownTexture('btnBluePressed')
+      .setOverTint(Constants.Color.ORANGE)
+      .setText('End Turn')
+      .setDisabled(true);
+
+    this.btnEndTurn.onClick().subscribe(() => {
+      this.onEndTurnClick();
+      this.enableButtons(false);
+      this.animateEndTurn();
     });
+  }
+
+  createUndoButton() {
+    this.btnUndo = this.add
+      .buttonContainer(100, Constants.Window.HEIGHT - 30, 'btnBlue', Constants.Color.WHITE)
+      .setDownTexture('btnBluePressed')
+      .setOverTint(Constants.Color.ORANGE)
+      .setText('Undo')
+      .setDisabled(true);
+
+    this.btnUndo.onClick().subscribe(() => {
+      const commandStack = this.onUndoClick();
+      if (commandStack.length === 0) {
+        this.enableButtons(false);
+      }
+    });
+  }
+
+  createTurnText() {
+    this.turnText = this.add
+      .text(-500, Constants.Window.HEIGHT / 2, 'Player Turn', { fontSize: 60, color: '#ffffff' , fontStyle: 'bold' })
+      .setOrigin(0.5);
+  }
+
+  createTextBackground() {
+    this.textBackground = this.add.graphics({ fillStyle: { color: Constants.Color.GREY, alpha: 1 }});
+    this.textBackground.fillRectShape(
+      new Phaser.Geom.Rectangle(0, Constants.Window.HEIGHT / 3,  Constants.Window.WIDTH, Constants.Window.HEIGHT / 3)
+    );
+    this.textBackground.setAlpha(0);
   }
 
   createPlayerOverlay() {
@@ -61,9 +118,51 @@ export default class GameUIScene extends Phaser.Scene {
       .setScale(0.3);
   }
 
+  animateEndTurn() {
+    if (this.interactionModel.playerTurn.getNumber() === 1) {
+      this.turnText.setText('Your Turn');
+    } else {
+      this.turnText.setText("Opponent's Turn");
+    }
+    
+
+    this.turnText.setX(-500);
+    const timeline = this.tweens.createTimeline();
+    timeline.add({
+      targets: this.turnText,
+      x: Constants.Window.WIDTH / 2,
+      duration: 600,
+      ease: 'Quint.easeOut',
+      delay: 400
+    });
+    timeline.add({
+      targets: this.turnText,
+      x: Constants.Window.WIDTH + 300,
+      duration: 600,
+      ease: 'Quint.easeOut',
+      delay: 400
+    });
+    timeline.play();
+
+    const backgroundTimeLine = this.tweens.createTimeline();
+    backgroundTimeLine.add({
+      targets: this.textBackground,
+      alpha: 0.9,
+      duration: 600,
+      ease: 'Quint.easeOut',
+      yoyo: true,
+      delay: 400
+    });
+    backgroundTimeLine.play();
+  }
+
+  enableButtons(enable) {
+    this.btnEndTurn.setDisabled(!enable);
+    this.btnUndo.setDisabled(!enable);
+  }
+
   populatePlayerHand() {
     const XOffset = 287;
-
     for (const player of this.players) {
       let x = XOffset;
       const playerPieces = player.getPiecesInHand();
@@ -78,61 +177,11 @@ export default class GameUIScene extends Phaser.Scene {
 
   createPiece(player, x, type) {
     const { height } = this.sys.game.canvas;
-    
     if (player.getNumber() === 1) {
-      return new Card(this, player, x, height - 10, type, false, this.handleCardSelection);
+      return new Card(this, player, x, height - 10, type, false, this.onPieceSelection);
     }
-
     if (player.getNumber() === 2) {
-      return new Card(this, player, x, 10, type, true, this.handleCardSelection);
+      return new Card(this, player, x, 10, type, true, this.onPieceSelection);
     }
-  }
-
-  handleCardSelection(selectedCard) {
-    this.clearSelection();
-
-    // Check if selected cart belongs to the player that has the turn.
-    if (selectedCard && this.interactionModel.playerTurn === selectedCard.getPlayer()) {
-      this.selectedCard = selectedCard;
-      this.selectedCard.setSelected(true);
-      Events.emit('card-selected');
-      const allowedTiles = this.board.showInitialPlacementPositions(selectedCard.getPlayer());
-      this.showMoveableArea(allowedTiles, selectedCard);
-    }
-  }
-
-  handlePiecePlacement() {
-    this.handleCardSelection(undefined);
-    this.interactionModel.changePlayerTurn();
-  }
-
-  showMoveableArea(allowedTiles, selectedCard) {
-    this.hideMoveableArea();
-    for (let i = 0, cnt = allowedTiles.length; i < cnt; i++) {
-      const fillColor = this.interactionModel.playerTurn === selectedCard.getPlayer() ? Constants.Color.DARK_RED : Constants.Color.GREY;
-      this.markers.push(new PlacementMarker(this.board, allowedTiles[i], selectedCard, this.handlePiecePlacement, fillColor));
-    }
-    return this;
-  }
-
-  hideMoveableArea() {
-    for (let i = 0, cnt = this.markers.length; i < cnt; i++) {
-      this.markers[i].destroy();
-    }
-    this.markers.length = 0;
-    return this;
-  }
-
-  clearSelection() {
-    for (const piece of this.pieces) {
-      piece.setSelected(false);
-    }
-    this.hideMoveableArea();
-  }
-
-  startScene(targetScene) {
-    this.scene.stop(Constants.Scenes.GAMEUI);
-    this.gameScene = this.scene.get(Constants.Scenes.GAME);
-    this.gameScene.scene.start(targetScene);
   }
 }

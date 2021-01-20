@@ -8,6 +8,7 @@ export const Constants = {
     DIFFICULTY: 'DIFFICULTY',
     GAMEUI: 'GAMEUI',
     GAME: 'GAME',
+    CONTROLLER: 'CONTROLLER'
   },
 
   Difficulty: {

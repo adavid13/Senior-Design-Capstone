@@ -50,9 +50,8 @@ export default class StealthPiece  extends BoardPiece {
       }
     }
 
-    const fillColor = this.scene.getInteractionModel().playerTurn === this.player ? Constants.Color.DARK_RED : Constants.Color.GREY;
     for (let i = 0, cnt = tileXYArray.length; i < cnt; i++) {
-      this.markers.push(new MoveableMarker(this, tileXYArray[i], fillColor));
+      this.markers.push(new MoveableMarker(this, tileXYArray[i], !this.scene.getInteractionModel().pieceCanMove(this)));
     }
     return this;
   }

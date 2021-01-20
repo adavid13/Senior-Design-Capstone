@@ -1,6 +1,5 @@
 import { Shape } from 'phaser3-rex-plugins/plugins/board-components.js';
 import { Constants } from '../utils/constants'; 
-import { createPiece } from './PieceFactory';
 
 export default class PlacementMarker extends Shape {
   constructor(board, tileXY, card, onClick) {
@@ -12,21 +11,14 @@ export default class PlacementMarker extends Shape {
     this.tileXY = tileXY;
     this.card = card;
     this.board = board;
+    
     this.setInteractive();
     this.on('pointerdown', () => {
-      onClick();
-      this.onPiecePlacement();
+      onClick(this.card, this.tileXY);
     }, this);
   }
 
   getTileXY() {
     return this.tileXY;
-  }
-
-  onPiecePlacement() {
-    const type = this.card.getType();
-    const player = this.card.getPlayer();
-    const faction = this.card.getFaction();
-    createPiece(type, { board: this.board, player, tileXY: this.tileXY, faction });
   }
 }
