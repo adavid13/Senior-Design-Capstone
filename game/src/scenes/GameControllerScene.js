@@ -55,7 +55,7 @@ export default class GameControllerScene extends Phaser.Scene {
       }
     );
     Events.on('piece-moved', this.handleMoveCompleted, this);
-    this.on('destroy', this.clearEvents, this);
+    this.events.on('shutdown', this.clearEvents, this);
   }
 
   createPlayers() {
