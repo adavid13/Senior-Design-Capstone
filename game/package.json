@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@dagrejs/graphlib": "^2.1.4",
-    "phaser": "~3.51.0",
+    "phaser": "~3.52.0",
     "phaser3-rex-plugins": "^1.1.36",
     "rxjs": "^6.6.3",
     "uuid": "^8.3.2"
