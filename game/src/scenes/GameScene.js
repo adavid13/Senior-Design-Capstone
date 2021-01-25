@@ -1,17 +1,6 @@
 import Phaser from 'phaser';
 import { Constants } from '../utils/constants';
-// import PieceSelectionMenu from '../components/ui/PieceSelectionMenu';
-import GameBoard from '../components/GameBoard';
-import GameBoardModel from '../components/model/GameBoardModel';
-import PlayerModel from '../components/model/PlayerModel';
-import MoveableMarker from '../components/MoveableMarker';
-import BoardPiece from '../components/BoardPiece';
-import KingPiece from '../components/KingPiece';
-import KnightPiece from '../components/KnightPiece';
-import MagePiece from '../components/MagePiece';
-import StealthPiece from '../components/StealthPiece';
-import BarbarianPiece from '../components/BarbarianPiece';
-import InteractionModel from '../components/model/InteractionModel';
+import { Events } from '../components/EventCenter';
 
 const sceneConfig = {
   key: Constants.Scenes.GAME,
@@ -24,39 +13,38 @@ export default class GameScene extends Phaser.Scene {
   }
 
   init(initParams) {
-    this.scene.launch(Constants.Scenes.GAMEUI);
-    this.difficulty = initParams.difficulty;
+    this.players = initParams.players;
+    this.interactionModel = initParams.interactionModel;
+    this.board = initParams.board;
   }
-
-  preload() {}
 
   create() {
     this.createBackground();
-    const players = this.createPlayers();
-    this.board = this.createBoard(players);
-    this.createPieces();
+    this.board.inititialize();
     this.setCamera();
-    this.setEvents();
 
-    this.interactionModel = new InteractionModel(players);
-    // this.selectionMenu = undefined;
     this.state = Constants.GameState.READY;
-  }
+    
+    this.input.setTopOnly(true);
+    this.input.on('pointermove', (pointer) => {
+      if (!pointer.isDown) return;
+      const cam = this.cameras.main;
+      cam.scrollX -= (pointer.x - pointer.prevPosition.x) / cam.zoom;
+      cam.scrollY -= (pointer.y - pointer.prevPosition.y) / cam.zoom;
+    });
 
-  update() {
-    this.board.update();
-    let { origDragPoint } = this.game;
-    const { activePointer } = this.game.input;
-    if (activePointer.isDown) {
-      if (origDragPoint) {
-        // move the camera by the amount the mouse has moved since last update
-        this.cameras.main.scrollX += origDragPoint.x - activePointer.position.x;
-        this.cameras.main.scrollY += origDragPoint.y - activePointer.position.y;
-      } // set new drag origin to current position
-      this.game.origDragPoint = activePointer.position.clone();
-    } else {
-      this.game.origDragPoint = null;
-    }
+    Events.on('piece-added', (piece) => {
+      this.board.handleTileColorChange(piece);
+    });
+
+    Events.on('piece-moved', (piece) => {
+      piece.clearTint();
+      this.board.handleTileColorChange(piece);
+    });
+
+    Events.on('piece-removed', (piece) => {
+      this.board.clearTileColor(piece);
+    });
   }
 
   createBackground() {
@@ -66,145 +54,12 @@ export default class GameScene extends Phaser.Scene {
     this.add.image(2034, 1758, 'gamebg').setOrigin(0, 0);
   }
 
-  createPlayers() {
-    return [
-      new PlayerModel(1, Constants.PlayerType.HUMAN, Constants.Faction.HUMAN),
-      new PlayerModel(2, Constants.PlayerType.AI, this.getFaction()),
-    ];
-  }
-
-  setState(state) {
-    this.state = state;
-  }
-
-  getFaction() {
-    if (this.difficulty === Constants.Difficulty.BEGINNER) return Constants.Faction.ANIMAL;
-    else if (this.difficulty === Constants.Difficulty.INTERMEDIATE) return Constants.Faction.HUMAN;
-    else if (this.difficulty === Constants.Difficulty.ADVANCED) return Constants.Faction.MONSTER;
-    console.error('Invalid difficulty setting');
-  }
-
-  createBoard(players) {
-    const model = new GameBoardModel(this.difficulty, players);
-    const board = new GameBoard(this, model);
-    board.inititialize();
-    return board;
-  }
-
-  createPieces() {
-    const player1 = this.board.getModel().getPlayers()[0];
-    this.chessA = new KingPiece(this.board, player1, { x: 11, y: 15 }, Constants.Faction.HUMAN);
-    this.chessB = new BarbarianPiece(this.board, player1, { x: 10, y: 15 }, Constants.Faction.HUMAN);
-    this.chessC = new BarbarianPiece(this.board, player1, { x: 10, y: 14 }, Constants.Faction.HUMAN);
-    this.chessD = new MagePiece (this.board, player1, { x: 12, y: 15 }, Constants.Faction.HUMAN);
-    this.chessE = new MagePiece (this.board, player1, { x: 11, y: 13 }, Constants.Faction.HUMAN);
-    this.chessF = new StealthPiece(this.board, player1, { x: 9, y: 14 }, Constants.Faction.HUMAN);
-    this.chessG = new StealthPiece(this.board, player1, { x: 9, y: 15 }, Constants.Faction.HUMAN);
-    this.chessH = new StealthPiece(this.board, player1, { x: 12, y: 14 }, Constants.Faction.HUMAN);
-    this.chessI = new KnightPiece(this.board, player1, { x: 13, y: 14 }, Constants.Faction.HUMAN);
-    this.chessJ = new KnightPiece(this.board, player1, { x: 9, y: 13 }, Constants.Faction.HUMAN);
-    this.chessK = new KnightPiece(this.board, player1, { x: 11, y: 14 }, Constants.Faction.HUMAN);
-
-    const player2 = this.board.getModel().getPlayers()[1];
-    this.chessL = new KingPiece(this.board, player2, { x: 11, y: 11 }, Constants.Faction.MONSTER);
-    this.chessM = new BarbarianPiece(this.board, player2, { x: 10, y: 11 }, Constants.Faction.MONSTER);
-    this.chessN = new BarbarianPiece(this.board, player2, { x: 10, y: 12 }, Constants.Faction.MONSTER);
-    this.chessO = new MagePiece (this.board, player2, { x: 9, y: 11 }, Constants.Faction.MONSTER);
-    this.chessP = new MagePiece (this.board, player2, { x: 13, y: 12 }, Constants.Faction.MONSTER);
-    this.chessQ = new StealthPiece(this.board, player2, { x: 11, y: 12 }, Constants.Faction.MONSTER);
-    this.chessR = new StealthPiece(this.board, player2, { x: 14, y: 12 }, Constants.Faction.MONSTER);
-    this.chessS = new StealthPiece(this.board, player2, { x: 13, y: 11 }, Constants.Faction.MONSTER);
-    this.chessT = new KnightPiece(this.board, player2, { x: 11, y: 10 }, Constants.Faction.MONSTER);
-    this.chessU = new KnightPiece(this.board, player2, { x: 12, y: 11 }, Constants.Faction.MONSTER);
-    this.chessV = new KnightPiece(this.board, player2, { x: 12, y: 12 }, Constants.Faction.MONSTER);
+  getInteractionModel() {
+    return this.interactionModel;
   }
 
   setCamera() {
     this.cameras.main.setBounds(0, 0, Constants.World.WIDTH, Constants.World.HEIGHT);
     this.cameras.main.centerOn(Constants.World.WIDTH / 2, Constants.World.HEIGHT / 2);
-  }
-
-  setEvents() {
-    this.board.on('tiledown', (pointer, tileXY) => {
-      switch (this.state) {
-        case Constants.GameState.READY: {
-          const gameObjects = this.board.tileXYToChessArray(tileXY.x, tileXY.y);
-          if (gameObjects.length === 0) {
-            this.clearSelection();
-            return;
-          }
-
-          let selectedObject = undefined;
-          const marker = gameObjects.find(object => object instanceof MoveableMarker);
-          const pieces = gameObjects.filter(object => object instanceof BoardPiece);
-
-          if (marker) {
-            selectedObject = marker;
-          } else {
-            //if (pieces.length === 1)
-              selectedObject = pieces[pieces.length - 1];
-            // else {
-            //   if (!this.selectionMenu) {
-            //     this.selectionMenu = new PieceSelectionMenu(this, pointer.worldX, pointer.worldY, pieces, (selectedPiece) => {
-            //       this.selectionMenu.collapse();
-            //       this.selectionMenu = undefined;
-            //       this.clearSelection();
-            //       this.selectedPiece = selectedPiece;
-            //       this.selectedPiece.setTint(0xffff00);
-            //       this.selectedPiece.showMoveableArea();
-            //       this.state = Constants.GameState.READY;
-            //     }, this);
-            //   }
-            //   this.state = Constants.GameState.PIECE_SELECTION;
-            //   return;
-            // }
-          }
-          
-          if (selectedObject instanceof BoardPiece) {
-            this.clearSelection();
-            this.interactionModel.selectedPiece = selectedObject;
-            selectedObject.setTint(Constants.Color.YELLOW_HIGHLIGHT);
-            selectedObject.showMoveableArea();
-          }
-    
-          if (selectedObject instanceof MoveableMarker) {
-            if (this.interactionModel.selectedPiece.getPlayer() === this.interactionModel.playerTurn) {
-              this.setState(Constants.GameState.PIECE_MOVING);
-              const targetTile = selectedObject.getTileXY();
-              const parent = selectedObject.getParentPiece();
-              if (!parent.moveToTile(targetTile)) return;
-              selectedObject.setFillStyle(Constants.Color.RED);
-              this.interactionModel.incrementTurn();
-              this.interactionModel.changePlayerTurn();
-            }
-          }
-          break;
-        }
-        // case Constants.GameState.PIECE_SELECTION: {
-        //   if (this.selectionMenu && !this.selectionMenu.isInTouching({ x: pointer.worldX, y: pointer.worldY })) {
-        //     this.selectionMenu.collapse();
-        //     this.selectionMenu = undefined;
-        //     this.state = Constants.GameState.READY;
-        //   }
-        //   break;
-        // }
-        default:
-          break;
-      }
-    });
-
-    this.board.on('kickout', function(chessToAdd, occupiedChess, tileXYZ){
-      console.error('a piece was removed from the board model: ', occupiedChess, tileXYZ);
-      occupiedChess.destroy();
-    })
-  }
-
-
-  clearSelection() {
-    const selectedPiece = this.interactionModel.selectedPiece;
-    if (selectedPiece) {
-      selectedPiece.hideMoveableArea();
-      selectedPiece.clearTint();
-    }
   }
 }

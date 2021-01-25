@@ -1,9 +1,8 @@
 import { Board } from 'phaser3-rex-plugins/plugins/board-components.js';
 import graphlib, { Graph } from '@dagrejs/graphlib';
 import BoardPiece from './BoardPiece';
-import { Events } from './EventCenter';
 import { scaleHexagonAtCenter } from '../utils/geometry';
-import { getAllPiecesAtTileXY } from '../utils/piecesUtils';
+import { getAllPieces, tileTouchesOpponentPiece, getAllPiecesAtTileXY } from '../utils/piecesUtils';
 import { Constants } from '../utils/constants'; 
 
 export default class GameBoard extends Board {
@@ -11,6 +10,7 @@ export default class GameBoard extends Board {
     super(scene, model.getGridConfig());
     this.scene = scene;
     this.model = model;
+    this.hexScaleFactor = 0.9;
   }
 
   inititialize() {
@@ -27,7 +27,6 @@ export default class GameBoard extends Board {
     const tileKeys = this.model.getKeys();
     for (const i in this.tileXYArray) {
       tileXY = this.tileXYArray[i];
-      // this.tileOutline.strokePoints(this.getGridPoints(tileXY.x, tileXY.y, true), true);
       worldXY = this.tileXYToWorldXY(tileXY.x, tileXY.y);
       this.scene.add
         .image(
@@ -41,24 +40,12 @@ export default class GameBoard extends Board {
     }
 
     this.setInteractive();
-    this.addEvents();
     return this;
-  }
-
-  addEvents() {
-    Events.on('piece-moved', this.handleTileColorChange, this);
-    Events.on('piece-added', this.handleTileColorChange, this);
-    this.on('destroy', this.clearEvents, this);
-  }
-
-  clearEvents() {
-    Events.removeAllListeners('piece-moved');
-    Events.removeAllListeners('piece-added');
   }
 
   handleTileColorChange(piece) {
     const tileXY = piece.rexChess.tileXYZ;
-    const scaleFactor = 0.9;
+    const scaleFactor = this.hexScaleFactor;
     const points = scaleHexagonAtCenter(this.getGridPoints(tileXY.x, tileXY.y, true), scaleFactor);
 
     if (piece.getPlayer().getNumber() === 1) {
@@ -83,13 +70,15 @@ export default class GameBoard extends Board {
     }
   }
 
+  clearTileColor(tileXY) {
+    const points = scaleHexagonAtCenter(this.getGridPoints(tileXY.x, tileXY.y, true), this.hexScaleFactor);
+    this.drawHexagon(this.tileOutline, points, Constants.Color.GREY);
+  }
+
   drawHexagon(graphic, points, color) {
     const lineWidth = 5;
     graphic.lineStyle(lineWidth, color, 1);
     graphic.strokePoints(points, true);
-  }
-
-  update() {
   }
 
   getModel() {
@@ -102,6 +91,42 @@ export default class GameBoard extends Board {
 
   displayTileOutline(display) {
     this.tileOutline.setVisible(display);
+  }
+
+  showInitialPlacementPositions(player) {
+    const piecesInBoard = getAllPieces(this);
+    const playerPieces = piecesInBoard.filter(piece => piece.getPlayer() === player);
+    if (playerPieces.length === 0) {
+      if (getAllPieces(this).length === 1) {
+        return this.getNeighborTileXY({ x: 12, y: 12 }, null);
+      } else {
+        return [{ x: 12, y: 12 }];
+      }
+    }
+
+    const allowedTiles = [];
+    const rejectedTiles= [];
+    for (const playerPiece of playerPieces) {
+      const neighborTiles = this.getNeighborTileXY(playerPiece.rexChess.tileXYZ, null);
+      for (const neighborTile of neighborTiles) {
+        // Tile was already rejected
+        if (rejectedTiles.some(rejectedTile => rejectedTile.x === neighborTile.x && rejectedTile.y === neighborTile.y)) {
+          continue;
+        }
+        if (getAllPiecesAtTileXY(this, neighborTile).length === 0) {
+          // Tile does not touch any of the opponents pieces
+          if (tileTouchesOpponentPiece(this, player, neighborTile)) {
+            rejectedTiles.push(neighborTile);
+          } else {
+            allowedTiles.push(neighborTile);
+            rejectedTiles.push(neighborTile);
+          }
+        } else {
+          rejectedTiles.push(neighborTile);
+        }
+      }
+    }
+    return allowedTiles;
   }
 
   arePiecesConnected() {
@@ -119,7 +144,7 @@ export default class GameBoard extends Board {
       neighbors.forEach(neighbor => {
         if (!graph.hasEdge(piece.rexChess.$uid, neighbor.rexChess.$uid))
           graph.setEdge(piece.rexChess.$uid, neighbor.rexChess.$uid);
-      })
+      });
     });
 
     return graphlib.alg.components(graph).length == 1;

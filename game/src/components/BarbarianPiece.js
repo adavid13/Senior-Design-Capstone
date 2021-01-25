@@ -1,36 +1,17 @@
 import { Constants } from '../utils/constants';
-import { getAllNeighborsOfTileXY } from '../utils/piecesUtils';
+import { getAllNeighborsOfTileXY, getPieceTexture, getDisplayName } from '../utils/piecesUtils';
 import { getAdjacentDirections, canPieceSlideToTile } from '../utils/boardUtils';
 import MoveableMarker from './MoveableMarker';
 import BoardPiece from './BoardPiece';
 
-function getTexture(faction) {
-  if (faction === Constants.Faction.ANIMAL) {
-    return 'animalBarbarian';
-  } else if(faction === Constants.Faction.HUMAN) {
-    return 'humanBarbarian';
-  } else {
-    return 'monsterBarbarian';
-  }
-}
-
-function getDisplayName(faction) {
-  if (faction === Constants.Faction.ANIMAL) {
-    return 'Boar';
-  } else if(faction === Constants.Faction.HUMAN) {
-    return 'Barbarian';
-  } else {
-    return 'Orc';
-  } 
-}
-
 export default class BarbarianPiece extends BoardPiece {
-  constructor(board, player, tileXY, faction) {
-    super(board, player, tileXY, getTexture(faction));
+  constructor({ board, player, tileXY, faction }) {
+    const type = Constants.Pieces.BARBARIAN;
+    super({ board, player, tileXY, texture: getPieceTexture(type, faction) });
     this.movingPoints = 3;
     this.faction = faction;
-    this.type = Constants.Pieces.BARBARIAN;
-    this._displayName = getDisplayName(faction);
+    this.type = type;
+    this._displayName = getDisplayName(type, faction);
   }
 
   /**
@@ -45,7 +26,7 @@ export default class BarbarianPiece extends BoardPiece {
         const tileXY = marker.getTileXY();
         return tileXY.x === destinationArray[i].x && tileXY.y === destinationArray[i].y;
       })) {
-        this.markers.push(new MoveableMarker(this, destinationArray[i]));
+        this.markers.push(new MoveableMarker(this, destinationArray[i], !this.scene.getInteractionModel().pieceCanMove(this)));
       }
     }
     return this;
@@ -70,7 +51,7 @@ export default class BarbarianPiece extends BoardPiece {
             // Check if tile is empty and is not the current costOneTile
             const isNextTileEmpty = !neighborAtDir || !(neighborAtDir instanceof BoardPiece);
             const isCurrentTile = nextTile.x === this.rexChess.tileXYZ.x && nextTile.y === this.rexChess.tileXYZ.y;
-            const isDuplicate = costTwoTiles.find(tile => tile.x === nextTile.x && tile.y === nextTile.y)
+            const isDuplicate = costTwoTiles.find(tile => tile.x === nextTile.x && tile.y === nextTile.y);
             if (isNextTileEmpty && !isCurrentTile && !isDuplicate) {
               costTwoTiles.push({ ...nextTile, z: 'pathfinderLayer' });
             }
@@ -85,7 +66,7 @@ export default class BarbarianPiece extends BoardPiece {
           const moveDirection = board.directionBetween(costTwoTile, costTwoTileNeighbor);
           const adjacentDirections = getAdjacentDirections(moveDirection);
           adjacentDirections.forEach(dir => {
-            let neighborAtDir = board.getNeighborChess(costTwoTile, dir)
+            let neighborAtDir = board.getNeighborChess(costTwoTile, dir);
             const nextTile = board.getNeighborTileXY(costTwoTile, dir);
             if (canPieceSlideToTile(board, this, costTwoTile, nextTile)) {
               // Check if tile is empty and is not the current costTwoTile

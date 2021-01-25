@@ -4,8 +4,10 @@ export default class InteractionModel {
   _selectedPiece;
   
   constructor(players) {
+    this._currentTurn = 0;
     this._players = players;
     this._playerTurn = 0;
+    this._commands = [];
   }
 
   get playerTurn() {
@@ -14,6 +16,7 @@ export default class InteractionModel {
 
   changePlayerTurn() {
     this._playerTurn = (this._playerTurn + 1) % 2;
+    this.clearCommands();
   }
 
   get selectedPiece() {
@@ -30,5 +33,27 @@ export default class InteractionModel {
 
   incrementTurn() {
     this._currentTurn += 1;
+  }
+
+  get commands() {
+    return this._commands;
+  }
+
+  clearCommands() {
+    while(this.commands.length > 0) {
+      this.commands.pop();
+    }
+  }
+
+  pieceCanBeAdded(card) {
+    return this.pieceCanMove(card);
+  }
+
+  pieceCanMove(piece) {
+    return piece.getPlayer() === this.playerTurn && this.commands.length === 0;
+  }
+
+  selectedPieceCanMove() {
+    return this.selectedPiece.getPlayer() === this.playerTurn && this.commands.length === 0;
   }
 }

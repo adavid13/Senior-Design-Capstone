@@ -8,6 +8,7 @@ export const Constants = {
     DIFFICULTY: 'DIFFICULTY',
     GAMEUI: 'GAMEUI',
     GAME: 'GAME',
+    CONTROLLER: 'CONTROLLER'
   },
 
   Difficulty: {
@@ -19,6 +20,11 @@ export const Constants = {
   World: {
     WIDTH: 3000,
     HEIGHT: 2800,
+  },
+
+  Window: {
+    WIDTH: 1024,
+    HEIGHT: 768,
   },
 
   GameObjectDepth: {

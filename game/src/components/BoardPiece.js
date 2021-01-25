@@ -6,7 +6,7 @@ import { verifyBoardContinuityOnMove, canPieceSlideToTile } from '../utils/board
 import { getAllPiecesAtTileXY, getAllNeighborsOfTileXY } from '../utils/piecesUtils';
 
 export default class BoardPiece extends Phaser.GameObjects.Image {
-  constructor(board, player, tileXY, texture) {
+  constructor({ board, player, tileXY, texture, onMoveComplete }) {
     const scene = board.scene;
     const worldXY = board.tileXYToWorldXY(tileXY.x, tileXY.y);
     super(scene, worldXY.x, worldXY.y, texture);
@@ -26,13 +26,13 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
     }, this);
 
     // private members
+    this.scene = scene;
     this.player = player;
+    this.onMoveComplete = onMoveComplete;
     this.movingPoints = 1;
     this.markers = [];
     this._displayName = 'BoardPiece';
     this.canOverlap = false;
-
-    Events.emit('piece-added', this);
   }
 
   set displayName(name) {
@@ -69,7 +69,7 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
     this.hideMoveableArea();
     let tileXYArray = this.pathFinder.findArea(this.movingPoints);
     for (let i = 0, cnt = tileXYArray.length; i < cnt; i++) {
-      this.markers.push(new MoveableMarker(this, tileXYArray[i]));
+      this.markers.push(new MoveableMarker(this, tileXYArray[i], !this.scene.getInteractionModel().pieceCanMove(this)));
     }
     return this;
   }
@@ -122,6 +122,10 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
     return false;
   }
 
+  moveToPreviousTile() {
+    this.moveToTile(this.previousTileXYZ);
+  }
+
   moveToTile(destinationTile) {
     if (this.moveTo.isRunning) return false;
     this.reorderDestinationTile(destinationTile);
@@ -133,10 +137,9 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
 
   moveAlongPath(path) {
     if (path.length === 0) {
-      this.showMoveableArea();
+      this.hideMoveableArea();
+      this.pathFinder.findArea(this.movingPoints);
       Events.emit('piece-moved', this);
-      const scene = this.rexChess.board.scene;
-      scene.setState(Constants.GameState.READY);
       return;
     }
 
