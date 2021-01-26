@@ -21,18 +21,18 @@ export default class Card extends Phaser.GameObjects.Container {
     };
 
     this.background = this.scene.add
-      .image(0, 0, 'card')
+      .sprite(0, 0, 'card', 0)
       .setOrigin(0.5, 1)
       .setScale(0.2);
 
     this.pieceTexture = this.scene.add
-      .image(0, -35, this.pieceTexture)
-      .setOrigin(0.5, 1)
-      .setScale(0.25);
+      .image(0, -54, this.pieceTexture)
+      .setOrigin(0.5)
+      .setScale(0.275);
 
     if (rotated) {
       this.background.setRotation(Math.PI);
-      this.pieceTexture.setOrigin(0.5, 0).setY(27);
+      this.pieceTexture.setOrigin(0.5).setY(53);
     }
 
     this.add(this.background);

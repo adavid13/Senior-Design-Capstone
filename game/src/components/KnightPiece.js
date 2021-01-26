@@ -11,4 +11,8 @@ export default class KnightPiece extends BoardPiece {
     this.type = type;
     this._displayName = getDisplayName(type, faction);
   }
+
+  animationFrame(texture) {
+    return [0, 1, 2, 3, 0].map(frame => ({ key: texture, frame }));
+  }
 }

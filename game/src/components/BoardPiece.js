@@ -5,7 +5,7 @@ import { Constants } from '../utils/constants';
 import { verifyBoardContinuityOnMove, canPieceSlideToTile } from '../utils/boardUtils';
 import { getAllPiecesAtTileXY, getAllNeighborsOfTileXY } from '../utils/piecesUtils';
 
-export default class BoardPiece extends Phaser.GameObjects.Image {
+export default class BoardPiece extends Phaser.GameObjects.Sprite {
   constructor({ board, player, tileXY, texture, onMoveComplete }) {
     const scene = board.scene;
     const worldXY = board.tileXYToWorldXY(tileXY.x, tileXY.y);
@@ -25,6 +25,12 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
       this.reorderTiles(gameObject);
     }, this);
 
+    this.idleAnimation = this.anims.create({
+      key: 'idle',
+      frames: this.animationFrame(texture),
+      frameRate: 6
+    });
+
     // private members
     this.scene = scene;
     this.player = player;
@@ -33,6 +39,12 @@ export default class BoardPiece extends Phaser.GameObjects.Image {
     this.markers = [];
     this._displayName = 'BoardPiece';
     this.canOverlap = false;
+
+    this.play({ key: 'idle', repeat: -1 });
+  }
+
+  animationFrame(texture) {
+    return [0, 1, 2, 1, 0].map(frame => ({ key: texture, frame }));
   }
 
   set displayName(name) {
