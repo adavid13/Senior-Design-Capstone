@@ -9,7 +9,7 @@ class UHP_Interface:
         pass
     def newgame():
         """
-        Asks the engine to start a new base game
+        Asks the engine to start a new base game  
         UHP  compliant
         May not need parameters based on our requirements
 
