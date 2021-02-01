@@ -30,7 +30,7 @@ class Engine:
         elif "options" in string:
             this.options()
         else:
-            return "Error: Command not recognized."
+            return "err Invalid command. Try 'help' to see a list of valid commands"
 
     def info():
         """
