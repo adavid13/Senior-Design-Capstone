@@ -24,6 +24,8 @@ class Engine:
             this.undo(string.split()[1])
         elif "options" in string:
             this.options()
+        elif "help" in string:
+            return "Available commands: info, newgame, play, pass, validmoves, bestmove, undo, options, help"
         else:
             return "err Invalid command. Try 'help' to see a list of valid commands"
 
