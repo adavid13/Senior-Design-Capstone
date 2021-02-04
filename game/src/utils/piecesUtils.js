@@ -11,6 +11,15 @@ export function getAllPieces(board) {
 }
 
 /**
+ * Returns all board pieces of the given player
+ */
+export function getAllPiecesOfPlayer(board, player) {
+  return board.getAllChess().filter(piece => {
+    return piece instanceof BoardPiece && piece.getPlayer() === player;
+  });
+}
+
+/**
  * Returns all board pieces at a specific tileZ. All markers are excluded
  */
 export function getAllPiecesAtTileZ(board, tileZ) {
@@ -46,6 +55,22 @@ export function getAllNeighborsOfTileXY(board, tileXY) {
 export function tileTouchesOpponentPiece(board, player, tile) {
   const neighbors = getAllNeighborsOfTileXY(board, tile);
   return neighbors.some(neighbor => neighbor.getPlayer() !== player);
+}
+
+/**
+ * Return true if player already placed the king in the board
+ */
+export function isKingOnTheBoard(player) {
+  return player.getPiecesInHand()[Constants.Pieces.KING] === 0;
+}
+
+/**
+ * Return true if the piece is surrounded. No distinction between friendlies or enemies
+ */
+export function isPieceSurrounded(board, piece) {
+  const tileXYZ = piece.rexChess.tileXYZ;
+  const neighbors = board.getNeighborChess(tileXYZ, null);
+  return neighbors.length >= 6;
 }
 
 /**

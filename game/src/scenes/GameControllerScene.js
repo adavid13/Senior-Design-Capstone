@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Constants } from '../utils/constants';
+import { isKingOnTheBoard, isPieceSurrounded, getAllPieces, getAllPiecesOfPlayer } from '../utils/piecesUtils';
 import { Events } from '../components/EventCenter';
 import PlayerModel from '../components/model/PlayerModel';
 import InteractionModel from '../components/model/InteractionModel';
@@ -11,6 +12,7 @@ import BoardPiece from '../components/BoardPiece';
 import MoveCommand from '../components/command/MoveCommand';
 import PlaceCommand from '../components/command/PlaceCommand';
 import Card from '../components/ui/Card';
+import KingPiece from '../components/KingPiece';
 
 const sceneConfig = {
   key: Constants.Scenes.CONTROLLER,
@@ -82,6 +84,7 @@ export default class GameControllerScene extends Phaser.Scene {
     Events.removeAllListeners('piece-moved');
     Events.removeAllListeners('piece-added');
     Events.removeAllListeners('piece-removed');
+    Events.removeAllListeners('alert');
   }
 
   getFaction() {
@@ -129,9 +132,15 @@ export default class GameControllerScene extends Phaser.Scene {
 
   handlePieceSelection(selectedPiece) {
     this.clearSelection();
-    this.interactionModel.selectedPiece = selectedPiece;
-    selectedPiece.setTint(Constants.Color.YELLOW_HIGHLIGHT);
-    selectedPiece.showMoveableArea();
+
+    const { playerTurn, commands } = this.interactionModel;
+    if (isKingOnTheBoard(playerTurn) || commands.length > 0 || playerTurn !== selectedPiece.getPlayer()) {
+      this.interactionModel.selectedPiece = selectedPiece;
+      selectedPiece.setTint(Constants.Color.YELLOW_HIGHLIGHT);
+      selectedPiece.showMoveableArea();
+    } else {
+      Events.emit('alert', 'You can only move a piece after the king is placed on the board.');
+    }
   }
 
   handlePieceInHandSelection(pieceInHand) {
@@ -188,9 +197,28 @@ export default class GameControllerScene extends Phaser.Scene {
   }
 
   handleEndTurnClick() {
+    const { currentTurn, playerTurn } = this.interactionModel;
+    if (currentTurn === 7 || currentTurn === 8) {
+      if (!isKingOnTheBoard(playerTurn)) {
+        return Constants.Turn.NEED_KING;
+      }
+    }
+
+    const endGame = this.isGameWon();
+    if (endGame) {
+      this.state = Constants.GameState.END_GAME;
+      return endGame;
+    }
+
     this.interactionModel.changePlayerTurn();
     this.interactionModel.incrementTurn();
     this.clearSelection();
+
+    if (!this.playerHasValidAction()) {
+      return Constants.Turn.SKIP_TURN;
+    }
+
+    return Constants.Turn.NEXT_TURN;
   }
 
   execute(command) {
@@ -227,5 +255,37 @@ export default class GameControllerScene extends Phaser.Scene {
     }
 
     this.interactionModel.selectedPiece = undefined;
+  }
+
+  isGameWon() {
+    const pieces = getAllPieces(this.board).filter(piece => piece instanceof KingPiece);
+    for (const piece of pieces) {
+      if (isPieceSurrounded(this.board, piece)) {
+        if (piece.getPlayer().getNumber() === 1) {
+          return Constants.Turn.DEFEAT;
+        } else {
+          return Constants.Turn.VICTORY;
+        }
+      }
+    }
+    return false;
+  }
+
+  playerHasValidAction() {
+    const { playerTurn } = this.interactionModel;
+    let canPlacePiece = false;
+    if (!playerTurn.isHandEmpty()) {
+      canPlacePiece = this.board.showInitialPlacementPositions(playerTurn).length > 0;
+    }
+
+    let canMovePiece = false;
+    const playerPieces = getAllPiecesOfPlayer(this.board, playerTurn);
+    playerPieces.forEach(piece => {
+      if (piece.getDestinationTiles().length > 0) {
+        canMovePiece = true;
+      }
+    });
+    
+    return canPlacePiece || canMovePiece;
   }
 }

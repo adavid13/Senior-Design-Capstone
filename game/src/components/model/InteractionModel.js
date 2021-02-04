@@ -4,7 +4,7 @@ export default class InteractionModel {
   _selectedPiece;
   
   constructor(players) {
-    this._currentTurn = 0;
+    this._currentTurn = 1;
     this._players = players;
     this._playerTurn = 0;
     this._commands = [];

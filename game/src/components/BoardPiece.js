@@ -79,13 +79,17 @@ export default class BoardPiece extends Phaser.GameObjects.Sprite {
 
   showMoveableArea() {
     this.hideMoveableArea();
-    let tileXYArray = this.pathFinder.findArea(this.movingPoints);
+    let tileXYArray = this.getDestinationTiles();
     for (let i = 0, cnt = tileXYArray.length; i < cnt; i++) {
       this.markers.push(new MoveableMarker(this, tileXYArray[i], !this.scene.getInteractionModel().pieceCanMove(this)));
     }
     return this;
   }
 
+  getDestinationTiles() {
+    return this.pathFinder.findArea(this.movingPoints);
+  }
+  
   hideMoveableArea() {
     for (let i = 0, cnt = this.markers.length; i < cnt; i++) {
       this.markers[i].destroy();

@@ -1,8 +1,8 @@
 const assetManifest = {
   images: [
     {
-      name: 'logo',
-      path: './assets/images/logo.png',
+      name: 'titlegrey',
+      path: './assets/images/titlegrey.png',
       loadOnStart: true,
     },
     {

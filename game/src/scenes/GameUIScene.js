@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Events } from '../components/EventCenter';
 import Card from '../components/ui/Card';
 import { Constants } from '../utils/constants';
+import { convertIntegerColorToString } from '../utils/color';
 
 const sceneConfig = {
   key: Constants.Scenes.GAMEUI,
@@ -27,14 +28,17 @@ export default class GameUIScene extends Phaser.Scene {
     this.pieces = [];
     this.markers = [];
     this.selectedCard = undefined;
+    this.handleEndTurnClick = this.handleEndTurnClick.bind(this);
     
     this.createMenuButton();
     this.createEndTurnButton();
     this.createUndoButton();
     this.createTextBackground();
     this.createTurnText();
-
+    this.createNotificationSystem();
+    this.createDialog();
     this.createPlayerOverlay();
+    
     this.populatePlayerHand();
 
     this.animateEndTurn();
@@ -46,52 +50,46 @@ export default class GameUIScene extends Phaser.Scene {
     Events.on('piece-moved', () => {
       this.enableButtons(this.interactionModel.commands.length > 0);
     }, this);
+
+    Events.on('alert', this.alert, this);
+  }
+
+  createButton(x, y, text) {
+    return this.add
+      .buttonContainer(x, y, 'image',
+        { texture: 'btnBlue', tint: Constants.Color.WHITE },
+        { style: { color: 'white', fontFamily: '"Bungee"', fontSize: '20px' } })
+      .setDownTexture('btnBluePressed')
+      .setOverTint(Constants.Color.ORANGE)
+      .setText(text);
   }
 
   createMenuButton() {
-    this.btnMenu = this.add
-      .buttonContainer(100, 30, 'btnBlue', Constants.Color.WHITE)
-      .setDownTexture('btnBluePressed')
-      .setOverTint(Constants.Color.ORANGE)
-      .setText('Main Menu');
-
+    this.btnMenu = this.createButton(100, 30, 'Main Menu');
     this.btnMenu.onClick().subscribe(this.onMenuClick);
   }
 
   createEndTurnButton() {
-    this.btnEndTurn = this.add
-      .buttonContainer(Constants.Window.WIDTH - 110, Constants.Window.HEIGHT - 30, 'btnBlue', Constants.Color.WHITE)
-      .setDownTexture('btnBluePressed')
-      .setOverTint(Constants.Color.ORANGE)
-      .setText('End Turn')
-      .setDisabled(true);
-
-    this.btnEndTurn.onClick().subscribe(() => {
-      this.onEndTurnClick();
-      this.enableButtons(false);
-      this.animateEndTurn();
-    });
+    this.btnEndTurn = this.createButton(Constants.Window.WIDTH - 110, Constants.Window.HEIGHT - 30, 'End Turn');
+    this.btnEndTurn.setDisabled(true)
+      .onClick().subscribe(this.handleEndTurnClick);
   }
 
   createUndoButton() {
-    this.btnUndo = this.add
-      .buttonContainer(100, Constants.Window.HEIGHT - 30, 'btnBlue', Constants.Color.WHITE)
-      .setDownTexture('btnBluePressed')
-      .setOverTint(Constants.Color.ORANGE)
-      .setText('Undo')
-      .setDisabled(true);
-
-    this.btnUndo.onClick().subscribe(() => {
-      const commandStack = this.onUndoClick();
-      if (commandStack.length === 0) {
-        this.enableButtons(false);
-      }
-    });
+    this.btnUndo = this.createButton(100, Constants.Window.HEIGHT - 30, 'Undo');
+    this.btnUndo.setDisabled(true)
+      .onClick().subscribe(() => {
+        const commandStack = this.onUndoClick();
+        if (commandStack.length === 0) {
+          this.enableButtons(false);
+        }
+      });
   }
 
   createTurnText() {
     this.turnText = this.add
-      .text(-500, Constants.Window.HEIGHT / 2, 'Player Turn', { fontSize: 60, color: '#ffffff' , fontStyle: 'bold' })
+      .text(-500, Constants.Window.HEIGHT / 2, 'Player Turn', { fontFamily: '"Bungee"', fontSize: 60, color: '#ffffff' })
+      .setShadow(5, 5, '#000000', 5, false, true)
       .setOrigin(0.5);
   }
 
@@ -118,6 +116,55 @@ export default class GameUIScene extends Phaser.Scene {
       .setScale(0.3);
   }
 
+  createNotificationSystem() {
+    const toastTextColor = convertIntegerColorToString(Constants.Color.WHITE);
+    this.toast = this.rexUI.add.toast({
+      x: Constants.Window.WIDTH / 2,
+      y: Constants.Window.HEIGHT * 4 / 5,
+      background: this.rexUI.add.roundRectangle(0, 0, 2, 2, 20, Constants.Color.GREY),
+      text: this.add.text(0, 0, '', { fontFamily: '"Bungee"', fontSize: '22px', fill: toastTextColor })
+        .setShadow(2, 2, '#000000', 2, false, true),
+      space: { top: 20, right: 20, bottom: 20, left: 20 },
+      duration: { in: 200, hold: 2500, out: 200 },
+    });
+  }
+
+  createDialog() {
+    const textColor = convertIntegerColorToString(Constants.Color.WHITE);
+    this.dialog = this.rexUI.add.dialog({
+      x: Constants.Window.WIDTH / 2,
+      y: Constants.Window.HEIGHT / 2,
+      width: 400,
+      background: this.rexUI.add.roundRectangle(0, 0, 100, 100, 20, Constants.Color.GREY),
+      content: this.rexUI.add.label({
+        width: 40,
+        height: 40,
+        text: this.add.text(0, 0, '', { fontFamily: '"Bungee"', fontSize: '22px', fill: textColor }),
+        space: { top: 20, right: 20, bottom: 20, left: 20 } 
+      })
+    })
+      .layout()
+      .setVisible(false);
+  }
+
+  openDialog(condition) {
+    this.dialog.getElement('content').setText(condition);
+    this.dialog.setVisible(true).popUp(1000);
+    this.tweens.add({
+      targets: this.dialog,
+      scaleX: 1,
+      scaleY: 1,
+      ease: 'Bounce',
+      duration: 1000,
+      repeat: 0,
+      yoyo: false
+    });
+  }
+
+  alert(message) {
+    this.toast.show(message);
+  }
+
   animateEndTurn() {
     if (this.interactionModel.playerTurn.getNumber() === 1) {
       this.turnText.setText('Your Turn');
@@ -125,7 +172,6 @@ export default class GameUIScene extends Phaser.Scene {
       this.turnText.setText("Opponent's Turn");
     }
     
-
     this.turnText.setX(-500);
     const timeline = this.tweens.createTimeline();
     timeline.add({
@@ -154,6 +200,35 @@ export default class GameUIScene extends Phaser.Scene {
       delay: 400
     });
     backgroundTimeLine.play();
+  }
+
+  handleEndTurnClick() {
+    const turnResult = this.onEndTurnClick();
+    switch (turnResult) {
+      case Constants.Turn.NEXT_TURN:
+        this.enableButtons(false);
+        this.animateEndTurn();
+        break;
+      case Constants.Turn.SKIP_TURN:
+        this.enableButtons(false);
+        this.animateEndTurn();
+        this.alert('You can\'t make any moves this turn.\nYou turn will be skipped.');
+        setTimeout(this.handleEndTurnClick, 3000);
+        break;
+      case Constants.Turn.NEED_KING:
+        this.alert('You must play the king in this turn.\nUndo your previous action.');
+        break;
+      case Constants.Turn.VICTORY:
+        this.openDialog('VICTORY!');
+        this.enableButtons(false);
+        break;
+      case Constants.Turn.DEFEAT:
+        this.openDialog('DEFEAT!');
+        this.enableButtons(false);
+        break;
+      default:
+        break;
+    }
   }
 
   enableButtons(enable) {

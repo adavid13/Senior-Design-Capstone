@@ -13,10 +13,13 @@ export default class DifficultyScene extends Phaser.Scene {
   create() {
     this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor('#69696c');
     this.titleText = this.add.text(this.scale.width / 2, this.scale.height / 3, 'Select the difficulty', {
+      fontFamily: '"Bungee"',
       fontSize: '64px',
       fill: '#fff',
     });
-    this.titleText.setOrigin(0.5);
+    this.titleText
+      .setOrigin(0.5)
+      .setShadow(5, 5, '#000000', 5, false, true);
 
     this.btnBeginner = this.createButton(this.scale.width / 4, this.scale.height / 2, 'Beginner');
 
@@ -45,7 +48,9 @@ export default class DifficultyScene extends Phaser.Scene {
 
   createButton(x, y, text) {
     return this.add
-      .buttonContainer(x, y, 'btnBlue', Constants.Color.WHITE)
+      .buttonContainer(x, y, 'image',
+        { texture: 'btnBlue', tint: Constants.Color.WHITE },
+        { style: { color: 'white', fontFamily: '"Bungee"', fontSize: '20px' } })
       .setDownTexture('btnBluePressed')
       .setOverTint(Constants.Color.ORANGE)
       .setText(text);

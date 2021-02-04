@@ -36,7 +36,7 @@ export default class GameBoard extends Board {
           Math.floor(Math.random() * 10)
         )
         .setScale(0.625);
-      this.scene.add.text(worldXY.x, worldXY.y, `${tileXY.x},${tileXY.y}`).setOrigin(0.5);
+      // this.scene.add.text(worldXY.x, worldXY.y, `${tileXY.x},${tileXY.y}`).setOrigin(0.5);
     }
 
     this.setInteractive();

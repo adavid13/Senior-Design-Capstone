@@ -12,7 +12,7 @@ export default class Button extends Phaser.GameObjects.Image {
   disabledTint;
   clickSubject;
 
-  constructor(scene, x, y, texture, tint) {
+  constructor(scene, x, y, { texture, tint }) {
     super(scene, x, y, texture);
     this.setTint(tint);
 

@@ -1,23 +1,81 @@
 import Phaser from 'phaser';
-import Button from './Button';
+import ImageButton from './ImageButton';
+import RectangleButton from './RectangleButton';
+import { convertIntegerColorToString } from '../../utils/color';
 
 export default class ButtonContainer extends Phaser.GameObjects.Container {
   button;
   text;
 
-  constructor(scene, x, y, texture, tint = 0xffffff) {
+  constructor(scene, x, y, type, buttonConfig, textConfig) {
     super(scene, x, y);
     this.scene = scene;
+    this.textConfig = textConfig;
+    this.onOver = this.onOver.bind(this);
+    this.onOut = this.onOut.bind(this);
+    this.onDown = this.onDown.bind(this);
+    this.onUp = this.onUp.bind(this);
 
-    this.button = new Button(scene, 0, 0, texture, tint);
-    this.text = this.scene.add.text(0, 0, 'Button', { color: 'black' }).setOrigin(0.5, 0.5);
+    if (type === 'image') {
+      this.button = new ImageButton(scene, 0, 0, buttonConfig);
+    } else {
+      this.button = new RectangleButton(scene, 0, 0, buttonConfig, {
+        onOver: this.onOver,
+        onOut: this.onOut,
+        onDown: this.onDown,
+        onUp: this.onUp
+      });
+    }
+    
+    this.text = this.scene.add
+      .text(0, 0, 'Button', textConfig.style)
+      .setOrigin(0.5);
+    this.textShadow();
 
     this.add(this.button);
     this.add(this.text);
   }
 
+  textShadow() {
+    if (this.textConfig.addShadow)
+      this.text.setShadow(5, 5, '#000000', 5, false, true);
+  }
+
+  clearTextShadow() {
+    this.text.setShadow(0, 0, '#000000', 0, false, true);
+  }
+
   onClick() {
     return this.button.onClick();
+  }
+
+  onOver() {
+    this.text.setColor(convertIntegerColorToString(this.textConfig.highlightColor));
+  }
+
+  onOut() {
+    this.text.setColor('#ffffff');
+    this.textShadow();
+  }
+
+  onDown() {
+    this.clearTextShadow();
+  }
+
+  onUp() {
+    this.textShadow();
+  }
+
+  alignCenter() {
+    this.button.setOrigin(0.5);
+    this.text.setOrigin(0.5);
+    return this;
+  }
+
+  alignLeft() {
+    this.button.setOrigin(0, 0.5);
+    this.text.setOrigin(0, 0.5);
+    return this;
   }
 
   setText(text) {
@@ -87,7 +145,7 @@ export default class ButtonContainer extends Phaser.GameObjects.Container {
 }
 
 Phaser.GameObjects.GameObjectFactory.register('buttonContainer',
-  function (x, y, key, tint = 0xffffff) {
-    return this.displayList.add(new ButtonContainer(this.scene, x, y, key, tint));
+  function (x, y, type, buttonConfig, textConfig) {
+    return this.displayList.add(new ButtonContainer(this.scene, x, y, type, buttonConfig, textConfig));
   }
 );

@@ -79,5 +79,14 @@ export const Constants = {
     READY: 'READY',
     PIECE_MOVING: 'PIECE_MOVING',
     PIECE_SELECTION: 'PIECE_SELECTION',
+    END_GAME: 'END_GAME'
+  },
+
+  Turn: {
+    NEXT_TURN: 'NEXT_TURN',
+    SKIP_TURN: 'SKIP_TURN',
+    NEED_KING: 'NEED_KING',
+    VICTORY: 'VICTORY',
+    DEFEAT: 'DEFEAT'
   }
 };

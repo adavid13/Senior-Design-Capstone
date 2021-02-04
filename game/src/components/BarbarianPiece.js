@@ -20,7 +20,7 @@ export default class BarbarianPiece extends BoardPiece {
    */ 
   showMoveableArea() {
     this.hideMoveableArea();
-    const destinationArray = this.findPath().map(path => path[path.length - 1]);
+    const destinationArray = this.getDestinationTiles();
     for (let i = 0, cnt = destinationArray.length; i < cnt; i++) {
       if (!this.markers.find(marker => {
         const tileXY = marker.getTileXY();
@@ -30,6 +30,10 @@ export default class BarbarianPiece extends BoardPiece {
       }
     }
     return this;
+  }
+
+  getDestinationTiles() {
+    return this.findPath().map(path => path[path.length - 1]);
   }
 
   findPath() {
