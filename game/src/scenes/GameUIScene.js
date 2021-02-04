@@ -104,7 +104,7 @@ export default class GameUIScene extends Phaser.Scene {
   createPlayerOverlay() {
     const { width, height } = this.sys.game.canvas;
     this.player1Border = this.add
-      .image(width / 2, height, 'border')
+      .image(width / 2, height, 'borderp1')
       .setOrigin(0.5, 1)
       .setScale(0.3);
 

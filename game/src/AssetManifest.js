@@ -6,6 +6,11 @@ const assetManifest = {
       loadOnStart: true,
     },
     {
+      name: 'borderp1',
+      path: './assets/images/borderp1.png',
+      loadOnStart: true,
+    },
+    {
       name: 'border',
       path: './assets/images/border.png',
       loadOnStart: true,
