@@ -29,7 +29,7 @@ export default class GameUIScene extends Phaser.Scene {
     this.markers = [];
     this.selectedCard = undefined;
     this.handleEndTurnClick = this.handleEndTurnClick.bind(this);
-    
+        
     this.createMenuButton();
     this.createEndTurnButton();
     this.createUndoButton();
@@ -108,12 +108,15 @@ export default class GameUIScene extends Phaser.Scene {
       .setOrigin(0.5, 1)
       .setScale(0.3);
 
-
     this.player2Border = this.add
       .image(width / 2, 0, 'border')
       .setRotation(Math.PI)
       .setOrigin(0.5, 1)
       .setScale(0.3);
+
+    this.p1Pipeline = this.plugins.get('rexGrayScalePipeline').add(this.player1Border);
+    this.p1Pipeline.intensity = 0;
+    this.p2Pipeline = this.plugins.get('rexGrayScalePipeline').add(this.player2Border);
   }
 
   createNotificationSystem() {
@@ -208,10 +211,12 @@ export default class GameUIScene extends Phaser.Scene {
       case Constants.Turn.NEXT_TURN:
         this.enableButtons(false);
         this.animateEndTurn();
+        this.swapOverlay(this.interactionModel.playerTurn.getNumber());
         break;
       case Constants.Turn.SKIP_TURN:
         this.enableButtons(false);
         this.animateEndTurn();
+        this.swapOverlay(this.interactionModel.playerTurn.getNumber());
         this.alert('You can\'t make any moves this turn.\nYou turn will be skipped.');
         setTimeout(this.handleEndTurnClick, 3000);
         break;
@@ -253,10 +258,54 @@ export default class GameUIScene extends Phaser.Scene {
   createPiece(player, x, type) {
     const { height } = this.sys.game.canvas;
     if (player.getNumber() === 1) {
-      return new Card(this, player, x, height - 10, type, false, this.onPieceSelection);
+      return new Card(this, player, x, height - 10, type, false, this.onPieceSelection).setEnabled();
     }
     if (player.getNumber() === 2) {
-      return new Card(this, player, x, 10, type, true, this.onPieceSelection);
+      return new Card(this, player, x, 10, type, true, this.onPieceSelection).setDisabled();
+    }
+  }
+
+  swapOverlay(player) {
+    if (player === 1) {
+      this.tweens.add({
+        targets: this.p1Pipeline,
+        intensity: 0,
+        yoyo: false,
+        repeat: 0
+      });
+      this.tweens.add({
+        targets: this.p2Pipeline,
+        intensity: 1,
+        yoyo: false,
+        repeat: 0
+      });
+      this.pieces.forEach(piece => {
+        if (piece.getPlayer().getNumber() === 1) {
+          piece.setEnabled();
+        } else {
+          piece.setDisabled();
+        }
+      });
+    } else {
+      this.tweens.add({
+        targets: this.p1Pipeline,
+        intensity: 1,
+        yoyo: false,
+        repeat: 0
+      });
+      this.tweens.add({
+        targets: this.p2Pipeline,
+        intensity: 0,
+        yoyo: false,
+        repeat: 0
+      });
+      this.pieces.forEach(piece => {
+        if (piece.getPlayer().getNumber() === 2) {
+          piece.setEnabled();
+        } else {
+          piece.setDisabled();
+        }
+      });
     }
   }
 }

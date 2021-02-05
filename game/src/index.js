@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import GrayScalePipelinePlugin from 'phaser3-rex-plugins/plugins/grayscalepipeline-plugin.js';
 import BoardPlugin from 'phaser3-rex-plugins/plugins/board-plugin';
 import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 import { Constants } from './utils/constants';
@@ -20,6 +21,11 @@ const config = {
   width: Constants.Window.WIDTH,
   height: Constants.Window.HEIGHT,
   plugins: {
+    global: [{
+      key: 'rexGrayScalePipeline',
+      plugin: GrayScalePipelinePlugin,
+      start: true
+    }],
     scene: [
       {
         key: 'rexBoard',
