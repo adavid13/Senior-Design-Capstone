@@ -41,6 +41,7 @@ class Engine:
 
         > info
         """
+        return "ENGG 4000 Chexy Development Version"
         pass
     def newgame():
         """
