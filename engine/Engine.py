@@ -41,8 +41,7 @@ class Engine:
 
         > info
         """
-        return "ENGG 4000 Chexy Development Version"
-        pass
+        return "id ENGG 4000 Chexy Development Version"
     def newgame():
         """
         Asks the engine to start a new base game  
