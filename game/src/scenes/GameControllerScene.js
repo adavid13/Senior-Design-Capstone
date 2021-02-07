@@ -39,12 +39,13 @@ export default class GameControllerScene extends Phaser.Scene {
     this.placementMarkers = [];
 
     this.handleMenuClick = this.handleMenuClick.bind(this);
+    this.handleRestartClick = this.handleRestartClick.bind(this);
     this.handleUndoClick = this.handleUndoClick.bind(this);
     this.handleEndTurnClick = this.handleEndTurnClick.bind(this);
     this.handlePieceInHandSelection = this.handlePieceInHandSelection.bind(this);
     this.handlePiecePlacement = this.handlePiecePlacement.bind(this);
 
-    this.toolTip = new Tooltip(this.gameUIScene, 0, 0, 'Wololo').layout();
+    this.toolTip = new Tooltip(this.gameUIScene, 0, 0, '').layout();
     this.toolTip.setVisible(false);
     this.timeout = undefined;
 
@@ -55,6 +56,7 @@ export default class GameControllerScene extends Phaser.Scene {
       { players: this.players,
         board: this.board,
         interactionModel: this.interactionModel,
+        onRestartClick: this.handleRestartClick,
         onMenuClick: this.handleMenuClick,
         onUndoClick: this.handleUndoClick,
         onEndTurnClick: this.handleEndTurnClick,
@@ -143,7 +145,7 @@ export default class GameControllerScene extends Phaser.Scene {
     }
     
     const pieces = getAllPiecesAtTileXY(this.board, tileXY);
-    if (pieces.length > 0) {
+    if (pieces.length > 0 && this.state !== Constants.GameState.END_GAME) {
       const piece = pieces[pieces.length - 1];
       this.timeout = setTimeout(() => {
         const text = piece.displayName + '\nType: ' + piece.type;
@@ -206,6 +208,12 @@ export default class GameControllerScene extends Phaser.Scene {
 
   handleMoveCompleted() {
     this.state = Constants.GameState.READY;
+  }
+
+  handleRestartClick() {
+    this.scene.stop(Constants.Scenes.GAMEUI);
+    this.scene.stop(Constants.Scenes.GAME);
+    this.scene.restart();
   }
 
   handleMenuClick() {

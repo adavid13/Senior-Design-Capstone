@@ -26,6 +26,16 @@ const assetManifest = {
       loadOnStart: true,
     },
     {
+      name: 'victory',
+      path: './assets/images/victory.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'defeat',
+      path: './assets/images/defeat.png',
+      loadOnStart: true,
+    },
+    {
       name: 'btnBluePressed',
       path: './assets/ui/buttonLong_blue_pressed.png',
       loadOnStart: true,

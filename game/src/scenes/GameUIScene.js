@@ -18,6 +18,7 @@ export default class GameUIScene extends Phaser.Scene {
     this.board = initParams.board;
     this.interactionModel = initParams.interactionModel;
     this.onMenuClick = initParams.onMenuClick;
+    this.onRestartClick = initParams.onRestartClick;
     this.onUndoClick = initParams.onUndoClick;
     this.onEndTurnClick = initParams.onEndTurnClick;
     this.onPieceSelection = initParams.onPieceSelection;
@@ -134,25 +135,68 @@ export default class GameUIScene extends Phaser.Scene {
 
   createDialog() {
     const textColor = convertIntegerColorToString(Constants.Color.WHITE);
+    const textHighlightColor = convertIntegerColorToString(Constants.Color.YELLOW);
     this.dialog = this.rexUI.add.dialog({
       x: Constants.Window.WIDTH / 2,
       y: Constants.Window.HEIGHT / 2,
       width: 400,
       background: this.rexUI.add.roundRectangle(0, 0, 100, 100, 20, Constants.Color.GREY),
+      title: this.createDialogLabel('', { fontFamily: '"Bungee"', fontSize: '32px', fill: textColor }),
       content: this.rexUI.add.label({
         width: 40,
         height: 40,
-        text: this.add.text(0, 0, '', { fontFamily: '"Bungee"', fontSize: '22px', fill: textColor }),
+        align: 'center',
+        icon: this.add.image(0, 0, 'victory'),
         space: { top: 20, right: 20, bottom: 20, left: 20 } 
-      })
+      }),
+      actions: [
+        this.createDialogButton('Play again'),
+        this.createDialogButton('Main menu'),
+      ],
+      align: { title: 'center', content: 'center' }
     })
       .layout()
+      .on('button.click', (button, groupName, index) => {
+        if (index === 0) {
+          this.onRestartClick();
+        } else {
+          this.onMenuClick();
+        }
+      })
+      .on('button.over', (button, groupName, index) => {
+        button.getElement('text').setColor(textHighlightColor);
+      })
+      .on('button.out', (button, groupName, index) => {
+        button.getElement('text').setColor(textColor);
+      })
       .setVisible(false);
   }
 
+  createDialogButton(text) {
+    const textColor = convertIntegerColorToString(Constants.Color.WHITE);
+    return this.rexUI.add.label({
+      background: this.rexUI.add.roundRectangle(0, 0, 100, 40, 20, Constants.Color.GREY),
+      text: this.add.text(0, 0, text, { fontFamily: '"Bungee"', fontSize: '22px', fill: textColor })
+        .setShadow(2, 2, '#000000', 2, false, true),
+      space: { top: 20, right: 20, bottom: 20, left: 20 },
+    });
+  }
+
+  createDialogLabel(text, style) {
+    return this.rexUI.add.label({
+      width: 40,
+      height: 40,
+      background: this.rexUI.add.roundRectangle(0, 0, 100, 40, 20, Constants.Color.GREY),
+      text: this.add.text(0, 0, text, style).setShadow(2, 2, '#000000', 2, false, true),
+      align: 'center',
+      space: { top: 20, right: 20, bottom: 20, left: 20 } 
+    });
+  }
+
   openDialog(condition) {
-    this.dialog.getElement('content').setText(condition);
-    this.dialog.setVisible(true).popUp(1000);
+    this.dialog.getElement('title').getElement('text').setText(condition);
+    this.dialog.getElement('content').getElement('icon').setTexture(condition);
+    this.dialog.layout().setVisible(true).popUp(1000);
     this.tweens.add({
       targets: this.dialog,
       scaleX: 1,
@@ -224,11 +268,11 @@ export default class GameUIScene extends Phaser.Scene {
         this.alert('You must play the king in this turn.\nUndo your previous action.');
         break;
       case Constants.Turn.VICTORY:
-        this.openDialog('VICTORY!');
+        this.openDialog('victory');
         this.enableButtons(false);
         break;
       case Constants.Turn.DEFEAT:
-        this.openDialog('DEFEAT!');
+        this.openDialog('defeat');
         this.enableButtons(false);
         break;
       default:
