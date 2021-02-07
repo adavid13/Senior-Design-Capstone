@@ -1,11 +1,13 @@
-import engine.ArtificialAgent.ArtificialAgent
+from ArtificialAgent import ArtificialAgent
+from GameBoard import GameBoard
 
 class Engine:
     def __init__(self):
-        self.INFO_STRING = "ENGG4000 Chexy System"
+        self.INFO_STRING = "id ENGG 4000 Chexy Development Version"
         self.artificialAgent = ArtificialAgent()
-        
-    def parse(string):
+        self.gameBoard = GameBoard()
+
+    def parse(self, string):
         '''
         Calls functions based on command strings
 
@@ -13,36 +15,36 @@ class Engine:
         '''
 
         if "info" in string:
-            this.info()
+            self.info()
         elif "newgame" in string:
-            this.newgame()
+            self.newGame()
         elif "play" in string:
-            this.play(string.split()[1])
+            self.play(string.split()[1])
         elif "pass" in string:
-            this.passTurn()
+            self.passTurn()
         elif "validmoves" in string:
-            this.validmoves()
+            self.validmoves()
         elif "bestmove" in string:
             args = string.split()
-            this.bestmove(args[1], args[2])
+            self.bestmove(args[1], args[2])
         elif "undo" in string:
-            this.undo(string.split()[1])
+            self.undo(string.split()[1])
         elif "options" in string:
-            this.options()
+            self.options()
         elif "help" in string:
             return "Available commands: info, newgame, play, pass, validmoves, bestmove, undo, options, help"
         else:
             return "err Invalid command. Try 'help' to see a list of valid commands"
 
-    def info():
+    def info(self):
         """
         Asks the engine to return its identification string.
         UHP compliant 
 
         > info
         """
-        return "id ENGG 4000 Chexy Development Version"
-    def newgame():
+        return self.INFO_STRING
+    def newGame(self):
         """
         Asks the engine to start a new base game  
         UHP  compliant
@@ -51,7 +53,7 @@ class Engine:
         > newgame
         """
         pass
-    def play(MoveString: str) -> str:
+    def play(self, moveString: str) -> str:
         """
         Asks the engine to play the specified MoveString
         Returns updated GameString
@@ -60,7 +62,7 @@ class Engine:
         < Base;InProgress;Black[1];wS1
         """
         pass
-    def passTurn() -> str:
+    def passTurn(self) -> str:
         """
         Asks the engine to play a pass move and return an updated GameString
         
@@ -68,7 +70,7 @@ class Engine:
         < Base;InProgress;Black[1];wS1
         """
         pass
-    def validmoves():
+    def validmoves(self):
         """
         Asks the engine for every valid move for the current board, returned as semi-colon seperated list
 
@@ -76,7 +78,7 @@ class Engine:
         < wS1;Wb1;wG1;wA1
         """
         pass
-    def bestmove(MaxTime=None, MaxDepth=None) -> str:
+    def bestmove(self, maxTime=None, maxDepth=None) -> str:
         """
         Asks the engine for the AI's suggestion for the best move on the current board within certain limits
 
@@ -86,14 +88,14 @@ class Engine:
         """
 
         pass
-    def undo(numMoves = 1) -> str:
+    def undo(self, numMoves = 1) -> str:
         """
         Asks the engine to undo one or more previous moves
         >undo 3
         <Base;NotStarted;White[1]
         """
         pass
-    def options():
+    def options(self):
         """
         Used to configure the engine, though no functionality required for UHP compliance.
         """
@@ -102,3 +104,7 @@ class Engine:
         pass
     def parseGameString(self, gameString):
         pass
+
+if __name__ == "__main__":
+    ge = Engine()
+    print("Engine Created")
