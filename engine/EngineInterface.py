@@ -1,5 +1,5 @@
 class UHP_Interface:
-    def info():
+    def info(self):
         """
         Asks the engine to return its identification string.
         UHP compliant 
@@ -7,7 +7,7 @@ class UHP_Interface:
         > info
         """
         pass
-    def newgame():
+    def newGame(self):
         """
         Asks the engine to start a new base game  
         UHP  compliant
@@ -16,7 +16,7 @@ class UHP_Interface:
         > newgame
         """
         pass
-    def play(MoveString: str) -> str:
+    def play(self,moveString: str) -> str:
         """
         Asks the engine to play the specified MoveString
         Returns updated GameString
@@ -25,7 +25,7 @@ class UHP_Interface:
         < Base;InProgress;Black[1];wS1
         """
         pass
-    def passTurn() -> str:
+    def passTurn(self) -> str:
         """
         Asks the engine to play a pass move and return an updated GameString
         
@@ -33,7 +33,7 @@ class UHP_Interface:
         < Base;InProgress;Black[1];wS1
         """
         pass
-    def validmoves():
+    def validMoves(self):
         """
         Asks the engine for every valid move for the current board, returned as semi-colon seperated list
 
@@ -41,7 +41,7 @@ class UHP_Interface:
         < wS1;Wb1;wG1;wA1
         """
         pass
-    def bestmove(MaxTime=None, MaxDepth=None) -> str:
+    def bestMove(self, maxTime=None, maxDepth=None) -> str:
         """
         Asks the engine for the AI's suggestion for the best move on the current board within certain limits
 
@@ -51,14 +51,14 @@ class UHP_Interface:
         """
 
         pass
-    def undo(numMoves = 1) -> str:
+    def undo(self, numMoves = 1) -> str:
         """
         Asks the engine to undo one or more previous moves
         >undo 3
         <Base;NotStarted;White[1]
         """
         pass
-    def options():
+    def options(self):
         """
         Used to configure the engine, though no functionality required for UHP compliance.
         """
