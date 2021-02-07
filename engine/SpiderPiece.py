@@ -4,3 +4,7 @@ class SpiderPiece:
         self.pieceNum = pieceNum
         self.coordinates = None
         self.id = "{}S{}".format(self.colour, self.pieceNum)
+        self.isBeetled = False
+
+    def __eq__(self, other):
+        return self.id == other.id
