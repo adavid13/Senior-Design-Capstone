@@ -9,12 +9,16 @@ class GameBoard:
 # https://www.redblobgames.com/grids/hexagons/
 # Doubled Coordinates
     def __init__(self, gameString=False):
+        # Due to doubled offsets being used, MAX_BOARD SIZE needs to be twice the size of 
+        # the actual amount of tiles that can be placed end-to-end
         self.MAX_BOARD_SIZE = 40
-        #self.Board = [[None]*self.MAX_BOARD_SIZE]*self.MAX_BOARD_SIZE
         self.Board = [[None for _ in range(self.MAX_BOARD_SIZE)] for __ in range(self.MAX_BOARD_SIZE)]
         self.pieces = []
 
     def playMove(self, moveString):
+        """
+        Seperates moves that place a piece and moves that move a piece from one place to another
+        """
         splitStr = moveString.split()
         pieceStr = splitStr[0]
         if len(splitStr) > 1:
@@ -221,7 +225,8 @@ class GameBoard:
         return False
 
     def getNeighbours(self, piece):
-        gamePiece = self.getPieceFromString(piece)
+        #gamePiece = self.getPieceFromString(piece)
+        gamePiece = piece
         coords = gamePiece.coordinates
         neighbours = []
         #print("Getting neighbours of {} at {},{}...".format(piece,  coords[0], coords[1]))
@@ -270,24 +275,31 @@ if __name__ == '__main__':
     Driver code for testing
     """
     gb = GameBoard()
-    # gb.insertPiece("wA1", None)
-    # gb.insertPiece("bG1", "wA1\\")
-    # gb.movePiece("wA1", "\\bG1")
 
-    gb.playMove("wA1")
+    gb.playMove("bQ")
 
-    gb.playMove("bS1 wA1\\")
+    gb.playMove("bS1 bQ\\")
 
-    gb.playMove("wQ bS1\\")
+    gb.playMove("wQ bQ-")
 
-    gb.playMove("bQ -wQ")
+    gb.playMove("bS3 bQ/")
+    
+    gb.playMove("bA1 \\bQ")
 
-    print("num nieghbours wA1 = {}".format(len(gb.getNeighbours("wA1"))))
-    print("num nieghbours bS1 = {}".format(len(gb.getNeighbours("bS1"))))
-    print("num nieghbours wQ = {}".format(len(gb.getNeighbours("wQ"))))
-    print("num nieghbours bQ = {}".format(len(gb.getNeighbours("bQ"))))
+    gb.playMove("bA2 -bQ")
+
+    gb.playMove("bA3 /bQ")
+
+    gb.playMove("wA1 bS3-")
+
+    gb.playMove("wA2 wA1\\")
+
+    gb.playMove("wA3 /wA2")
+
+    gb.playMove("bA1 wA3\\")
 
     gb.printBoard()
+    print(gb.isGameOver())
 
     
 
