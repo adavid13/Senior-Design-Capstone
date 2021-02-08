@@ -76,6 +76,8 @@ class GameBoard:
 
         relativePiece = self.getPieceFromString(relPieceString)
         movingPiece = self.getPieceFromString(piece)
+        if movingPiece.isBeetled is not False:
+            raise Exception("piece {} is beelted by piece {}".format(movingPiece, movingPiece.isBeetled))
         if relativePiece is None or movingPiece is None:
             raise Exception("This piece not implemented")
 
@@ -88,15 +90,33 @@ class GameBoard:
         if direction != "beetleclimb":
             self.Board[newCoords[0]][newCoords[1]] = movingPiece
             self.Board[oldCoords[0]][oldCoords[1]] = None
+            if piece[1] == 'B':
+                #beetle moved off piece
+                if movingPiece.beetling is not None:
+                    beetledPiece = movingPiece.beetling
+                    self.Board[oldCoords[0]][oldCoords[1]] = beetledPiece
+                    movingPiece.beetling = None
+                    beetledPiece.isBeetled = False
         else:
-            self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]].isBeetled = True
+            self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]].isBeetled = movingPiece
+            beetledPiece = movingPiece.beetling
+            movingPiece.beetling = self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]]
+
+            if beetledPiece is not None:
+                self.Board[oldCoords[0]][oldCoords[1]] = beetledPiece
+                beetledPiece.isBeetled = False
+            else:
+                self.Board[oldCoords[0]][oldCoords[1]] = None
+
+        
+
 
         print('piece: {}, newlocation: {},{}'.format(movingPiece.id, newCoords[0], newCoords[1]))
 
 
     def getNewCoordinates(self, relativePieceCoordinates, direction):
         """
-        Translates UHP notation to engine array coordinates
+        Helps translates UHP notation to engine array coordinates
         """
         if direction == 'left':
             newCoords = (relativePieceCoordinates[0]-2, relativePieceCoordinates[1])
@@ -176,7 +196,7 @@ class GameBoard:
             gamePiece = GrasshopperPiece(pieceColour, pieceNum)
 
         else:
-            raise NotImplementedError("This piece is not available")
+            raise NotImplementedError("This piece ({}) is not available".format(piece))
 
         return gamePiece
 
@@ -194,7 +214,10 @@ class GameBoard:
     def deepCopyBoard(self):
         """
         Returns a deep copy of the board, used for creating different gamestates
+        
+        Actually I don't think it'll be required. GameModel will have a function that generates a new board from GameString
         """
+
         pass
 
     def isGameOver(self):
@@ -225,11 +248,9 @@ class GameBoard:
         return False
 
     def getNeighbours(self, piece):
-        #gamePiece = self.getPieceFromString(piece)
         gamePiece = piece
         coords = gamePiece.coordinates
         neighbours = []
-        #print("Getting neighbours of {} at {},{}...".format(piece,  coords[0], coords[1]))
         neighbours.append(self.Board[coords[0]-2][coords[1]])
         neighbours.append(self.Board[coords[0]-1][coords[1]-1])
         neighbours.append(self.Board[coords[0]+1][coords[1]-1])
@@ -253,6 +274,7 @@ class GameBoard:
         Debugging tool, displays the board and relative pieces
         """
         for j in range(self.MAX_BOARD_SIZE):
+            # Every other row is offset
             if j % 2 == 0:
                 rowstr = ""
             else:
@@ -267,6 +289,8 @@ class GameBoard:
                         else:
 
                             rowstr += self.Board[i][j].id + " "
+                    if self.Board[i][j] is not None and self.Board[i][j].isBeetled is not False:
+                        rowstr = rowstr[0:-1] + "*"
             print(rowstr, j)
 
 
@@ -276,29 +300,20 @@ if __name__ == '__main__':
     """
     gb = GameBoard()
 
-    gb.playMove("bQ")
-
-    gb.playMove("bS1 bQ\\")
-
-    gb.playMove("wQ bQ-")
-
-    gb.playMove("bS3 bQ/")
-    
-    gb.playMove("bA1 \\bQ")
-
-    gb.playMove("bA2 -bQ")
-
-    gb.playMove("bA3 /bQ")
-
-    gb.playMove("wA1 bS3-")
-
-    gb.playMove("wA2 wA1\\")
-
-    gb.playMove("wA3 /wA2")
-
-    gb.playMove("bA1 wA3\\")
-
+    gb.playMove("wA1")
+    gb.playMove("bB1 wA1-")
+    gb.playMove("wS1 -wA1")
     gb.printBoard()
+
+    gb.playMove("bB1 wA1")
+    gb.printBoard()
+
+    gb.playMove("bB1 wS1")
+    gb.printBoard()
+
+    gb.playMove("bB1 \wS1")
+    gb.printBoard()
+
     print(gb.isGameOver())
 
     

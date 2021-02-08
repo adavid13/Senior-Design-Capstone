@@ -5,6 +5,14 @@ class BeetlePiece:
         self.coordinates = None
         self.id = "{}B{}".format(self.colour, self.pieceNum)
         self.isBeetled = False
+        self.beetling = None
+
+    def getValidMoves(self, gameBoard):
+        """
+        Returns a list of string, the possible moves the piece can make in it's position in the gameboard
+        """
+
+        pass
 
 
     def __eq__(self, other):

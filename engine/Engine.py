@@ -98,8 +98,10 @@ class Engine:
     def options(self):
         """
         Used to configure the engine, though no functionality required for UHP compliance.
+
+        No options currently, return nothing
         """
-        pass
+        return None
     def parseMoveString(self, moveString):
         pass
     def parseGameString(self, gameString):
