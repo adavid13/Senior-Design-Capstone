@@ -1,11 +1,13 @@
 from ArtificialAgent import ArtificialAgent
 from GameBoard import GameBoard
+from GameModel import GameModel
 
 class Engine:
     def __init__(self):
         self.INFO_STRING = "id ENGG 4000 Chexy Development Version"
         self.artificialAgent = ArtificialAgent()
-        self.gameBoard = GameBoard()
+        #self.gameBoard = GameBoard() # GameModel contains a board object
+        self.gameModel = GameModel()
 
     def parse(self, string):
         '''
@@ -13,28 +15,32 @@ class Engine:
 
         > command [argument 1] [argument 2]
         '''
+        returnStr = ""
 
         if "info" in string:
-            self.info()
+            returnStr += self.info()
         elif "newgame" in string:
-            self.newGame()
+            returnStr += self.newGame()
         elif "play" in string:
-            self.play(string.split()[1])
+            returnStr += self.play(string.split()[1])
         elif "pass" in string:
-            self.passTurn()
+            returnStr += self.passTurn()
         elif "validmoves" in string:
-            self.validmoves()
+            returnStr += self.validmoves()
         elif "bestmove" in string:
             args = string.split()
-            self.bestmove(args[1], args[2])
+            returnStr += self.bestmove(args[1], args[2])
         elif "undo" in string:
-            self.undo(string.split()[1])
+            returnStr += self.undo(string.split()[1])
         elif "options" in string:
-            self.options()
+            returnStr += self.options()
         elif "help" in string:
-            return "Available commands: info, newgame, play, pass, validmoves, bestmove, undo, options, help"
+            returnStr += "Available commands: info, newgame, play, pass, validmoves, bestmove, undo, options, help"
         else:
-            return "err Invalid command. Try 'help' to see a list of valid commands"
+            returnStr += "err Invalid command. Try 'help' to see a list of valid commands"
+        
+        returnStr += "\nok"
+        return returnStr
 
     def info(self):
         """
@@ -44,15 +50,18 @@ class Engine:
         > info
         """
         return self.INFO_STRING
-    def newGame(self):
+    def newGame(self) -> str:
         """
         Asks the engine to start a new base game  
         UHP  compliant
         May not need parameters based on our requirements
 
         > newgame
+        > Base;NotStarted;White[1]
         """
-        pass
+        self.gameModel = GameModel()
+        return str(self.gameModel)
+
     def play(self, moveString: str) -> str:
         """
         Asks the engine to play the specified MoveString
@@ -70,7 +79,7 @@ class Engine:
         < Base;InProgress;Black[1];wS1
         """
         pass
-    def validmoves(self):
+    def validmoves(self) -> str:
         """
         Asks the engine for every valid move for the current board, returned as semi-colon seperated list
 
@@ -101,7 +110,7 @@ class Engine:
 
         No options currently, return nothing
         """
-        return None
+        return ""
     def parseMoveString(self, moveString):
         pass
     def parseGameString(self, gameString):
