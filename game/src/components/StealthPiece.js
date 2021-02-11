@@ -1,7 +1,6 @@
 import { Constants } from '../utils/constants';
 import { verifyBoardContinuityOnMove, findFreeTileAtDirection } from '../utils/boardUtils';
 import { getAllNeighborsOfTileXY, getAllPiecesAtTileXY, getPieceTexture, getDisplayName } from '../utils/piecesUtils';
-import MoveableMarker from './MoveableMarker';
 import BoardPiece from './BoardPiece';
 
 export default class StealthPiece  extends BoardPiece {
@@ -32,8 +31,7 @@ export default class StealthPiece  extends BoardPiece {
    * This override manually calculates (without the use of pathfinder.findArea) the
    * allowable move tiles.
    */ 
-  showMoveableArea() {
-    this.hideMoveableArea();
+  getDestinationTiles() {
     const { board, tileXYZ } = this.rexChess;
     const tileXYArray = [];
     const neighbors = getAllNeighborsOfTileXY(board, tileXYZ)
@@ -49,12 +47,9 @@ export default class StealthPiece  extends BoardPiece {
         }
       }
     }
-
-    for (let i = 0, cnt = tileXYArray.length; i < cnt; i++) {
-      this.markers.push(new MoveableMarker(this, tileXYArray[i], !this.scene.getInteractionModel().pieceCanMove(this)));
-    }
-    return this;
+    return tileXYArray;
   }
+
 
   /**
    * This override is to control the tileZ of the piece before

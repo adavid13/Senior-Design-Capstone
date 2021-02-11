@@ -15,7 +15,10 @@ const execute = function () {
 
 const undo = function () {
   const { board, selectedCard, tileXY } = this.value;
+  const type = selectedCard.getType();
+  const player = selectedCard.getPlayer();
   board.removeChess(null, tileXY.x, tileXY.y, 'pathfinderLayer', true);
+  player.addPieceToHand(type);
   selectedCard.setVisible(true);
   Events.emit('piece-removed', tileXY);
 };

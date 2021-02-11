@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Constants } from '../utils/constants';
+import { isKingOnTheBoard, isPieceSurrounded, getAllPieces, getAllPiecesOfPlayer, getAllPiecesAtTileXY } from '../utils/piecesUtils';
 import { Events } from '../components/EventCenter';
 import PlayerModel from '../components/model/PlayerModel';
 import InteractionModel from '../components/model/InteractionModel';
@@ -11,6 +12,8 @@ import BoardPiece from '../components/BoardPiece';
 import MoveCommand from '../components/command/MoveCommand';
 import PlaceCommand from '../components/command/PlaceCommand';
 import Card from '../components/ui/Card';
+import Tooltip from '../components/ui/Tooltip';
+import KingPiece from '../components/KingPiece';
 
 const sceneConfig = {
   key: Constants.Scenes.CONTROLLER,
@@ -36,10 +39,15 @@ export default class GameControllerScene extends Phaser.Scene {
     this.placementMarkers = [];
 
     this.handleMenuClick = this.handleMenuClick.bind(this);
+    this.handleRestartClick = this.handleRestartClick.bind(this);
     this.handleUndoClick = this.handleUndoClick.bind(this);
     this.handleEndTurnClick = this.handleEndTurnClick.bind(this);
     this.handlePieceInHandSelection = this.handlePieceInHandSelection.bind(this);
     this.handlePiecePlacement = this.handlePiecePlacement.bind(this);
+
+    this.toolTip = new Tooltip(this.gameUIScene, 0, 0, '').layout();
+    this.toolTip.setVisible(false);
+    this.timeout = undefined;
 
     this.scene.launch(Constants.Scenes.GAME, 
       { players: this.players, board: this.board, interactionModel: this.interactionModel }
@@ -48,6 +56,7 @@ export default class GameControllerScene extends Phaser.Scene {
       { players: this.players,
         board: this.board,
         interactionModel: this.interactionModel,
+        onRestartClick: this.handleRestartClick,
         onMenuClick: this.handleMenuClick,
         onUndoClick: this.handleUndoClick,
         onEndTurnClick: this.handleEndTurnClick,
@@ -69,7 +78,8 @@ export default class GameControllerScene extends Phaser.Scene {
     const model = new GameBoardModel(this.difficulty, players);
     const board = new GameBoard(this.gameScene, model);
 
-    board.on('tiledown',this.handleTileClick, this);
+    board.on('tiledown', this.handleTileClick, this);
+    board.on('tileover', this.handleTileOver, this);
     board.on('kickout', function(chessToAdd, occupiedChess, tileXYZ){
       console.error('a piece was removed from the board model: ', occupiedChess, tileXYZ);
       occupiedChess.destroy();
@@ -82,6 +92,7 @@ export default class GameControllerScene extends Phaser.Scene {
     Events.removeAllListeners('piece-moved');
     Events.removeAllListeners('piece-added');
     Events.removeAllListeners('piece-removed');
+    Events.removeAllListeners('alert');
   }
 
   getFaction() {
@@ -127,11 +138,36 @@ export default class GameControllerScene extends Phaser.Scene {
     }
   }
 
+  handleTileOver(pointer, tileXY) {
+    if (this.timeout) {
+      this.toolTip.setVisible(false);
+      clearTimeout(this.timeout);
+    }
+    
+    const pieces = getAllPiecesAtTileXY(this.board, tileXY);
+    if (pieces.length > 0 && this.state !== Constants.GameState.END_GAME) {
+      const piece = pieces[pieces.length - 1];
+      this.timeout = setTimeout(() => {
+        const text = piece.displayName + '\nType: ' + piece.type;
+        this.toolTip.x = pointer.x;
+        this.toolTip.y = pointer.y;
+        this.toolTip.setTooltipText(text);
+        this.toolTip.setVisible(true);
+      }, 2000);
+    }
+  }
+
   handlePieceSelection(selectedPiece) {
     this.clearSelection();
-    this.interactionModel.selectedPiece = selectedPiece;
-    selectedPiece.setTint(Constants.Color.YELLOW_HIGHLIGHT);
-    selectedPiece.showMoveableArea();
+
+    const { playerTurn, commands } = this.interactionModel;
+    if (isKingOnTheBoard(playerTurn) || commands.length > 0 || playerTurn !== selectedPiece.getPlayer()) {
+      this.interactionModel.selectedPiece = selectedPiece;
+      selectedPiece.setTint(Constants.Color.YELLOW_HIGHLIGHT);
+      selectedPiece.showMoveableArea();
+    } else {
+      Events.emit('alert', 'You can only move a piece after the king is placed on the board.');
+    }
   }
 
   handlePieceInHandSelection(pieceInHand) {
@@ -174,6 +210,12 @@ export default class GameControllerScene extends Phaser.Scene {
     this.state = Constants.GameState.READY;
   }
 
+  handleRestartClick() {
+    this.scene.stop(Constants.Scenes.GAMEUI);
+    this.scene.stop(Constants.Scenes.GAME);
+    this.scene.restart();
+  }
+
   handleMenuClick() {
     this.scene.stop(Constants.Scenes.GAMEUI);
     this.scene.stop(Constants.Scenes.GAME);
@@ -188,9 +230,28 @@ export default class GameControllerScene extends Phaser.Scene {
   }
 
   handleEndTurnClick() {
+    const { currentTurn, playerTurn } = this.interactionModel;
+    if (currentTurn === 7 || currentTurn === 8) {
+      if (!isKingOnTheBoard(playerTurn)) {
+        return Constants.Turn.NEED_KING;
+      }
+    }
+
+    const endGame = this.isGameWon();
+    if (endGame) {
+      this.state = Constants.GameState.END_GAME;
+      return endGame;
+    }
+
     this.interactionModel.changePlayerTurn();
     this.interactionModel.incrementTurn();
     this.clearSelection();
+
+    if (!this.playerHasValidAction()) {
+      return Constants.Turn.SKIP_TURN;
+    }
+
+    return Constants.Turn.NEXT_TURN;
   }
 
   execute(command) {
@@ -227,5 +288,37 @@ export default class GameControllerScene extends Phaser.Scene {
     }
 
     this.interactionModel.selectedPiece = undefined;
+  }
+
+  isGameWon() {
+    const pieces = getAllPieces(this.board).filter(piece => piece instanceof KingPiece);
+    for (const piece of pieces) {
+      if (isPieceSurrounded(this.board, piece)) {
+        if (piece.getPlayer().getNumber() === 1) {
+          return Constants.Turn.DEFEAT;
+        } else {
+          return Constants.Turn.VICTORY;
+        }
+      }
+    }
+    return false;
+  }
+
+  playerHasValidAction() {
+    const { playerTurn } = this.interactionModel;
+    let canPlacePiece = false;
+    if (!playerTurn.isHandEmpty()) {
+      canPlacePiece = this.board.showInitialPlacementPositions(playerTurn).length > 0;
+    }
+
+    let canMovePiece = false;
+    const playerPieces = getAllPiecesOfPlayer(this.board, playerTurn);
+    playerPieces.forEach(piece => {
+      if (piece.getDestinationTiles().length > 0) {
+        canMovePiece = true;
+      }
+    });
+    
+    return canPlacePiece || canMovePiece;
   }
 }

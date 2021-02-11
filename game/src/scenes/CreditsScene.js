@@ -12,7 +12,9 @@ export default class CreditsScene extends Phaser.Scene {
 
   create() {
     this.btnBack = this.add
-      .buttonContainer(this.scale.width / 2, this.scale.height / 2, 'btnBlue', Constants.Color.WHITE)
+      .buttonContainer(this.scale.width / 2, this.scale.height / 2, 'image',
+        { texture: 'btnBlue', tint: Constants.Color.WHITE },
+        { style: { color: 'white', fontFamily: '"Bungee"', fontSize: '20px' } })
       .setDownTexture('btnBluePressed')
       .setOverTint(Constants.Color.ORANGE)
       .setText('Back');

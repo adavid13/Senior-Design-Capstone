@@ -1,8 +1,13 @@
 const assetManifest = {
   images: [
     {
-      name: 'logo',
-      path: './assets/images/logo.png',
+      name: 'titlegrey',
+      path: './assets/images/titlegrey.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'borderp1',
+      path: './assets/images/borderp1.png',
       loadOnStart: true,
     },
     {
@@ -18,6 +23,16 @@ const assetManifest = {
     {
       name: 'gamebg',
       path: './assets/images/gamebg.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'victory',
+      path: './assets/images/victory.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'defeat',
+      path: './assets/images/defeat.png',
       loadOnStart: true,
     },
     {

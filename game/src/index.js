@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import GrayScalePipelinePlugin from 'phaser3-rex-plugins/plugins/grayscalepipeline-plugin.js';
 import BoardPlugin from 'phaser3-rex-plugins/plugins/board-plugin';
 import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 import { Constants } from './utils/constants';
@@ -10,7 +11,6 @@ import DifficultyScene from './scenes/DifficultyScene';
 import GameScene from './scenes/GameScene';
 import GameUIScene from './scenes/GameUIScene';
 import GameControllerScene from './scenes/GameControllerScene';
-import ExampleScene from './scenes/ExampleScene';
 
 /*eslint no-unused-vars: "off"*/
 import ButtonContainer from './components/ui/ButtonContainer';
@@ -21,6 +21,11 @@ const config = {
   width: Constants.Window.WIDTH,
   height: Constants.Window.HEIGHT,
   plugins: {
+    global: [{
+      key: 'rexGrayScalePipeline',
+      plugin: GrayScalePipelinePlugin,
+      start: true
+    }],
     scene: [
       {
         key: 'rexBoard',
@@ -33,7 +38,7 @@ const config = {
       },
     ],
   },
-  scene: [PreloadScene, TitleScene, OptionsScene, CreditsScene, DifficultyScene, GameControllerScene, GameScene, GameUIScene, ExampleScene],
+  scene: [PreloadScene, TitleScene, OptionsScene, CreditsScene, DifficultyScene, GameControllerScene, GameScene, GameUIScene],
 };
 
 const game = new Phaser.Game(config);
