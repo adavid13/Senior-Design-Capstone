@@ -16,28 +16,39 @@ class Engine:
         > command [argument 1] [argument 2]
         '''
         returnStr = ""
+        params = string.split()
 
-        if "info" in string:
+        if "info" in params[0]:
             returnStr += self.info()
-        elif "newgame" in string:
+        elif "newgame" in params[0]:
             returnStr += self.newGame()
-        elif "play" in string:
-            returnStr += self.play(string.split()[1])
-        elif "pass" in string:
+        elif "pass" in string:          # Pass has to check the entire string because it may be passed as a "play" parameter
             returnStr += self.passTurn()
-        elif "validmoves" in string:
+        elif "play" in params[0]:
+            if len(params) > 1:
+                returnStr += self.play(params[1])
+            else:
+                return "err Not enough arguments. A move must be specified."
+        elif "validmoves" in params[0]:
             returnStr += self.validmoves()
-        elif "bestmove" in string:
-            args = string.split()
-            returnStr += self.bestmove(args[1], args[2])
-        elif "undo" in string:
-            returnStr += self.undo(string.split()[1])
-        elif "options" in string:
+        elif "bestmove" in params[0]:
+            if len(params) == 2:
+                returnStr += self.bestmove(params[1])
+            elif len(params) == 3:
+                returnStr += self.bestmove(params[1], params[2])
+            else:
+                return "err bestmove requires 1-2 parameters"
+        elif "undo" in params[0]:
+            if len(params) > 1:
+                returnStr += self.undo(params[1])
+            else:
+                returnStr += self.undo()
+        elif "options" in params[0]:
             returnStr += self.options()
-        elif "help" in string:
-            returnStr += "Available commands: info, newgame, play, pass, validmoves, bestmove, undo, options, help"
+        elif "help" in params[0]:
+            return "Available commands: info, newgame, play, pass, validmoves, bestmove, undo, options, help"
         else:
-            returnStr += "err Invalid command. Try 'help' to see a list of valid commands"
+            return "err Invalid command. Try 'help' to see a list of valid commands."
         
         returnStr += "\nok"
         return returnStr
@@ -103,6 +114,7 @@ class Engine:
         >undo 3
         <Base;NotStarted;White[1]
         """
+        print(numMoves)
         pass
     def options(self):
         """
