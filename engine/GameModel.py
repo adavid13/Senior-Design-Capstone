@@ -29,9 +29,11 @@ class GameModel:
         self.moves = moves
         self.board = board      # Note: Seems like a board object is irrelevant when we keep a list of moves like this
 
-        self.movestring = ';'.join(self.moves)
+        
         self.gamestring = ';'.join(map(str, [self.gameType, self.gameState, self.playerTurn]))
-        self.gamestring += ';' + self.movestring
+        if moves:
+            self.movestring = ';'.join(self.moves)
+            self.gamestring += ';' + self.movestring
     
     def __repr__(self):
         return self.gamestring
