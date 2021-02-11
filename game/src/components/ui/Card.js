@@ -15,7 +15,7 @@ export default class Card extends Phaser.GameObjects.Container {
     this.player = player;
     this.type = type;
     this.pieceTexture = getPieceTexture(type, player.getFaction());
-
+    this._isOnBoard = false;
     this.onPieceSelected = (piece) => {
       onPieceSelected(piece);
     };
@@ -59,6 +59,14 @@ export default class Card extends Phaser.GameObjects.Container {
 
   getFaction() {
     return this.player.getFaction();
+  }
+
+  get isOnBoard() {
+    return this._isOnBoard;
+  }
+
+  set isOnBoard(isOnBoard) {
+    this._isOnBoard = isOnBoard;
   }
 
   setSelected(isSelected) {

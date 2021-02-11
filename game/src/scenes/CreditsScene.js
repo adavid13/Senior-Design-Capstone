@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import Button from '../components/ui/Button';
 import { Constants } from '../utils/constants';
 
 const sceneConfig = {
@@ -11,17 +12,11 @@ export default class CreditsScene extends Phaser.Scene {
   }
 
   create() {
-    this.btnBack = this.add
-      .buttonContainer(this.scale.width / 2, this.scale.height / 2, 'image',
-        { texture: 'btnBlue', tint: Constants.Color.WHITE },
-        { style: { color: 'white', fontFamily: '"Bungee"', fontSize: '20px' } })
-      .setDownTexture('btnBluePressed')
-      .setOverTint(Constants.Color.ORANGE)
-      .setText('Back');
-
-    this.btnBack.onClick().subscribe(() => {
-      this.startScene(Constants.Scenes.TITLE);
-    });
+    this.btnBack = new Button(this, this.scale.width / 2, this.scale.height / 2,
+      'Back', 22, 'center', 180, 10, Constants.Color.GREY_DARK, () => {
+        this.startScene(Constants.Scenes.TITLE);
+      }
+    );
   }
 
   startScene(targetScene) {

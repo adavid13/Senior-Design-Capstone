@@ -16,15 +16,14 @@ export default class GameScene extends Phaser.Scene {
     this.players = initParams.players;
     this.interactionModel = initParams.interactionModel;
     this.board = initParams.board;
+    this.interfaceModel = initParams.interfaceModel;
   }
 
   create() {
     this.createBackground();
     this.board.inititialize();
     this.setCamera();
-
-    this.state = Constants.GameState.READY;
-    
+   
     this.input.setTopOnly(true);
     this.input.on('pointermove', (pointer) => {
       if (!pointer.isDown) return;
