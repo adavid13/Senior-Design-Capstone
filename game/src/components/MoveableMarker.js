@@ -11,14 +11,14 @@ export default class MoveableMarker extends Shape {
     this.setScale(0.5);
     this.setDepth(Constants.GameObjectDepth.MARKER);
     this.chess = chess;
-    this.tileXY = tileXY;
+    this._tileXY = tileXY;
   }
 
-  getParentPiece() {
+  get parentPiece() {
     return this.chess;
   }
 
-  getTileXY() {
-    return this.tileXY;
+  get tileXY() {
+    return this._tileXY;
   }
 }

@@ -48,7 +48,6 @@
     "@dagrejs/graphlib": "^2.1.4",
     "phaser": "~3.52.0",
     "phaser3-rex-plugins": "^1.1.36",
-    "rxjs": "^6.6.3",
     "uuid": "^8.3.2",
     "webfontloader": "^1.6.28"
   }

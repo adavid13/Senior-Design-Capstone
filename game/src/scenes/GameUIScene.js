@@ -1,8 +1,15 @@
 import Phaser from 'phaser';
 import { Events } from '../components/EventCenter';
-import Card from '../components/ui/Card';
 import { Constants } from '../utils/constants';
 import { convertIntegerColorToString } from '../utils/color';
+// import Overlay from '../components/ui/Overlay';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Label from '../components/ui/Label';
+import RoundBackground from '../components/ui/RoundBackground';
+import MenuDialog from '../components/ui/MenuDialog';
+import EndGameDialog from '../components/ui/EndGameDialog';
+import OptionsDialog from '../components/ui/OptionsDialog';
 
 const sceneConfig = {
   key: Constants.Scenes.GAMEUI,
@@ -18,32 +25,50 @@ export default class GameUIScene extends Phaser.Scene {
     this.board = initParams.board;
     this.interactionModel = initParams.interactionModel;
     this.onMenuClick = initParams.onMenuClick;
+    this.onMainMenuClick = initParams.onMainMenuClick;
+    // this.onCloseClick = initParams.onCloseClick;
     this.onRestartClick = initParams.onRestartClick;
     this.onUndoClick = initParams.onUndoClick;
     this.onEndTurnClick = initParams.onEndTurnClick;
     this.onPieceSelection = initParams.onPieceSelection;
+    this.randomAction = initParams.randomAction;
+    this.interfaceModel = initParams.interfaceModel;
+    this.difficulty = initParams.difficulty;
   }
 
   create() {
-    this.input.setTopOnly(true);
     this.pieces = [];
     this.markers = [];
     this.selectedCard = undefined;
     this.handleEndTurnClick = this.handleEndTurnClick.bind(this);
-        
+    this.openOptionsDialog = this.openOptionsDialog.bind(this);
+    this.openMenuDialog = this.openMenuDialog.bind(this);
+    this.concede = this.concede.bind(this);
+    
+    // Buttons
     this.createMenuButton();
     this.createEndTurnButton();
     this.createUndoButton();
+
+    // Turn change text
     this.createTextBackground();
     this.createTurnText();
+
+    // Others
+    this.createTimerLabel();
+    this.timedEvent = this.time.addEvent({ delay: this.interfaceModel.getPlayerTimerinSec() * 1000, callback: this.timeIsUp, callbackScope: this });
+    this.playerTimer = this.getPlayerTimer();
     this.createNotificationSystem();
-    this.createDialog();
     this.createPlayerOverlay();
-    
     this.populatePlayerHand();
+        // this.overlay = new Overlay(this, 0.3).setVisible(false);
 
-    this.animateEndTurn();
+    // Dialogs
+    this.createMenuDialog();
+    this.createOptionsDialog();
+    this.createEndGameDialog();
 
+    // Events    
     Events.on('piece-added', () => {
       this.enableButtons(true);
     }, this);
@@ -53,38 +78,47 @@ export default class GameUIScene extends Phaser.Scene {
     }, this);
 
     Events.on('alert', this.alert, this);
+    this.input.setTopOnly(true);
+
+    this.animateEndTurn();
   }
 
-  createButton(x, y, text) {
-    return this.add
-      .buttonContainer(x, y, 'image',
-        { texture: 'btnBlue', tint: Constants.Color.WHITE },
-        { style: { color: 'white', fontFamily: '"Bungee"', fontSize: '20px' } })
-      .setDownTexture('btnBluePressed')
-      .setOverTint(Constants.Color.ORANGE)
-      .setText(text);
+  update() {
+    const countdown = this.playerTimer / 1000 - Math.floor(this.timedEvent.getElapsedSeconds());
+    this.timer.changeText(this.formatTime(countdown));
+    this.timedEvent.getElapsedSeconds();
+  }
+
+  formatTime(time) {
+    const minutes = Math.floor(time / 60);
+    let seconds = time % 60;
+    seconds = seconds.toString().padStart(2,'0');
+    return `${minutes}:${seconds}`;
   }
 
   createMenuButton() {
-    this.btnMenu = this.createButton(100, 30, 'Main Menu');
-    this.btnMenu.onClick().subscribe(this.onMenuClick);
+    this.btnMenu = new Button(this, 100, 30, 'Menu', 22,
+      'center', 180, 10, Constants.Color.GREY, this.openMenuDialog);
   }
 
   createEndTurnButton() {
-    this.btnEndTurn = this.createButton(Constants.Window.WIDTH - 110, Constants.Window.HEIGHT - 30, 'End Turn');
-    this.btnEndTurn.setDisabled(true)
-      .onClick().subscribe(this.handleEndTurnClick);
+    this.btnEndTurn = new Button(this, Constants.Window.WIDTH - 110, Constants.Window.HEIGHT - 30,
+      'End Turn', 22, 'center', 180, 10, Constants.Color.GREY, this.handleEndTurnClick
+    )
+      .setButtonEnable(false);
   }
 
   createUndoButton() {
-    this.btnUndo = this.createButton(100, Constants.Window.HEIGHT - 30, 'Undo');
-    this.btnUndo.setDisabled(true)
-      .onClick().subscribe(() => {
-        const commandStack = this.onUndoClick();
-        if (commandStack.length === 0) {
-          this.enableButtons(false);
-        }
-      });
+    const onClick = () => {
+      const commandStack = this.onUndoClick();
+      if (commandStack.length === 0) {
+        this.enableButtons(false);
+      }  
+    };
+
+    this.btnUndo = new Button(this, 100, Constants.Window.HEIGHT - 30, 'Undo',
+      22, 'center', 180, 10, Constants.Color.GREY, onClick)
+      .setButtonEnable(false);
   }
 
   createTurnText() {
@@ -102,6 +136,10 @@ export default class GameUIScene extends Phaser.Scene {
     this.textBackground.setAlpha(0);
   }
 
+  createTimerLabel() {
+    this.timer = new Label(this, Constants.Window.WIDTH - 110, 30, '00:00', 22, 'center', 180, 10, Constants.Color.GREY);
+  }
+  
   createPlayerOverlay() {
     const { width, height } = this.sys.game.canvas;
     this.player1Border = this.add
@@ -125,7 +163,7 @@ export default class GameUIScene extends Phaser.Scene {
     this.toast = this.rexUI.add.toast({
       x: Constants.Window.WIDTH / 2,
       y: Constants.Window.HEIGHT * 4 / 5,
-      background: this.rexUI.add.roundRectangle(0, 0, 2, 2, 20, Constants.Color.GREY),
+      background: new RoundBackground(this, 0, 0, 2, 2, 20),
       text: this.add.text(0, 0, '', { fontFamily: '"Bungee"', fontSize: '22px', fill: toastTextColor })
         .setShadow(2, 2, '#000000', 2, false, true),
       space: { top: 20, right: 20, bottom: 20, left: 20 },
@@ -133,83 +171,87 @@ export default class GameUIScene extends Phaser.Scene {
     });
   }
 
-  createDialog() {
-    const textColor = convertIntegerColorToString(Constants.Color.WHITE);
-    const textHighlightColor = convertIntegerColorToString(Constants.Color.YELLOW);
-    this.dialog = this.rexUI.add.dialog({
-      x: Constants.Window.WIDTH / 2,
-      y: Constants.Window.HEIGHT / 2,
-      width: 400,
-      background: this.rexUI.add.roundRectangle(0, 0, 100, 100, 20, Constants.Color.GREY),
-      title: this.createDialogLabel('', { fontFamily: '"Bungee"', fontSize: '32px', fill: textColor }),
-      content: this.rexUI.add.label({
-        width: 40,
-        height: 40,
-        align: 'center',
-        icon: this.add.image(0, 0, 'victory'),
-        space: { top: 20, right: 20, bottom: 20, left: 20 } 
-      }),
-      actions: [
-        this.createDialogButton('Play again'),
-        this.createDialogButton('Main menu'),
-      ],
-      align: { title: 'center', content: 'center' }
-    })
-      .layout()
-      .on('button.click', (button, groupName, index) => {
-        if (index === 0) {
-          this.onRestartClick();
-        } else {
-          this.onMenuClick();
-        }
-      })
-      .on('button.over', (button, groupName, index) => {
-        button.getElement('text').setColor(textHighlightColor);
-      })
-      .on('button.out', (button, groupName, index) => {
-        button.getElement('text').setColor(textColor);
-      })
+  createMenuDialog() {
+    const closeDialog = () => {
+      this.menuDialog.hideDialog();
+      // this.onCloseClick();
+    };
+    this.menuDialog = new MenuDialog(this, this.openOptionsDialog, this.concede, closeDialog)
       .setVisible(false);
   }
 
-  createDialogButton(text) {
-    const textColor = convertIntegerColorToString(Constants.Color.WHITE);
-    return this.rexUI.add.label({
-      background: this.rexUI.add.roundRectangle(0, 0, 100, 40, 20, Constants.Color.GREY),
-      text: this.add.text(0, 0, text, { fontFamily: '"Bungee"', fontSize: '22px', fill: textColor })
-        .setShadow(2, 2, '#000000', 2, false, true),
-      space: { top: 20, right: 20, bottom: 20, left: 20 },
+  createOptionsDialog() {
+    this.optionsDialog = new OptionsDialog(this, this.interfaceModel, () => {
+      this.interfaceModel.confirmChanges();
+      this.optionsDialog.hideDialog();
     });
+    this.optionsDialog.hideDialog();
   }
 
-  createDialogLabel(text, style) {
-    return this.rexUI.add.label({
-      width: 40,
-      height: 40,
-      background: this.rexUI.add.roundRectangle(0, 0, 100, 40, 20, Constants.Color.GREY),
-      text: this.add.text(0, 0, text, style).setShadow(2, 2, '#000000', 2, false, true),
-      align: 'center',
-      space: { top: 20, right: 20, bottom: 20, left: 20 } 
-    });
+  createEndGameDialog() {
+    this.dialog = new EndGameDialog(this, this.onRestartClick, this.onMainMenuClick)
+      .setVisible(false);
   }
 
-  openDialog(condition) {
-    this.dialog.getElement('title').getElement('text').setText(condition);
-    this.dialog.getElement('content').getElement('icon').setTexture(condition);
-    this.dialog.layout().setVisible(true).popUp(1000);
-    this.tweens.add({
-      targets: this.dialog,
-      scaleX: 1,
-      scaleY: 1,
-      ease: 'Bounce',
-      duration: 1000,
-      repeat: 0,
-      yoyo: false
-    });
+  openEndGameDialog(condition) {
+    // TODO: remove onmenuclick
+    this.onMenuClick();
+    this.dialog.changeTile(condition);
+    this.dialog.changeImage(condition);
+    this.dialog.showDialog();
+  }
+
+  openMenuDialog() {
+    // TODO: remove onmenuclick
+    this.onMenuClick();
+    this.menuDialog.showDialog();
+  }
+
+  openOptionsDialog() {
+    this.menuDialog.hideDialog();
+    this.optionsDialog.showDialog();
+  }
+
+  concede() {
+    this.openEndGameDialog('defeat');
+    this.enableButtons(false);
+    this.btnMenu.setButtonEnable(false);
+    this.stopTimer();
+    this.onEndTurnClick(true);
   }
 
   alert(message) {
     this.toast.show(message);
+  }
+
+  timeIsUp() {
+    if (this.interactionModel.commands.length === 0) {
+      this.randomAction(this.pieces.filter(piece => { return !piece.isOnBoard; }));
+    }
+    this.handleEndTurnClick();
+    this.alert('Time\'s up! Your turn was skipped.');     
+  }
+
+  getPlayerTimer() {
+    const { playerTurn } = this.interactionModel;
+    if (playerTurn.getPlayerType() === Constants.PlayerType.AI) {
+      return this.interfaceModel.getAiTimer(this.difficulty);
+    } else {
+      return this.interfaceModel.getPlayerTimerinSec() * 1000;
+    }
+  }
+
+  resetTimer() {
+    this.playerTimer = this.getPlayerTimer();
+    this.timedEvent = this.time.addEvent({
+      delay: this.getPlayerTimer(),
+      callback: this.timeIsUp,
+      callbackScope: this
+    });
+  }
+
+  stopTimer() {
+    this.timedEvent.remove(false);
   }
 
   animateEndTurn() {
@@ -251,29 +293,34 @@ export default class GameUIScene extends Phaser.Scene {
 
   handleEndTurnClick() {
     const turnResult = this.onEndTurnClick();
+    this.stopTimer();
     switch (turnResult) {
       case Constants.Turn.NEXT_TURN:
         this.enableButtons(false);
         this.animateEndTurn();
         this.swapOverlay(this.interactionModel.playerTurn.getNumber());
+        this.resetTimer();
         break;
       case Constants.Turn.SKIP_TURN:
         this.enableButtons(false);
         this.animateEndTurn();
         this.swapOverlay(this.interactionModel.playerTurn.getNumber());
-        this.alert('You can\'t make any moves this turn.\nYou turn will be skipped.');
+        this.resetTimer();
+        this.alert('You can\'t make any moves this turn.\nYou turn was skipped.');
         setTimeout(this.handleEndTurnClick, 3000);
         break;
       case Constants.Turn.NEED_KING:
         this.alert('You must play the king in this turn.\nUndo your previous action.');
         break;
       case Constants.Turn.VICTORY:
-        this.openDialog('victory');
+        this.openEndGameDialog('victory');
         this.enableButtons(false);
+        this.btnMenu.setButtonEnable(false);
         break;
       case Constants.Turn.DEFEAT:
-        this.openDialog('defeat');
+        this.openEndGameDialog('defeat');
         this.enableButtons(false);
+        this.btnMenu.setButtonEnable(false);
         break;
       default:
         break;
@@ -281,8 +328,8 @@ export default class GameUIScene extends Phaser.Scene {
   }
 
   enableButtons(enable) {
-    this.btnEndTurn.setDisabled(!enable);
-    this.btnUndo.setDisabled(!enable);
+    this.btnEndTurn.setButtonEnable(enable);
+    this.btnUndo.setButtonEnable(enable);
   }
 
   populatePlayerHand() {

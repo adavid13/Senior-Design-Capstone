@@ -10,6 +10,7 @@ const execute = function () {
   const piece = createPiece(type, { board, player, tileXY, faction });
   player.removePieceFromHand(type);
   selectedCard.setVisible(false);
+  selectedCard.isOnBoard = true;
   Events.emit('piece-added', piece);
 };
 
@@ -20,6 +21,7 @@ const undo = function () {
   board.removeChess(null, tileXY.x, tileXY.y, 'pathfinderLayer', true);
   player.addPieceToHand(type);
   selectedCard.setVisible(true);
+  selectedCard.isOnBoard = false;
   Events.emit('piece-removed', tileXY);
 };
 

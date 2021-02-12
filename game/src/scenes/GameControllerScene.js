@@ -26,6 +26,7 @@ export default class GameControllerScene extends Phaser.Scene {
 
   init(initParams) {
     this.difficulty = initParams.difficulty;
+    this.interfaceModel = initParams.interfaceModel;
   }
 
   create() {
@@ -39,28 +40,36 @@ export default class GameControllerScene extends Phaser.Scene {
     this.placementMarkers = [];
 
     this.handleMenuClick = this.handleMenuClick.bind(this);
+    this.handleMainMenuClick = this.handleMainMenuClick.bind(this);
     this.handleRestartClick = this.handleRestartClick.bind(this);
     this.handleUndoClick = this.handleUndoClick.bind(this);
+    // this.handleUiCloseClick = this.handleUiCloseClick.bind(this);
     this.handleEndTurnClick = this.handleEndTurnClick.bind(this);
     this.handlePieceInHandSelection = this.handlePieceInHandSelection.bind(this);
     this.handlePiecePlacement = this.handlePiecePlacement.bind(this);
+    this.randomAction = this.randomAction.bind(this);
 
     this.toolTip = new Tooltip(this.gameUIScene, 0, 0, '').layout();
     this.toolTip.setVisible(false);
     this.timeout = undefined;
 
     this.scene.launch(Constants.Scenes.GAME, 
-      { players: this.players, board: this.board, interactionModel: this.interactionModel }
+      { players: this.players, board: this.board, interactionModel: this.interactionModel, interfaceModel: this.interfaceModel }
     );
     this.scene.launch(Constants.Scenes.GAMEUI,
       { players: this.players,
         board: this.board,
         interactionModel: this.interactionModel,
         onRestartClick: this.handleRestartClick,
+        onMainMenuClick: this.handleMainMenuClick,
         onMenuClick: this.handleMenuClick,
         onUndoClick: this.handleUndoClick,
+        // onCloseClick: this.handleUiCloseClick,
         onEndTurnClick: this.handleEndTurnClick,
-        onPieceSelection: this.handlePieceInHandSelection
+        onPieceSelection: this.handlePieceInHandSelection,
+        randomAction: this.randomAction,
+        interfaceModel: this.interfaceModel,
+        difficulty: this.difficulty,
       }
     );
     Events.on('piece-moved', this.handleMoveCompleted, this);
@@ -217,10 +226,18 @@ export default class GameControllerScene extends Phaser.Scene {
   }
 
   handleMenuClick() {
+    // this.state = Constants.GameState.UI;
+  }
+
+  handleMainMenuClick() {
     this.scene.stop(Constants.Scenes.GAMEUI);
     this.scene.stop(Constants.Scenes.GAME);
     this.scene.start(Constants.Scenes.TITLE);
   }
+
+  // handleUiCloseClick() {
+  //   this.state = Constants.GameState.READY;
+  // }
 
   handleUndoClick() {
     const command = this.interactionModel.commands.pop();
@@ -229,7 +246,7 @@ export default class GameControllerScene extends Phaser.Scene {
     return this.interactionModel.commands;
   }
 
-  handleEndTurnClick() {
+  handleEndTurnClick(concede) {
     const { currentTurn, playerTurn } = this.interactionModel;
     if (currentTurn === 7 || currentTurn === 8) {
       if (!isKingOnTheBoard(playerTurn)) {
@@ -238,7 +255,8 @@ export default class GameControllerScene extends Phaser.Scene {
     }
 
     const endGame = this.isGameWon();
-    if (endGame) {
+    if (endGame || concede) {
+      this.clearSelection();
       this.state = Constants.GameState.END_GAME;
       return endGame;
     }
@@ -305,12 +323,13 @@ export default class GameControllerScene extends Phaser.Scene {
   }
 
   playerHasValidAction() {
-    const { playerTurn } = this.interactionModel;
-    let canPlacePiece = false;
-    if (!playerTurn.isHandEmpty()) {
-      canPlacePiece = this.board.showInitialPlacementPositions(playerTurn).length > 0;
-    }
+    const canPlacePiece = this.playerHasValidPlacement();
+    const canMovePiece = this.playerHasValidMove();
+    return canPlacePiece || canMovePiece;
+  }
 
+  playerHasValidMove() {
+    const { playerTurn } = this.interactionModel;
     let canMovePiece = false;
     const playerPieces = getAllPiecesOfPlayer(this.board, playerTurn);
     playerPieces.forEach(piece => {
@@ -318,7 +337,77 @@ export default class GameControllerScene extends Phaser.Scene {
         canMovePiece = true;
       }
     });
+    return canMovePiece;
+  }
+
+  playerHasValidPlacement() {
+    const { playerTurn } = this.interactionModel;
+    let canPlacePiece = false;
+    if (!playerTurn.isHandEmpty()) {
+      canPlacePiece = this.board.showInitialPlacementPositions(playerTurn).length > 0;
+    }
+    return canPlacePiece;
+  }
+
+  randomAction(piecesInHand) {
+    const { playerTurn } = this.interactionModel;
+    if (!isKingOnTheBoard(playerTurn)) {
+      this.randomPlacement(piecesInHand);
+    } else if (!playerTurn.isHandEmpty()) {
+      if (!this.playerHasValidMove()) {
+        this.randomPlacement(piecesInHand);
+      } else if (!this.playerHasValidPlacement()) {
+        this.randomMove();
+      } else {
+        let random = Math.floor(Math.random() * 2);
+        if (random === 0) {
+          this.randomMove();
+        } else {
+          this.randomPlacement(piecesInHand);
+        }
+      }
+    } else {
+      this.randomMove();
+    }
+  }
+
+  randomPlacement(piecesInHand) {
+    const { playerTurn } = this.interactionModel;
+    const positions = this.board.showInitialPlacementPositions(playerTurn);
+    let random = Math.floor(Math.random() * positions.length);
+    const tileXY = positions[random];
+
+    const playerPieces = piecesInHand.filter(pieceInHand => pieceInHand.getPlayer() === playerTurn);
+    let selectedCard;
+    if (!isKingOnTheBoard(playerTurn) && this.interactionModel.currentTurn === 7 || this.interactionModel.currentTurn === 8) {
+      selectedCard = playerPieces.find(piece => piece.getType() === Constants.Pieces.KING);
+    } else {
+      random = Math.floor(Math.random() * playerPieces.length);
+      selectedCard = playerPieces[random];
+      console.log('random', random);
+      console.log('playerPieces', playerPieces);
+      console.log('selectedCard', selectedCard);
+    }
+
+    this.execute(new PlaceCommand({ board: this.board, tileXY, selectedCard }));
+  }
+
+  randomMove() {
+    const { playerTurn } = this.interactionModel;
+    const playerPieces = getAllPiecesOfPlayer(this.board, playerTurn);
+    const validPieces = playerPieces.filter(piece => piece.getDestinationTiles().length > 0);
     
-    return canPlacePiece || canMovePiece;
+    let random = Math.floor(Math.random() * validPieces.length);
+    const selectedPiece = validPieces[random];
+
+    const tiles = selectedPiece.getDestinationTiles();
+    random = Math.floor(Math.random() * tiles.length);
+    const selectedTile = tiles[random];
+
+    this.execute(new MoveCommand({
+      interactionModel: this.interactionModel,
+      selectedMarker: { tileXY: selectedTile, parentPiece: selectedPiece },
+      blockInput: () => this.state = Constants.GameState.PIECE_MOVING
+    }));
   }
 }

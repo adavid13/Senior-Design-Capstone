@@ -20,7 +20,7 @@ export default class BoardPiece extends Phaser.GameObjects.Sprite {
 
     // add behaviors
     this.createPathfinder(scene);
-    this.moveTo = scene.rexBoard.add.moveTo(this, { speed: 200 });
+    this.moveTo = scene.rexBoard.add.moveTo(this, { speed: 350 });
     this.moveTo.on('complete', (gameObject) => {
       this.reorderTiles(gameObject);
     }, this);
