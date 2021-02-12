@@ -4,8 +4,10 @@
 #those files require the user name to be engg4000
 
 cd ~/ChexyAgent
+sudo apt install nginx
 sudo cp ChexyAgent.service /etc/systemd/system/ChexyAgent.service
 sudo systemctl start ChexyAgent
+sudo systemctl restart ChexyAgent
 sudo systemctl enable ChexyAgent
 sudo cp ChexyAgent /etc/nginx/sites-available/ChexyAgent
 sudo mv /etc/nginx/sites-enabled/ChexyAgent ~/ChexyAgent/oldChexyAgent
@@ -15,3 +17,5 @@ sudo rm /etc/nginx/sites-enabled/default
 sudo systemctl daemon-reload
 sudo systemctl restart nginx
 sudo ufw allow 'Nginx Full'
+sudo ufw allow 80
+sudo ufw allow 443
