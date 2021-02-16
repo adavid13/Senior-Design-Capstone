@@ -42,14 +42,28 @@ class GameModel:
             self.gamestring += ';' + self.movestring
         return self.gamestring
 
-    def playMove(self, passTurn=False):
-        if passTurn:
-            if self.turnColor == 'White':
-                self.turnColor = 'Black'
-            else:
-                self.turnColor = 'White'
-                self.turnNum += 1
+    def playMove(self, moveString="", passTurn=False):
+        if not passTurn:
+            # Should check for valid move before doing this
+            self.board.playMove(moveString)
+            self.moves.append(moveString)
+
+        if self.turnColor == 'White':
+            self.turnColor = 'Black'
         else:
-            pass
+            self.turnColor = 'White'
+            self.turnNum += 1
         
+        # update gamestate
+        state = self.board.isGameOver()
+        if state:
+            if state == 'W':
+                self.gameState = 'WhiteWins'
+            elif state == 'B':
+                self.gameState = 'BlackWins'
+            elif state == 'D':
+                self.gameState = 'Draw'
+        else:
+            self.gameState = 'InProgress'
+
         return self.updateString()

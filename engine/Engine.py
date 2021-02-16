@@ -26,7 +26,7 @@ class Engine:
             returnStr += self.passTurn()
         elif "play" in params[0]:
             if len(params) > 1:
-                returnStr += self.play(params[1])
+                returnStr += self.play(' '.join(params[1:]))
             else:
                 return "err Not enough arguments. A move must be specified."
         elif "validmoves" in params[0]:
@@ -90,7 +90,10 @@ class Engine:
         > play wS1
         < Base;InProgress;Black[1];wS1
         """
-        pass
+        try:
+            return self.gameModel.playMove(moveString)
+        except Exception as e:
+            return "err" + str(e)
     
     def validmoves(self) -> str:
         """
