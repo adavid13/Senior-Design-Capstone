@@ -37,3 +37,7 @@ class GameModel:
     
     def __repr__(self):
         return self.gamestring
+
+    def playMove(self, moveString):
+        
+        pass
