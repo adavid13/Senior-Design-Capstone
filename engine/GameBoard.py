@@ -260,10 +260,11 @@ class GameBoard:
         return neighbours
 
 
-    def makeGraph(self):
+    def isHiveConnected(self):
         """
-        Turns board into a graph structure to simplify 1-hive detection and other features
+        Turns board into a graph structure to detect if the board is a single hive
         """
+        
         pass
 
     def printBoard(self):
