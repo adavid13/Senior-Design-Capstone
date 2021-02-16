@@ -36,7 +36,7 @@ class GameBoard:
         """
         Inserts a piece onto the board in UHP notation (ex: wS1 wS2/)
 
-        No checking for validity yet
+        No checking for validity yet (e.g. check if board is empty if relativeLoc is None)
         """
         gamePiece = self.createPiece(piece)
         self.pieces.append(gamePiece)
@@ -59,7 +59,7 @@ class GameBoard:
         if direction != "beetleclimb":
             self.Board[newCoords[0]][newCoords[1]] = gamePiece
         else:
-            self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]].isBeetled = True
+            self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]].beetleOnTop = gamePiece
         gamePiece.coordinates = newCoords
         print('piece: {}, newlocation: {},{}'.format(gamePiece.id, newCoords[0], newCoords[1]))
         return
@@ -76,8 +76,8 @@ class GameBoard:
 
         relativePiece = self.getPieceFromString(relPieceString)
         movingPiece = self.getPieceFromString(piece)
-        if movingPiece.isBeetled is not False:
-            raise Exception("piece {} is beelted by piece {}".format(movingPiece, movingPiece.isBeetled))
+        if movingPiece.beetleOnTop is not None:
+            raise Exception("piece {} is beelted by piece {}".format(movingPiece, movingPiece.beetleOnTop))
         if relativePiece is None or movingPiece is None:
             raise Exception("This piece not implemented")
 
@@ -96,20 +96,17 @@ class GameBoard:
                     beetledPiece = movingPiece.beetling
                     self.Board[oldCoords[0]][oldCoords[1]] = beetledPiece
                     movingPiece.beetling = None
-                    beetledPiece.isBeetled = False
+                    beetledPiece.beetleOnTop = None
         else:
-            self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]].isBeetled = movingPiece
             beetledPiece = movingPiece.beetling
             movingPiece.beetling = self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]]
 
             if beetledPiece is not None:
-                self.Board[oldCoords[0]][oldCoords[1]] = beetledPiece
-                beetledPiece.isBeetled = False
+                self.Board[oldCoords[0]][oldCoords[1]] = beetledPiece #redundant b/c already the case?
+                beetledPiece.beetleOnTop = None
             else:
                 self.Board[oldCoords[0]][oldCoords[1]] = None
-
-        
-
+            self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]].beetleOnTop = movingPiece
 
         print('piece: {}, newlocation: {},{}'.format(movingPiece.id, newCoords[0], newCoords[1]))
 
@@ -290,7 +287,7 @@ class GameBoard:
                         else:
 
                             rowstr += self.Board[i][j].id + " "
-                    if self.Board[i][j] is not None and self.Board[i][j].isBeetled is not False:
+                    if self.Board[i][j] is not None and self.Board[i][j].beetleOnTop is not None:
                         rowstr = rowstr[0:-1] + "*"
             print(rowstr, j)
 

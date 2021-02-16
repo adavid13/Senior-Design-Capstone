@@ -4,7 +4,7 @@ class BeetlePiece:
         self.pieceNum = pieceNum
         self.coordinates = None
         self.id = "{}B{}".format(self.colour, self.pieceNum)
-        self.isBeetled = False
+        self.beetleOnTop = None
         self.beetling = None
 
     def getValidMoves(self, gameBoard):
