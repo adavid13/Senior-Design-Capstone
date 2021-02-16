@@ -128,8 +128,24 @@ class Engine:
     def parseMoveString(self, moveString):
         pass
     def parseGameString(self, gameString):
-        pass
+        """
+        Creates a gamestate from a gamestring
+        
+        Will need to be changed to play through gameModel instead of directly through the board
+        """
+        gameModel = GameModel()
+        gameStringSplit = gameString.split(";")
+        if gameStringSplit[0] != "Base":
+            raise NotImplementedError("Non-Base games not supported")
+        turnColour = gameStringSplit[0:5]
+        for i in range(3, len(gameStringSplit)):
+            print(gameStringSplit[i])
+            gameModel.board.playMove(gameStringSplit[i])
+
+        return gameModel
 
 if __name__ == "__main__":
     ge = Engine()
+    ge.parseGameString("Base;NotStarted;Black[2];wA1;bS1 -wA1;wB1 \\bS1")
+    ge.gameModel.board.printBoard()
     print("Engine Created")

@@ -264,8 +264,23 @@ class GameBoard:
         """
         Turns board into a graph structure to detect if the board is a single hive
         """
-        
-        pass
+        if(len(self.pieces) == 0):
+            return True
+        rootPiece = self.pieces[0]
+        pieceStack = [rootPiece]
+        connectedSet = set()
+        while len(pieceStack) > 0:
+            root = pieceStack.pop()
+            connectedSet.add(root.id)
+            for neigh in self.getNeighbours(root):
+                if neigh.id not in connectedSet:
+                    pieceStack.append(neigh)
+
+            if root.beetleOnTop is not None:
+                pieceStack.append(root.beetleOnTop)
+
+        return len(connectedSet) == len(self.pieces)
+
 
     def printBoard(self):
         """
@@ -297,22 +312,15 @@ if __name__ == '__main__':
     Driver code for testing
     """
     gb = GameBoard()
-
-    gb.playMove("wA1")
-    gb.playMove("bB1 wA1-")
+    gb.playMove("wS1")
+    gb.playMove("bS1 wS1-")
+    gb.playMove("wA1 bS1-")
+    gb.playMove("bS1 wA1-")
     gb.playMove("wS1 -wA1")
+    gb.playMove("bB1 bS1")
     gb.printBoard()
 
-    gb.playMove("bB1 wA1")
-    gb.printBoard()
-
-    gb.playMove("bB1 wS1")
-    gb.printBoard()
-
-    gb.playMove("bB1 \wS1")
-    gb.printBoard()
-
-    print(gb.isGameOver())
-
+    #print(gb.isGameOver())
+    print(gb.isHiveConnected())
     
 
