@@ -73,6 +73,15 @@ class Engine:
         self.gameModel = GameModel()
         return str(self.gameModel)
 
+    def passTurn(self) -> str:
+        """
+        Asks the engine to play a pass move and return an updated GameString
+        
+        > pass
+        < Base;InProgress;Black[1];wS1
+        """
+        return self.gameModel.playMove(passTurn=True)
+
     def play(self, moveString: str) -> str:
         """
         Asks the engine to play the specified MoveString
@@ -82,14 +91,7 @@ class Engine:
         < Base;InProgress;Black[1];wS1
         """
         pass
-    def passTurn(self) -> str:
-        """
-        Asks the engine to play a pass move and return an updated GameString
-        
-        > pass
-        < Base;InProgress;Black[1];wS1
-        """
-        pass
+    
     def validmoves(self) -> str:
         """
         Asks the engine for every valid move for the current board, returned as semi-colon seperated list

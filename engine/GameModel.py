@@ -21,19 +21,35 @@ class GameModel:
 
     '''
 
-    def __init__(self, state='NotStarted', turn='White[1]', moves=[], board=gb.GameBoard()):
+    def __init__(self, state='NotStarted', turnColor='White', turnNum=1, moves=[], board=gb.GameBoard()):
         '''Create model for new game'''
         self.gameType = "Base"          # Creates a game without expansion pieces
         self.gameState = state
-        self.playerTurn = turn
+        self.turnColor = turnColor
+        self.turnNum = turnNum
         self.moves = moves
-        self.board = board      # Note: Seems like a board object is irrelevant when we keep a list of moves like this
+        self.board = board
 
-        
-        self.gamestring = ';'.join(map(str, [self.gameType, self.gameState, self.playerTurn]))
-        if moves:
-            self.movestring = ';'.join(self.moves)
-            self.gamestring += ';' + self.movestring
+        self.updateString()
     
     def __repr__(self):
         return self.gamestring
+
+    def updateString(self):
+        self.gamestring = ';'.join(map(str, [self.gameType, self.gameState, self.turnColor + f"[{self.turnNum}]"]))
+        if self.moves:
+            self.movestring = ';'.join(self.moves)
+            self.gamestring += ';' + self.movestring
+        return self.gamestring
+
+    def playMove(self, passTurn=False):
+        if passTurn:
+            if self.turnColor == 'White':
+                self.turnColor = 'Black'
+            else:
+                self.turnColor = 'White'
+                self.turnNum += 1
+        else:
+            pass
+        
+        return self.updateString()
