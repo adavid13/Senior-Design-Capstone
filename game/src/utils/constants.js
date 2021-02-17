@@ -24,7 +24,7 @@ export const Constants = {
 
   Window: {
     WIDTH: 1024,
-    HEIGHT: 768,
+    HEIGHT: 650,
   },
 
   GameObjectDepth: {

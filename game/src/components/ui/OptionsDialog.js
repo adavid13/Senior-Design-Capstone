@@ -16,11 +16,13 @@ export default class OptionsDialog extends Dialog {
     super(scene, 'Options', 400, [primaryButton, secondaryButton]);
     this.scene = scene;
     this.changeTime = this.changeTime.bind(this);
+    this.changeSoundLevel = this.changeSoundLevel.bind(this);
+    this.changeMusicLevel = this.changeMusicLevel.bind(this);
     this.interfaceModel = interfaceModel;
 
     this.createSlider('Turn Time - 00:00', this.interfaceModel.playerTimer, this.changeTime);
-    this.createSlider('Sound Volume', this.interfaceModel.soundLevel, () => {});
-    this.createSlider('Music Volume', this.interfaceModel.musicLevel, () => {});
+    this.createSlider('Sound Volume', this.interfaceModel.soundLevel, this.changeSoundLevel);
+    this.createSlider('Music Volume', this.interfaceModel.musicLevel, this.changeMusicLevel);
 
     this.layout();
   }
@@ -70,5 +72,13 @@ export default class OptionsDialog extends Dialog {
   hideDialog() {
     super.hideDialog();
     return this;
+  }
+
+  changeSoundLevel(value) {
+    this.interfaceModel.tempSoundLevel = value;
+  }
+
+  changeMusicLevel(value) {
+    this.interfaceModel.tempMusicLevel = value;
   }
 }
