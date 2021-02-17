@@ -1,6 +1,6 @@
 
 body {
-    background-color: darkred;
+    background-color: #ffad00;
     justify-content: center;
     align-items: center;
     align-content: center;
@@ -14,7 +14,7 @@ body {
 }
 
 #nav-name{
-    color: white;
+    color: #ffffff;
 }
 
 #rules{
@@ -22,7 +22,7 @@ body {
     justify-content: center;
     align-content: center;
     align-items: center;
-    background-color: lightskyblue;
+    background-color: #ffffff;
     padding-bottom: 10rem;
     padding-top: 2rem;
 }
@@ -35,7 +35,7 @@ h2{
 }
 
 p{
-    color: black;
+    color: #000000;
     font-size: larger;
 }
 
@@ -43,4 +43,3 @@ p{
     padding-left: 12rem;
     padding-right: 12rem;
 }
-
