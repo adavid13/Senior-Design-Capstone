@@ -133,8 +133,7 @@ class Engine:
     def parseGameString(self, gameString):
         """
         Creates a gamestate from a gamestring
-        
-        Will need to be changed to play through gameModel instead of directly through the board
+
         """
         gameModel = GameModel()
         gameStringSplit = gameString.split(";")
@@ -143,12 +142,13 @@ class Engine:
         turnColour = gameStringSplit[0:5]
         for i in range(3, len(gameStringSplit)):
             print(gameStringSplit[i])
-            gameModel.board.playMove(gameStringSplit[i])
+            #gameModel.board.playMove(gameStringSplit[i])
+            gameModel.playMove(gameStringSplit[i])
 
         return gameModel
 
 if __name__ == "__main__":
     ge = Engine()
-    ge.parseGameString("Base;NotStarted;Black[2];wA1;bS1 -wA1;wB1 \\bS1")
+    ge.parseGameString("Base;NotStarted;Black[2];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wB1")
     ge.gameModel.board.printBoard()
     print("Engine Created")
