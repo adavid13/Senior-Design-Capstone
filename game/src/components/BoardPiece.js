@@ -13,7 +13,7 @@ export default class BoardPiece extends Phaser.GameObjects.Sprite {
 
     this.reposition = this.reposition.bind(this);
     this.setOrigin(0.5);
-    this.setScale(0.45);
+    this.setScale(0.37);
     this.setDepth(Constants.GameObjectDepth.PIECE);
     scene.add.existing(this);
     board.addChess(this, tileXY.x, tileXY.y, 'pathfinderLayer');

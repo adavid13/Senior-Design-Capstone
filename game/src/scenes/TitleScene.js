@@ -23,11 +23,11 @@ export default class TitleScene extends Phaser.Scene {
       this.startScene(Constants.Scenes.DIFFICULTY, { interfaceModel: this.interfaceModel });
     });
 
-    this.btnOptions = this.createButton(50, this.scale.height / 2 + 100, 'Options', () => {
+    this.btnOptions = this.createButton(50, this.scale.height / 2 + 80, 'Options', () => {
       this.openOptionsDialog();
     });
 
-    this.btnCredits = this.createButton(50, this.scale.height / 2 + 200, 'Credits', () => {
+    this.btnCredits = this.createButton(50, this.scale.height / 2 + 160, 'Credits', () => {
       this.startScene(Constants.Scenes.CREDITS);
     });
 
@@ -41,7 +41,7 @@ export default class TitleScene extends Phaser.Scene {
   }
 
   createButton(x, y, text, onClick) {
-    const button = new Button(this, x, y, text, 60, 'left', 400, 10, Constants.Color.GREY, onClick);
+    const button = new Button(this, x, y, text, 55, 'left', 400, 10, Constants.Color.GREY, onClick);
     button.setOrigin(0, 0.5);
     button.layout();
     return button;

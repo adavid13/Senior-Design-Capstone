@@ -1,4 +1,5 @@
 import { Dialog } from 'phaser3-rex-plugins/templates/ui/ui-components.js';
+import RoundBackground from './RoundBackground';
 import { Constants } from '../../utils/constants';
 import { convertIntegerColorToString } from '../../utils/color';
 
@@ -8,11 +9,12 @@ export default class Tooltip extends Dialog {
     const config = {
       x,
       y,
-      background: scene.rexUI.add.roundRectangle(0, 0, 100, 100, 20, Constants.Color.GREY),
+      background: new RoundBackground(scene, 0, 0, 2, 2, 20),
       content: scene.rexUI.add.label({
         width: 40,
         height: 40,
-        text: scene.add.text(0, 0, text, { fontFamily: '"Bungee"', fontSize: '16px', fill: textColor }),
+        text: scene.add.text(0, 0, text, { fontFamily: '"Bungee"', fontSize: '16px', fill: textColor })
+          .setShadow(2, 2, '#000000', 2, false, true),
         space: { top: 20, right: 20, bottom: 20, left: 20 } 
       })
     };

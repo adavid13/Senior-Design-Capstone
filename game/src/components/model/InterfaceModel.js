@@ -36,7 +36,7 @@ export default class InteractionModel {
 
   getAiTimer(difficulty) {
     if (difficulty === Constants.Difficulty.BEGINNER)
-      return 5000;
+      return 15000;
     else if (difficulty === Constants.Difficulty.INTERMEDIATE)
       return 30000;
     else 

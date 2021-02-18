@@ -20,7 +20,7 @@ export default class DifficultyScene extends Phaser.Scene {
     this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor('#69696c');
     this.titleText = this.add.text(this.scale.width / 2, this.scale.height / 3, 'Select the difficulty', {
       fontFamily: '"Bungee"',
-      fontSize: '64px',
+      fontSize: '55px',
       fill: '#fff',
     });
     this.titleText

@@ -123,7 +123,7 @@ export default class GameUIScene extends Phaser.Scene {
 
   createTurnText() {
     this.turnText = this.add
-      .text(-500, Constants.Window.HEIGHT / 2, 'Player Turn', { fontFamily: '"Bungee"', fontSize: 60, color: '#ffffff' })
+      .text(-500, Constants.Window.HEIGHT / 2, 'Player Turn', { fontFamily: '"Bungee"', fontSize: 55, color: '#ffffff' })
       .setShadow(5, 5, '#000000', 5, false, true)
       .setOrigin(0.5);
   }
@@ -164,7 +164,7 @@ export default class GameUIScene extends Phaser.Scene {
       x: Constants.Window.WIDTH / 2,
       y: Constants.Window.HEIGHT * 4 / 5,
       background: new RoundBackground(this, 0, 0, 2, 2, 20),
-      text: this.add.text(0, 0, '', { fontFamily: '"Bungee"', fontSize: '22px', fill: toastTextColor })
+      text: this.add.text(0, 0, '', { fontFamily: '"Bungee"', fontSize: '18px', fill: toastTextColor })
         .setShadow(2, 2, '#000000', 2, false, true),
       space: { top: 20, right: 20, bottom: 20, left: 20 },
       duration: { in: 200, hold: 2500, out: 200 },
@@ -221,12 +221,13 @@ export default class GameUIScene extends Phaser.Scene {
   }
 
   alert(message) {
-    this.toast.show(message);
+    if (!this.toast.player.isPlaying)
+      this.toast.show(message);
   }
 
   timeIsUp() {
     if (this.interactionModel.commands.length === 0) {
-      this.randomAction(this.pieces.filter(piece => { return !piece.isOnBoard; }));
+      this.randomAction(this.getAllCardsNotPlayed());
     }
     this.handleEndTurnClick();
     this.alert('Time\'s up! Your turn was skipped.');     
@@ -239,6 +240,10 @@ export default class GameUIScene extends Phaser.Scene {
     } else {
       return this.interfaceModel.getPlayerTimerinSec() * 1000;
     }
+  }
+
+  getAllCardsNotPlayed() {
+    return this.pieces.filter(piece => { return !piece.isOnBoard; });
   }
 
   resetTimer() {
@@ -292,16 +297,17 @@ export default class GameUIScene extends Phaser.Scene {
   }
 
   handleEndTurnClick() {
-    const turnResult = this.onEndTurnClick();
-    this.stopTimer();
+    const turnResult = this.onEndTurnClick(false);
     switch (turnResult) {
       case Constants.Turn.NEXT_TURN:
+        this.stopTimer();
         this.enableButtons(false);
         this.animateEndTurn();
         this.swapOverlay(this.interactionModel.playerTurn.getNumber());
         this.resetTimer();
         break;
       case Constants.Turn.SKIP_TURN:
+        this.stopTimer();
         this.enableButtons(false);
         this.animateEndTurn();
         this.swapOverlay(this.interactionModel.playerTurn.getNumber());
@@ -313,11 +319,13 @@ export default class GameUIScene extends Phaser.Scene {
         this.alert('You must play the king in this turn.\nUndo your previous action.');
         break;
       case Constants.Turn.VICTORY:
+        this.stopTimer();
         this.openEndGameDialog('victory');
         this.enableButtons(false);
         this.btnMenu.setButtonEnable(false);
         break;
       case Constants.Turn.DEFEAT:
+        this.stopTimer();
         this.openEndGameDialog('defeat');
         this.enableButtons(false);
         this.btnMenu.setButtonEnable(false);
