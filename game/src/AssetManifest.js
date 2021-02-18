@@ -26,6 +26,21 @@ const assetManifest = {
       loadOnStart: true,
     },
     {
+      name: 'pig',
+      path: './assets/images/pig.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'king',
+      path: './assets/images/king.png',
+      loadOnStart: true,
+    },
+    {
+      name: 'skeleton',
+      path: './assets/images/skeleton.png',
+      loadOnStart: true,
+    },
+    {
       name: 'victory',
       path: './assets/images/victory.png',
       loadOnStart: true,
