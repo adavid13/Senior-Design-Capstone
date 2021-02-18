@@ -229,8 +229,8 @@ export default class GameUIScene extends Phaser.Scene {
     if (this.interactionModel.commands.length === 0) {
       this.randomAction(this.getAllCardsNotPlayed());
     }
-    this.handleEndTurnClick();
-    this.alert('Time\'s up! Your turn was skipped.');     
+    this.alert('Time\'s up! Your turn is going to be skipped.');
+    this.endTurnWithDelay();   
   }
 
   getPlayerTimer() {
@@ -336,8 +336,10 @@ export default class GameUIScene extends Phaser.Scene {
   }
 
   enableButtons(enable) {
-    this.btnEndTurn.setButtonEnable(enable);
-    this.btnUndo.setButtonEnable(enable);
+    if (!enable || this.interactionModel.playerTurn.getPlayerType() !== Constants.PlayerType.AI) {
+      this.btnEndTurn.setButtonEnable(enable);
+      this.btnUndo.setButtonEnable(enable);
+    }
   }
 
   populatePlayerHand() {
@@ -406,5 +408,9 @@ export default class GameUIScene extends Phaser.Scene {
         }
       });
     }
+  }
+
+  endTurnWithDelay() {
+    setTimeout(() => { this.handleEndTurnClick(false); }, 2000);
   }
 }

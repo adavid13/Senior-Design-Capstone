@@ -443,15 +443,19 @@ export default class GameControllerScene extends Phaser.Scene {
           } else {
             this.randomAction(this.gameUIScene.getAllCardsNotPlayed());
           }
-          this.gameUIScene.handleEndTurnClick(false);
+          this.endTurnWithDelay();
         }
       })
       .catch(error => {
         const { currentTurn } = this.interactionModel;
         if (turn === currentTurn) {
           this.randomAction(this.gameUIScene.getAllCardsNotPlayed());
-          this.gameUIScene.handleEndTurnClick(false);
+          this.endTurnWithDelay();
         }
       });
+  }
+
+  endTurnWithDelay() {
+    setTimeout(() => { this.gameUIScene.handleEndTurnClick(false); }, 2000);
   }
 }
