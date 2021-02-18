@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Constants } from '../utils/constants';
 import { isKingOnTheBoard, isPieceSurrounded, getAllPieces, getAllPiecesOfPlayer, getAllPiecesAtTileXY } from '../utils/piecesUtils';
+import { getMove } from '../components/api/moveApi';
 import { Events } from '../components/EventCenter';
 import PlayerModel from '../components/model/PlayerModel';
 import InteractionModel from '../components/model/InteractionModel';
@@ -14,6 +15,7 @@ import PlaceCommand from '../components/command/PlaceCommand';
 import Card from '../components/ui/Card';
 import Tooltip from '../components/ui/Tooltip';
 import KingPiece from '../components/KingPiece';
+import { BoardStateAdapter } from '../components/BoardStateAdapter';  
 
 const sceneConfig = {
   key: Constants.Scenes.CONTROLLER,
@@ -170,12 +172,14 @@ export default class GameControllerScene extends Phaser.Scene {
     this.clearSelection();
 
     const { playerTurn, commands } = this.interactionModel;
-    if (isKingOnTheBoard(playerTurn) || commands.length > 0 || playerTurn !== selectedPiece.getPlayer()) {
-      this.interactionModel.selectedPiece = selectedPiece;
-      selectedPiece.setTint(Constants.Color.YELLOW_HIGHLIGHT);
-      selectedPiece.showMoveableArea();
-    } else {
-      Events.emit('alert', 'You can only move a piece after the king is placed on the board.');
+    if (playerTurn === this.players[0]) {
+      if (isKingOnTheBoard(playerTurn) || commands.length > 0 || playerTurn !== selectedPiece.getPlayer()) {
+        this.interactionModel.selectedPiece = selectedPiece;
+        selectedPiece.setTint(Constants.Color.YELLOW_HIGHLIGHT);
+        selectedPiece.showMoveableArea();
+      } else {
+        Events.emit('alert', 'You can only move a piece after the king is placed on the board.');
+      }
     }
   }
 
@@ -184,7 +188,8 @@ export default class GameControllerScene extends Phaser.Scene {
       case Constants.GameState.READY: {
         this.clearSelection();
         // Check if selected card belongs to the player that has the turn.
-        if (pieceInHand && this.interactionModel.pieceCanBeAdded(pieceInHand)) {
+        const { playerTurn } = this.interactionModel;
+        if (playerTurn === this.players[0] && pieceInHand && this.interactionModel.pieceCanBeAdded(pieceInHand)) {
           pieceInHand.setSelected(true);
           this.interactionModel.selectedPiece = pieceInHand;
           const allowedTiles = this.board.showInitialPlacementPositions(pieceInHand.getPlayer());
@@ -267,6 +272,10 @@ export default class GameControllerScene extends Phaser.Scene {
 
     if (!this.playerHasValidAction()) {
       return Constants.Turn.SKIP_TURN;
+    }
+
+    if (playerTurn.getPlayerType() === Constants.PlayerType.HUMAN) {
+      setTimeout(() => { this.getAIAction(currentTurn + 1); }, 1000 );
     }
 
     return Constants.Turn.NEXT_TURN;
@@ -384,9 +393,6 @@ export default class GameControllerScene extends Phaser.Scene {
     } else {
       random = Math.floor(Math.random() * playerPieces.length);
       selectedCard = playerPieces[random];
-      console.log('random', random);
-      console.log('playerPieces', playerPieces);
-      console.log('selectedCard', selectedCard);
     }
 
     this.execute(new PlaceCommand({ board: this.board, tileXY, selectedCard }));
@@ -409,5 +415,43 @@ export default class GameControllerScene extends Phaser.Scene {
       selectedMarker: { tileXY: selectedTile, parentPiece: selectedPiece },
       blockInput: () => this.state = Constants.GameState.PIECE_MOVING
     }));
+  }
+
+  getAIAction(turn) {
+    const state = BoardStateAdapter.convertState(this.board, this.players);
+    getMove(state)
+      .then(response => {
+        const { currentTurn } = this.interactionModel;
+        const allCardsNotPlayed = this.gameUIScene.getAllCardsNotPlayed();
+        const aiCards = allCardsNotPlayed.filter(card => card.getPlayer() === this.players[1]);
+        const action = BoardStateAdapter.convertAction(response, this.board, this.players, aiCards, this.interactionModel);
+        
+        // check if the response from the server returned in the correct turn. Ignore otherwise.
+        if (turn === currentTurn) {
+          if (action?.type === 'move') {
+            this.execute(new MoveCommand({
+              interactionModel: this.interactionModel,
+              selectedMarker: { tileXY: action.tileXY, parentPiece: action.piece },
+              blockInput: () => this.state = Constants.GameState.PIECE_MOVING
+            }));
+          } else if (action?.type === 'placement') {
+            this.execute(new PlaceCommand({
+              board: this.board,
+              tileXY: action.tileXY,
+              selectedCard: action.piece
+            }));
+          } else {
+            this.randomAction(this.gameUIScene.getAllCardsNotPlayed());
+          }
+          this.gameUIScene.handleEndTurnClick(false);
+        }
+      })
+      .catch(error => {
+        const { currentTurn } = this.interactionModel;
+        if (turn === currentTurn) {
+          this.randomAction(this.gameUIScene.getAllCardsNotPlayed());
+          this.gameUIScene.handleEndTurnClick(false);
+        }
+      });
   }
 }

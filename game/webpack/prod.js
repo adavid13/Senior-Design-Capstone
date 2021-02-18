@@ -1,9 +1,12 @@
-const merge = require('webpack-merge');
+const webpack = require('webpack');
+const { mergeWithCustomize, unique } = require("webpack-merge");
 const CopyPlugin = require('copy-webpack-plugin');
 const base = require('./base');
 const TerserPlugin = require('terser-webpack-plugin');
 
-module.exports = merge(base, {
+const test = mergeWithCustomize({
+  customizeArray: unique("plugins", ["DefinePlugin"], (plugin) => plugin.constructor && plugin.constructor.name)
+})(base, {
   mode: 'production',
   output: {
     filename: 'bundle.min.js',
@@ -25,8 +28,20 @@ module.exports = merge(base, {
     ],
   },
   plugins: [
+    new webpack.DefinePlugin({
+      CANVAS_RENDERER: JSON.stringify(true),
+      WEBGL_RENDERER: JSON.stringify(true),
+      'process.env.NODE_ENV': JSON.stringify('production'),
+      'process.env.API_URL': JSON.stringify('https://chexy.tk')
+    }),
     new CopyPlugin({
-      patterns: [{ from: './assets', to: 'assets' }],
+      patterns: [
+        { from: './assets', to: 'assets' },
+        { from: './index.css', to: 'index.css' },
+        { from: './rules.html', to: 'rules.html' }
+      ],
     }),
   ],
 });
+console.log("WEBPACK CONFIG ON BUILD", test.plugins);
+module.exports = test;

@@ -7,11 +7,11 @@ export default class GameBoardModel {
         gridType: 'hexagonGrid',
         x: 300,
         y: 300,
-        size: 60,
+        size: 50,
         staggeraxis: 'x',
         staggerindex: 'odd',
       },
-      radius: 12,
+      radius: 14,
     };
 
     this.difficulty = difficulty;

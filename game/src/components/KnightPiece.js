@@ -6,10 +6,11 @@ export default class KnightPiece extends BoardPiece {
   constructor({ board, player, tileXY, faction }) {
     const type = Constants.Pieces.KNIGHT;
     super({ board, player, tileXY, texture: getPieceTexture(type, faction) });
-    this.movingPoints = 22;
+    this.movingPoints = 30;
     this.faction = faction;
     this.type = type;
     this._displayName = getDisplayName(type, faction);
+    this.moveTo.setSpeed(550);
   }
 
   animationFrame(texture) {

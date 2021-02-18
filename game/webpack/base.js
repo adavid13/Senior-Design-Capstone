@@ -6,6 +6,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 module.exports = {
   mode: 'development',
   devtool: 'eval-source-map',
+  entry: ['@babel/polyfill', './src/index.js'],
   output: {
     path: path.resolve(process.cwd(), 'dist'),
   },
@@ -25,9 +26,21 @@ module.exports = {
     new webpack.DefinePlugin({
       CANVAS_RENDERER: JSON.stringify(true),
       WEBGL_RENDERER: JSON.stringify(true),
+      'process.env.NODE_ENV': JSON.stringify('development'),
+      'process.env.API_URL': JSON.stringify("http://localhost:5000")
     }),
     new HtmlWebpackPlugin({
       template: './index.html',
+      minify: {
+        removeAttributeQuotes: true,
+        collapseWhitespace: true,
+        html5: true,
+        minifyCSS: true,
+        minifyJS: true,
+        minifyURLs: true,
+        removeComments: true,
+        removeEmptyAttributes: true
+      },
     }),
   ],
 };
