@@ -6,3 +6,5 @@ dist
 instance
 ChexyAgentenv
 ChexyAgentServer/test*
+*.ipynb
+*.log
