@@ -15,7 +15,7 @@ class GameModel:
     BlackWins 	    The game is over, the black side has won.
 
     Player turn is in the form: 'color[#]' where color is either 'White' or 'Black', and 
-    # is the turn number, which increments whenever a new round begins (both players 
+    [#] is the turn number, which increments whenever a new round begins (both players 
     complete a turn)
 
 
@@ -29,7 +29,7 @@ class GameModel:
         self.turnNum = turnNum
         self.moves = moves
         self.board = board
-
+        self.previousState = None
         self.updateString()
     
     def __repr__(self):
@@ -43,6 +43,7 @@ class GameModel:
         return self.gamestring
 
     def playMove(self, moveString="", passTurn=False):
+        copyGameModel = self.deepCopy()
         if not passTurn:
             # Should check for valid move before doing this
             self.board.playMove(moveString)
@@ -66,4 +67,68 @@ class GameModel:
         else:
             self.gameState = 'InProgress'
 
+        self.previousState = copyGameModel
         return self.updateString()
+
+    def deepCopy(self):
+        newGameModel = GameModel()
+        newGameModel.board = gb.GameBoard()
+        for move in self.moves:
+            newGameModel._playMoveWithoutChecking(move)
+
+        newGameModel.previousState = self.previousState
+        return newGameModel
+
+    def undo(self):
+        return self.previousState
+
+    def checkIfMoveDisconnectsHive(self, moveString):
+        """
+        False if move is fine
+        True if move is not allowed
+        """
+        copyGameModel = self.deepCopy()
+        copyGameModel.playMove(moveString)
+        return not copyGameModel.board.isHiveConnected()
+
+    def _playMoveWithoutChecking(self, moveString, passTurn = False):
+        if not passTurn:
+            # Should check for valid move before doing this
+            self.board.playMove(moveString)
+            #self.moves.append(moveString)
+
+        if self.turnColor == 'White':
+            self.turnColor = 'Black'
+        else:
+            self.turnColor = 'White'
+            self.turnNum += 1
+        
+        # update gamestate
+        state = self.board.isGameOver()
+        if state:
+            if state == 'W':
+                self.gameState = 'WhiteWins'
+            elif state == 'B':
+                self.gameState = 'BlackWins'
+            elif state == 'D':
+                self.gameState = 'Draw'
+        else:
+            self.gameState = 'InProgress'
+
+        return self.updateString()
+
+
+if __name__ == "__main__":
+    gm = GameModel()
+    gm.playMove("wB1")
+    gm.playMove("bS1 -wB1")
+    gm.playMove("wS1 -bS1")
+    print(gm.checkIfMoveDisconnectsHive("bS1 -wS1"))
+    print(gm.checkIfMoveDisconnectsHive("bS1 -wS1"))
+    print(gm.checkIfMoveDisconnectsHive("bS1 -wS1"))
+    print(gm.checkIfMoveDisconnectsHive("bS1 -wS1"))
+
+    gm.playMove("bQ \\wS1")
+    
+    # gm.playMove("wQ BS1-")
+    gm.board.printBoard()
