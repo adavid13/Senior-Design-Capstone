@@ -119,7 +119,7 @@ class Engine:
         >undo 3
         <Base;NotStarted;White[1]
         """
-        print(numMoves)
+        self.gameModel = GameModel.previousState
         pass
     def options(self):
         """

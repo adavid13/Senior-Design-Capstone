@@ -26,10 +26,8 @@ class GameBoard:
         else:
             relativeStr = None
         if self.getPieceFromString(pieceStr) is not None:
-            print("moving {}...".format(pieceStr))
             self.movePiece(pieceStr, relativeStr)
         else:
-            print("inserting {}...".format(pieceStr))
             self.insertPiece(pieceStr, relativeStr)
 
     def insertPiece(self, piece, relativeLoc):
@@ -43,7 +41,6 @@ class GameBoard:
         if relativeLoc is None:
             self.Board[self.MAX_BOARD_SIZE//2][self.MAX_BOARD_SIZE//2] = gamePiece
             gamePiece.coordinates = (self.MAX_BOARD_SIZE//2, self.MAX_BOARD_SIZE//2)
-            print('first piece played {}'.format(piece))
             return
         
         direction, relPieceString = self.getDirectionAndPieceString(relativeLoc)
@@ -61,7 +58,6 @@ class GameBoard:
         else:
             self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]].beetleOnTop = gamePiece
         gamePiece.coordinates = newCoords
-        print('piece: {}, newlocation: {},{}'.format(gamePiece.id, newCoords[0], newCoords[1]))
         return
 
     def movePiece(self, piece, relativeLoc):
@@ -108,7 +104,6 @@ class GameBoard:
                 self.Board[oldCoords[0]][oldCoords[1]] = None
             self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]].beetleOnTop = movingPiece
 
-        print('piece: {}, newlocation: {},{}'.format(movingPiece.id, newCoords[0], newCoords[1]))
 
 
     def getNewCoordinates(self, relativePieceCoordinates, direction):
