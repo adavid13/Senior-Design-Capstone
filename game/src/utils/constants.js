@@ -24,7 +24,7 @@ export const Constants = {
 
   Window: {
     WIDTH: 1024,
-    HEIGHT: 768,
+    HEIGHT: 650,
   },
 
   GameObjectDepth: {
@@ -41,8 +41,8 @@ export const Constants = {
     BLACK: 0x000000,
     BLUE: 0x6FC9F9,
     GREY: 0x69696c,
-    GREY_LIGHT: 0x909b97,
-    GREY_DARK: 0x748481,
+    GREY_LIGHT: 0xa2a2a2,
+    GREY_DARK: 0x595959,
     BROWN_LIGHT: 0xd3baac,
     BROWN_DARK: 0x867472,
     GREEN_LIGHT: 0xdfdf86,
@@ -76,8 +76,18 @@ export const Constants = {
   },
 
   GameState: {
+    UI: 'UI',
     READY: 'READY',
     PIECE_MOVING: 'PIECE_MOVING',
     PIECE_SELECTION: 'PIECE_SELECTION',
+    END_GAME: 'END_GAME'
+  },
+
+  Turn: {
+    NEXT_TURN: 'NEXT_TURN',
+    SKIP_TURN: 'SKIP_TURN',
+    NEED_KING: 'NEED_KING',
+    VICTORY: 'VICTORY',
+    DEFEAT: 'DEFEAT'
   }
 };

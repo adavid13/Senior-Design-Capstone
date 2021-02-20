@@ -20,16 +20,20 @@ export default class BarbarianPiece extends BoardPiece {
    */ 
   showMoveableArea() {
     this.hideMoveableArea();
-    const destinationArray = this.findPath().map(path => path[path.length - 1]);
+    const destinationArray = this.getDestinationTiles();
     for (let i = 0, cnt = destinationArray.length; i < cnt; i++) {
       if (!this.markers.find(marker => {
-        const tileXY = marker.getTileXY();
+        const tileXY = marker.tileXY;
         return tileXY.x === destinationArray[i].x && tileXY.y === destinationArray[i].y;
       })) {
         this.markers.push(new MoveableMarker(this, destinationArray[i], !this.scene.getInteractionModel().pieceCanMove(this)));
       }
     }
     return this;
+  }
+
+  getDestinationTiles() {
+    return this.findPath().map(path => path[path.length - 1]);
   }
 
   findPath() {

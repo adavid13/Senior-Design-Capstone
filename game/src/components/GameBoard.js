@@ -27,6 +27,7 @@ export default class GameBoard extends Board {
     const tileKeys = this.model.getKeys();
     for (const i in this.tileXYArray) {
       tileXY = this.tileXYArray[i];
+      // this.tileOutline.strokePoints(this.getGridPoints(tileXY.x, tileXY.y, true), true);
       worldXY = this.tileXYToWorldXY(tileXY.x, tileXY.y);
       this.scene.add
         .image(
@@ -35,8 +36,8 @@ export default class GameBoard extends Board {
           tileKeys[Math.floor(Math.random() * tileKeys.length)],
           Math.floor(Math.random() * 10)
         )
-        .setScale(0.625);
-      this.scene.add.text(worldXY.x, worldXY.y, `${tileXY.x},${tileXY.y}`).setOrigin(0.5);
+        .setScale(0.55);
+      // this.scene.add.text(worldXY.x, worldXY.y, `${tileXY.x},${tileXY.y}`).setOrigin(0.5);
     }
 
     this.setInteractive();
@@ -98,9 +99,9 @@ export default class GameBoard extends Board {
     const playerPieces = piecesInBoard.filter(piece => piece.getPlayer() === player);
     if (playerPieces.length === 0) {
       if (getAllPieces(this).length === 1) {
-        return this.getNeighborTileXY({ x: 12, y: 12 }, null);
+        return this.getNeighborTileXY({ x: 14, y: 14 }, null);
       } else {
-        return [{ x: 12, y: 12 }];
+        return [{ x: 14, y: 14 }];
       }
     }
 

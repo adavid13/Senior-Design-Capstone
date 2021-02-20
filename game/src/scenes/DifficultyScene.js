@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import ImageButton from '../components/ui/ImageButton';
 import { Constants } from '../utils/constants';
 
 const sceneConfig = {
@@ -10,45 +11,47 @@ export default class DifficultyScene extends Phaser.Scene {
     super(sceneConfig);
   }
 
+  init(initParams) {
+    this.interfaceModel = initParams.interfaceModel;
+  }
+
   create() {
+    
     this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor('#69696c');
     this.titleText = this.add.text(this.scale.width / 2, this.scale.height / 3, 'Select the difficulty', {
-      fontSize: '64px',
+      fontFamily: '"Bungee"',
+      fontSize: '55px',
       fill: '#fff',
     });
-    this.titleText.setOrigin(0.5);
+    this.titleText
+      .setOrigin(0.5)
+      .setShadow(5, 5, '#000000', 5, false, true);
 
-    this.btnBeginner = this.createButton(this.scale.width / 4, this.scale.height / 2, 'Beginner');
-
-    this.btnBeginner.onClick().subscribe(() => {
+    this.btnBeginner = this.createButton(this.scale.width / 4, this.scale.height * 3 / 5, 'Beginner', 'pig', () => {
       this.startScene(Constants.Scenes.CONTROLLER, {
         difficulty: Constants.Difficulty.BEGINNER,
+        interfaceModel: this.interfaceModel,
       });
     });
 
-    this.btnIntermediate = this.createButton(this.scale.width / 2, this.scale.height / 2, 'Intermediate');
-
-    this.btnIntermediate.onClick().subscribe(() => {
+    this.btnIntermediate = this.createButton(this.scale.width / 2, this.scale.height * 3 / 5, 'Intermediate', 'king', () => {
       this.startScene(Constants.Scenes.CONTROLLER, {
         difficulty: Constants.Difficulty.INTERMEDIATE,
+        interfaceModel: this.interfaceModel,
       });
     });
 
-    this.btnAdvanced = this.createButton((this.scale.width * 3) / 4, this.scale.height / 2, 'Advanced');
-
-    this.btnAdvanced.onClick().subscribe(() => {
+    this.btnAdvanced = this.createButton((this.scale.width * 3) / 4, this.scale.height * 3 / 5, 'Advanced', 'skeleton', () => {
       this.startScene(Constants.Scenes.CONTROLLER, {
         difficulty: Constants.Difficulty.ADVANCED,
+        interfaceModel: this.interfaceModel,
       });
     });
   }
 
-  createButton(x, y, text) {
-    return this.add
-      .buttonContainer(x, y, 'btnBlue', Constants.Color.WHITE)
-      .setDownTexture('btnBluePressed')
-      .setOverTint(Constants.Color.ORANGE)
-      .setText(text);
+  createButton(x, y, text, texture, onClick) {
+    return new ImageButton(this, x, y, text, 22, 'right', 180, 10,
+      Constants.Color.GREY_DARK, onClick, { iconObject: this.add.image(0, 0, texture).setDepth(Constants.GameObjectDepth.UI), orientation: 'y' });
   }
 
   startScene(targetScene, params) {

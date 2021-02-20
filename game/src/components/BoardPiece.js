@@ -13,14 +13,14 @@ export default class BoardPiece extends Phaser.GameObjects.Sprite {
 
     this.reposition = this.reposition.bind(this);
     this.setOrigin(0.5);
-    this.setScale(0.45);
+    this.setScale(0.37);
     this.setDepth(Constants.GameObjectDepth.PIECE);
     scene.add.existing(this);
     board.addChess(this, tileXY.x, tileXY.y, 'pathfinderLayer');
 
     // add behaviors
     this.createPathfinder(scene);
-    this.moveTo = scene.rexBoard.add.moveTo(this, { speed: 200 });
+    this.moveTo = scene.rexBoard.add.moveTo(this, { speed: 350 });
     this.moveTo.on('complete', (gameObject) => {
       this.reorderTiles(gameObject);
     }, this);
@@ -79,13 +79,17 @@ export default class BoardPiece extends Phaser.GameObjects.Sprite {
 
   showMoveableArea() {
     this.hideMoveableArea();
-    let tileXYArray = this.pathFinder.findArea(this.movingPoints);
+    let tileXYArray = this.getDestinationTiles();
     for (let i = 0, cnt = tileXYArray.length; i < cnt; i++) {
       this.markers.push(new MoveableMarker(this, tileXYArray[i], !this.scene.getInteractionModel().pieceCanMove(this)));
     }
     return this;
   }
 
+  getDestinationTiles() {
+    return this.pathFinder.findArea(this.movingPoints);
+  }
+  
   hideMoveableArea() {
     for (let i = 0, cnt = this.markers.length; i < cnt; i++) {
       this.markers[i].destroy();

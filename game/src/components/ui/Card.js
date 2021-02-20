@@ -15,7 +15,7 @@ export default class Card extends Phaser.GameObjects.Container {
     this.player = player;
     this.type = type;
     this.pieceTexture = getPieceTexture(type, player.getFaction());
-
+    this._isOnBoard = false;
     this.onPieceSelected = (piece) => {
       onPieceSelected(piece);
     };
@@ -24,11 +24,15 @@ export default class Card extends Phaser.GameObjects.Container {
       .sprite(0, 0, 'card', 0)
       .setOrigin(0.5, 1)
       .setScale(0.2);
+    this.backgroundPipeline = this.scene.plugins.get('rexGrayScalePipeline').add(this.background);
+    this.backgroundPipeline.intensity = 0;
 
     this.pieceTexture = this.scene.add
       .image(0, -54, this.pieceTexture)
       .setOrigin(0.5)
       .setScale(0.275);
+    this.texturePipeline = this.scene.plugins.get('rexGrayScalePipeline').add(this.pieceTexture);
+    this.texturePipeline.intensity = 0;
 
     if (rotated) {
       this.background.setRotation(Math.PI);
@@ -57,6 +61,14 @@ export default class Card extends Phaser.GameObjects.Container {
     return this.player.getFaction();
   }
 
+  get isOnBoard() {
+    return this._isOnBoard;
+  }
+
+  set isOnBoard(isOnBoard) {
+    this._isOnBoard = isOnBoard;
+  }
+
   setSelected(isSelected) {
     this.selected = isSelected;
     if (isSelected) {
@@ -72,6 +84,41 @@ export default class Card extends Phaser.GameObjects.Container {
       this.pieceTexture.setTint(Constants.Color.WHITE);
       this.setY(this.originalY);
     }
+    return this;
+  }
+
+  setDisabled() {
+    this.background.disableInteractive();
+    this.scene.tweens.add({
+      targets: this.backgroundPipeline,
+      intensity: 1,
+      yoyo: false,
+      repeat: 0
+    });
+    this.scene.tweens.add({
+      targets: this.texturePipeline,
+      intensity: 1,
+      yoyo: false,
+      repeat: 0
+    });
+    return this;
+  }
+
+  setEnabled() {
+    this.background.setInteractive();
+    this.scene.tweens.add({
+      targets: this.backgroundPipeline,
+      intensity: 0,
+      yoyo: false,
+      repeat: 0
+    });
+    this.scene.tweens.add({
+      targets: this.texturePipeline,
+      intensity: 0,
+      yoyo: false,
+      repeat: 0
+    });
+    return this;
   }
 
   handleOver(pointer) {

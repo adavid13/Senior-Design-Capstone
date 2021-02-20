@@ -3,17 +3,18 @@ import { Constants } from '../../utils/constants';
 
 const execute = function () {
   const { selectedMarker } = this.value;
-  const targetTile = selectedMarker.getTileXY();
-  const piece = selectedMarker.getParentPiece();
+  const targetTile = selectedMarker.tileXY;
+  const piece = selectedMarker.parentPiece;
   piece.moveToTile(targetTile);
-  selectedMarker.setFillStyle(Constants.Color.RED);
+  if (selectedMarker.setFillStyle)
+    selectedMarker.setFillStyle(Constants.Color.RED);
 };
 
 const undo = function () {
   const { selectedMarker, interactionModel, blockInput } = this.value;
   blockInput();
   interactionModel.selectedPiece = undefined;
-  const piece = selectedMarker.getParentPiece();
+  const piece = selectedMarker.parentPiece;
   piece.moveToPreviousTile();
 };
 

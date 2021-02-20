@@ -1,0 +1,45 @@
+
+body {
+    background-color: #ffad00;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+}
+
+#phaser {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+}
+
+#nav-name{
+    color: #ffffff;
+}
+
+#rules{
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    padding-bottom: 10rem;
+    padding-top: 2rem;
+}
+
+h2{
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+}
+
+p{
+    color: #000000;
+    font-size: larger;
+}
+
+.col{
+    padding-left: 12rem;
+    padding-right: 12rem;
+}

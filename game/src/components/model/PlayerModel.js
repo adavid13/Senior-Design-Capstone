@@ -38,15 +38,21 @@ export default class PlayerModel {
   }
 
   removePieceFromHand(pieceType) {
-    const piecesRemaining = this.getPiecesInHand[pieceType];
+    const piecesRemaining = this.piecesInHand[pieceType];
     if (piecesRemaining > 0) {
-      this.getPiecesInHand[pieceType] = piecesRemaining - 1;
+      this.piecesInHand[pieceType] = piecesRemaining - 1;
       return true;
     }
     return false;
   }
 
   addPieceToHand(pieceType) {
-    this.getPiecesInHand[pieceType] = this.getPiecesInHand[pieceType] + 1;
+    this.piecesInHand[pieceType] = this.piecesInHand[pieceType] + 1;
+  }
+
+  isHandEmpty() {
+    return Object.values(this.piecesInHand).reduce((result, value) => {
+      return value === 0 && result;
+    }, true);
   }
 }

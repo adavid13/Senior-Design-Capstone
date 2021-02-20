@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import AssetManifest from '../AssetManifest';
+import WebFontFile from '../components/WebFontFile';
 import { Constants } from '../utils/constants';
 
 const sceneConfig = {
@@ -59,6 +60,8 @@ export default class PreloadScene extends Phaser.Scene {
         });
       }
     });
+
+    this.load.addFile(new WebFontFile(this.load, 'Bungee'));
 
     this.load.on('progress', this.updateProgress);
     this.load.on('complete', this.complete);
