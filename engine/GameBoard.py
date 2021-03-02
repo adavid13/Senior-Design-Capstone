@@ -48,7 +48,7 @@ class GameBoard:
         relativePiece = self.getPieceFromString(relPieceString)
         #tuple (x, y)
         if relativePiece is None:
-            raise Exception("This piece not on the board yet")
+            raise Exception("piece {} is not on the board yet".format(relPieceString))
         relativePieceCoordinates = relativePiece.coordinates
 
         # See linked guide at top of file to see how these translations are determined
@@ -281,6 +281,10 @@ class GameBoard:
         """
         Debugging tool, displays the board and relative pieces
         """
+        for j in range(self.MAX_BOARD_SIZE):
+            if j % 2 == 0:
+                print('{:02d}'.format(j),end='  ')
+        print()
         for j in range(self.MAX_BOARD_SIZE):
             # Every other row is offset
             if j % 2 == 0:
