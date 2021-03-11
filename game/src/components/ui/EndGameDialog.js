@@ -1,7 +1,8 @@
 import Dialog from './Dialog';
+import { Constants } from '../../utils/constants';
 
 export default class EndGameDialog extends Dialog {
-  constructor(scene, onPlayAgain, onMainMenu) {
+  constructor(scene, interfaceModel, onPlayAgain, onMainMenu) {
     const primaryButton = {
       text: 'Play again',
       callback: onPlayAgain
@@ -10,9 +11,9 @@ export default class EndGameDialog extends Dialog {
       text: 'Main menu',
       callback: onMainMenu
     };
-    super(scene, '', 400, [primaryButton, secondaryButton]);
+    super(scene, interfaceModel, '', 400, [primaryButton, secondaryButton]);
     this.getElement('content').add(
-      scene.add.image(0, 0, 'victory'),
+      scene.add.image(0, 0, 'victory').setDepth(Constants.GameObjectDepth.UI),
       { padding: { top: 15, right: 0, bottom: 30, left: 0 } }
     );
     this.layout();

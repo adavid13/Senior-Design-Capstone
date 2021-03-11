@@ -252,6 +252,43 @@ const assetManifest = {
       loadOnStart: true,
     },
   ],
+  sounds: [
+    {
+      name: 'theme',
+      path: ['./assets/sounds/theme.ogg', './assets/sounds/theme.m4a', './assets/sounds/theme.mp3'],
+      loadOnStart: true,
+    },
+    {
+      name: 'positive',
+      path: ['./assets/sounds/positive.m4a', './assets/sounds/positive.mp3'],
+      loadOnStart: true,
+    },
+    {
+      name: 'negative',
+      path: ['./assets/sounds/negative.m4a', './assets/sounds/negative.mp3'],
+      loadOnStart: true,
+    },
+    {
+      name: 'button-hover',
+      path: ['./assets/sounds/button_hover.wav'],
+      loadOnStart: true,
+    },
+    {
+      name: 'button-click',
+      path: ['./assets/sounds/button_click.wav'],
+      loadOnStart: true,
+    },
+    {
+      name: 'whoosh',
+      path: ['./assets/sounds/whoosh.wav'],
+      loadOnStart: true,
+    },
+    {
+      name: 'thud',
+      path: ['./assets/sounds/thud.wav'],
+      loadOnStart: true,
+    },
+  ],
 };
 
 export default assetManifest;

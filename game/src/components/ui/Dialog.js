@@ -10,66 +10,88 @@ export default class Dialog extends RexDialog {
    * @param width 
    * @param actionsConfig [{ text: String, callback: fn() }, {...}, ...]
    */
-  constructor(scene, title, width, actionsConfig = [], choicesConfig = []) {
+  constructor(scene, interfaceModel, title, width, actionsConfig = [], choicesConfig = []) {
     const config = {
       x: Constants.Window.WIDTH / 2,
       y: Constants.Window.HEIGHT / 2,
       width: width,
       background: new RoundBackground(scene, 0, 0, 100, 100, 20),
-      title: new Label(scene, 0, 0, title, 32, 'center', 40),
-      content: scene.rexUI.add.sizer({ x: 0, y: 0, width: 100, height: 0, orientation: 'y' }),
+      title: new Label(scene, 0, 0, title, 32, 'center', 40).setDepth(Constants.GameObjectDepth.UI),
+      content: scene.rexUI.add.sizer({ x: 0, y: 0, width: 100, height: 0, orientation: 'y' })
+        .setDepth(Constants.GameObjectDepth.UI),
       actions: [],
       choices: [],
       space: { left: 15, right: 15, top: 15, bottom: 15, title: 15, action: 30, choice: 15 },
+      expand: { choices: false },
       align: { title: 'center', content: 'center' }
     };
 
     super(scene, config);
     this.scene = scene;
+    this.setDepth(Constants.GameObjectDepth.UI);
+    this.interfaceModel = interfaceModel;
     this.actionsConfig = actionsConfig;
     this.choicesConfig = choicesConfig;
+    this.actionsIndex = 0;
+    this.choicesIndex = 0;
     this.createActions(actionsConfig);
     this.createChoices(choicesConfig);
-    this.setEvents();
+    this.createSounds();
 
     scene.add.existing(this);
     this.layout();
   }
 
-  createButton(text) {
-    const fontSize = 22;
-    const align = 'center';
-    const width = 100;
-    return new Label(this.scene, 0, 0, text, fontSize, align, width);
+  createButton(text, groupName, index) {
+    const textColor = convertIntegerColorToString(Constants.Color.WHITE);
+    const textHighlightColor = convertIntegerColorToString(Constants.Color.YELLOW);
+
+    const button = this.scene.add.text(0, 0, text, {
+      fontFamily: '"Bungee"',
+      fontSize: '22px',
+      fill: '#fff',
+      align: 'center'
+    })
+      .setShadow(2, 2, '#000000', 2, false, true)
+      .setDepth(Constants.GameObjectDepth.UI);
+
+    if (groupName === 'choices') {
+      button.setFixedSize(125, 0);
+    }
+
+    button.on('pointerdown', () => { this.handleClick(button, groupName, index); });
+    button.on('pointerover', () => { 
+      this.hoverSound.play();
+      button.setColor(textHighlightColor);
+    });
+    button.on('pointerout', () => { button.setColor(textColor); });
+    return button;
+  }
+
+  createSounds() {
+    this.hoverSound = this.scene.sound.add('button-hover');
+    this.hoverSound.setVolume(this.interfaceModel.soundLevel);
+    this.clickSound = this.scene.sound.add('button-click');
+    this.clickSound.setVolume(this.interfaceModel.soundLevel);
   }
 
   createActions(actionsConfig) {
     actionsConfig.forEach(actionConfig => {
-      this.addAction([this.createButton(actionConfig.text)]);
+      this.addAction([this.createButton(actionConfig.text, 'actions', this.actionsIndex)]);
+      this.actionsIndex++;
     });
   }
 
   createChoices(choicesConfig) {
     choicesConfig.forEach(choiceConfig => {
-      this.addChoice([this.createButton(choiceConfig.text)]);
-    });
-  }
-
-  setEvents() {
-    const textColor = convertIntegerColorToString(Constants.Color.WHITE);
-    const textHighlightColor = convertIntegerColorToString(Constants.Color.YELLOW);
-
-    this.on('button.click', this.handleClick, this)
-    .on('button.over', (button, groupName, index) => {
-      button.getElement('text').setColor(textHighlightColor);
-    })
-    .on('button.out', (button, groupName, index) => {
-      button.getElement('text').setColor(textColor);
+      this.addChoice([this.createButton(choiceConfig.text, 'choices', this.choicesIndex)]);
+      this.choicesIndex++;
     });
   }
 
   handleClick(button, groupName, index) {
     const config = this.getConfig(groupName, index);
+    this.clickSound.play();
     if (config.callback) {
       config.callback();
     }

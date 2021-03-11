@@ -4,7 +4,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 const base = require('./base');
 const TerserPlugin = require('terser-webpack-plugin');
 
-const test = mergeWithCustomize({
+module.exports = mergeWithCustomize({
   customizeArray: unique("plugins", ["DefinePlugin"], (plugin) => plugin.constructor && plugin.constructor.name)
 })(base, {
   mode: 'production',
@@ -43,5 +43,3 @@ const test = mergeWithCustomize({
     }),
   ],
 });
-console.log("WEBPACK CONFIG ON BUILD", test.plugins);
-module.exports = test;

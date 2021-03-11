@@ -6,6 +6,7 @@ import { convertIntegerColorToString } from '../utils/color';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Label from '../components/ui/Label';
+import Overlay from '../components/ui/Overlay';
 import RoundBackground from '../components/ui/RoundBackground';
 import MenuDialog from '../components/ui/MenuDialog';
 import EndGameDialog from '../components/ui/EndGameDialog';
@@ -45,6 +46,10 @@ export default class GameUIScene extends Phaser.Scene {
     this.openMenuDialog = this.openMenuDialog.bind(this);
     this.concede = this.concede.bind(this);
     
+    this.createSounds();
+    this.overlay = new Overlay(this, 0.3);
+    this.overlay.setVisible(false);
+
     // Buttons
     this.createMenuButton();
     this.createEndTurnButton();
@@ -96,14 +101,20 @@ export default class GameUIScene extends Phaser.Scene {
     return `${minutes}:${seconds}`;
   }
 
+  createSounds() {
+    this.victorySound = this.sound.add('positive');
+    this.defeatSound = this.sound.add('negative');
+    this.whooshSound = this.sound.add('whoosh');
+  }
+
   createMenuButton() {
     this.btnMenu = new Button(this, 100, 30, 'Menu', 22,
-      'center', 180, 10, Constants.Color.GREY, this.openMenuDialog);
+      'center', 180, 10, Constants.Color.GREY, this.openMenuDialog, this.interfaceModel);
   }
 
   createEndTurnButton() {
     this.btnEndTurn = new Button(this, Constants.Window.WIDTH - 110, Constants.Window.HEIGHT - 30,
-      'End Turn', 22, 'center', 180, 10, Constants.Color.GREY, this.handleEndTurnClick
+      'End Turn', 22, 'center', 180, 10, Constants.Color.GREY, this.handleEndTurnClick, this.interfaceModel
     )
       .setButtonEnable(false);
   }
@@ -117,7 +128,7 @@ export default class GameUIScene extends Phaser.Scene {
     };
 
     this.btnUndo = new Button(this, 100, Constants.Window.HEIGHT - 30, 'Undo',
-      22, 'center', 180, 10, Constants.Color.GREY, onClick)
+      22, 'center', 180, 10, Constants.Color.GREY, onClick, this.interfaceModel)
       .setButtonEnable(false);
   }
 
@@ -173,28 +184,43 @@ export default class GameUIScene extends Phaser.Scene {
 
   createMenuDialog() {
     const closeDialog = () => {
+      this.overlay.setVisible(false);
       this.menuDialog.hideDialog();
       // this.onCloseClick();
     };
-    this.menuDialog = new MenuDialog(this, this.openOptionsDialog, this.concede, closeDialog)
+    this.menuDialog = new MenuDialog(this, this.interfaceModel, this.openOptionsDialog, this.concede, closeDialog)
       .setVisible(false);
   }
 
   createOptionsDialog() {
-    this.optionsDialog = new OptionsDialog(this, this.interfaceModel, () => {
+    this.optionsDialog = new OptionsDialog(this, [], this.interfaceModel, () => {
       this.interfaceModel.confirmChanges();
+      this.overlay.setVisible(false);
       this.optionsDialog.hideDialog();
+    }, () => {
+      this.optionsDialog.hideDialog();
+      this.overlay.setVisible(false);
     });
     this.optionsDialog.hideDialog();
   }
 
   createEndGameDialog() {
-    this.dialog = new EndGameDialog(this, this.onRestartClick, this.onMainMenuClick)
+    this.dialog = new EndGameDialog(this, this.interfaceModel, () => {
+      this.defeatSound.stop();
+      this.victorySound.stop();
+      this.onRestartClick();
+    }, () => {
+      this.defeatSound.stop();
+      this.victorySound.stop();
+      this.onMainMenuClick();
+    })
       .setVisible(false);
   }
 
   openEndGameDialog(condition) {
     // TODO: remove onmenuclick
+    this.overlay.setVisible(true);
+    this.menuDialog.hideDialog();
     this.onMenuClick();
     this.dialog.changeTile(condition);
     this.dialog.changeImage(condition);
@@ -203,11 +229,13 @@ export default class GameUIScene extends Phaser.Scene {
 
   openMenuDialog() {
     // TODO: remove onmenuclick
+    this.overlay.setVisible(true);
     this.onMenuClick();
     this.menuDialog.showDialog();
   }
 
   openOptionsDialog() {
+    this.overlay.setVisible(true);
     this.menuDialog.hideDialog();
     this.optionsDialog.showDialog();
   }
@@ -215,6 +243,8 @@ export default class GameUIScene extends Phaser.Scene {
   concede() {
     this.openEndGameDialog('defeat');
     this.enableButtons(false);
+    this.defeatSound.setVolume(this.interfaceModel.musicLevel);
+    this.defeatSound.play();
     this.btnMenu.setButtonEnable(false);
     this.stopTimer();
     this.onEndTurnClick(true);
@@ -230,6 +260,7 @@ export default class GameUIScene extends Phaser.Scene {
       this.randomAction(this.getAllCardsNotPlayed());
     }
     this.alert('Time\'s up! Your turn is going to be skipped.');
+    this.enableButtons(false);
     this.endTurnWithDelay();   
   }
 
@@ -294,6 +325,15 @@ export default class GameUIScene extends Phaser.Scene {
       delay: 400
     });
     backgroundTimeLine.play();
+
+    setTimeout(() => { 
+      this.whooshSound.setVolume(this.interfaceModel.soundLevel);
+      this.whooshSound.play();
+    }, 400);
+    setTimeout(() => { 
+      this.whooshSound.setVolume(this.interfaceModel.soundLevel);
+      this.whooshSound.play();
+    }, 1400);
   }
 
   handleEndTurnClick() {
@@ -321,12 +361,16 @@ export default class GameUIScene extends Phaser.Scene {
       case Constants.Turn.VICTORY:
         this.stopTimer();
         this.openEndGameDialog('victory');
+        this.victorySound.setVolume(this.interfaceModel.musicLevel);
+        this.victorySound.play();
         this.enableButtons(false);
         this.btnMenu.setButtonEnable(false);
         break;
       case Constants.Turn.DEFEAT:
         this.stopTimer();
         this.openEndGameDialog('defeat');
+        this.defeatSound.setVolume(this.interfaceModel.musicLevel);
+        this.defeatSound.play();
         this.enableButtons(false);
         this.btnMenu.setButtonEnable(false);
         break;
@@ -359,10 +403,10 @@ export default class GameUIScene extends Phaser.Scene {
   createPiece(player, x, type) {
     const { height } = this.sys.game.canvas;
     if (player.getNumber() === 1) {
-      return new Card(this, player, x, height - 10, type, false, this.onPieceSelection).setEnabled();
+      return new Card(this, this.interfaceModel, player, x, height - 10, type, false, this.onPieceSelection).setEnabled();
     }
     if (player.getNumber() === 2) {
-      return new Card(this, player, x, 10, type, true, this.onPieceSelection).setDisabled();
+      return new Card(this, this.interfaceModel, player, x, 10, type, true, this.onPieceSelection).setDisabled();
     }
   }
 

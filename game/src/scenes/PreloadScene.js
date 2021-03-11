@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import AssetManifest from '../AssetManifest';
+import Button from '../components/ui/Button';
 import WebFontFile from '../components/WebFontFile';
+import InterfaceModel from '../components/model/InterfaceModel';
 import { Constants } from '../utils/constants';
 
 const sceneConfig = {
@@ -61,6 +63,12 @@ export default class PreloadScene extends Phaser.Scene {
       }
     });
 
+    AssetManifest.sounds.forEach((sound) => {
+      if (sound.loadOnStart) {
+        this.load.audio(sound.name, sound.path);
+      }
+    });
+
     this.load.addFile(new WebFontFile(this.load, 'Bungee'));
 
     this.load.on('progress', this.updateProgress);
@@ -87,6 +95,11 @@ export default class PreloadScene extends Phaser.Scene {
   };
 
   complete = () => {
-    this.scene.start(Constants.Scenes.TITLE);
+    this.interfaceModel = new InterfaceModel();
+    this.btnStart = new Button(this, this.scale.width / 2, this.scale.height / 2 + 100,
+      'Start', 22, 'center', 180, 10, Constants.Color.GREY_DARK, () => {
+        this.scene.start(Constants.Scenes.TITLE, { interfaceModel: this.interfaceModel });
+      }
+    );
   };
 }
