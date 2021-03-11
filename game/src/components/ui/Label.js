@@ -25,11 +25,17 @@ export default class Label extends RexLabel {
     }
     config.text = textObject;
     super(scene, config);
+    this.setDepth(Constants.GameObjectDepth.UI);
     this.layout();
   }
 
   changeText(text) {
     this.getElement('text').setText(text);
+    this.layout();
+  }
+
+  clearShadow() {
+    this.getElement('text').setShadow(0, 0, '#000000', 0, false, true);
     this.layout();
   }
 }

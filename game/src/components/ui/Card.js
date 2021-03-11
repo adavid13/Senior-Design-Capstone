@@ -6,9 +6,10 @@ export default class Card extends Phaser.GameObjects.Container {
   background;
   pieceTexture;
 
-  constructor(scene, player, x, y, type, rotated, onPieceSelected) {
+  constructor(scene, interfaceModel, player, x, y, type, rotated, onPieceSelected) {
     super(scene, x, y);
     this.scene = scene;
+    this.interfaceModel = interfaceModel;
     this.rotated = rotated;
     this.originalX = x;
     this.originalY = y;
@@ -16,6 +17,7 @@ export default class Card extends Phaser.GameObjects.Container {
     this.type = type;
     this.pieceTexture = getPieceTexture(type, player.getFaction());
     this._isOnBoard = false;
+    this.createSounds();
     this.onPieceSelected = (piece) => {
       onPieceSelected(piece);
     };
@@ -67,6 +69,11 @@ export default class Card extends Phaser.GameObjects.Container {
 
   set isOnBoard(isOnBoard) {
     this._isOnBoard = isOnBoard;
+  }
+
+  createSounds() {
+    this.hoverSound = this.scene.sound.add('button-hover');
+    this.clickSound = this.scene.sound.add('button-click');
   }
 
   setSelected(isSelected) {
@@ -128,6 +135,10 @@ export default class Card extends Phaser.GameObjects.Container {
       } else {
         this.setY(this.y - 10);
       }
+      if (this.hoverSound && this.interfaceModel) {
+        this.hoverSound.setVolume(this.interfaceModel.soundLevel);
+        this.hoverSound.play();
+      }
     }
   }
 
@@ -142,6 +153,10 @@ export default class Card extends Phaser.GameObjects.Container {
       this.onPieceSelected(null);
     } else {
       this.onPieceSelected(this);
+    }
+    if (this.clickSound && this.interfaceModel) {
+      this.clickSound.setVolume(this.interfaceModel.soundLevel);
+      this.clickSound.play();
     }
   }
 }

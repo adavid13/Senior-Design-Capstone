@@ -32,6 +32,16 @@ export default class GameScene extends Phaser.Scene {
       cam.scrollY -= (pointer.y - pointer.prevPosition.y) / cam.zoom;
     });
 
+    this.input.on("wheel",  (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
+      const cam = this.cameras.main;
+      if (deltaY > 0 && cam.zoom > 0.35) {
+        cam.zoom -= .1;
+      }
+      if (deltaY < 0 && cam.zoom < 3) {
+        cam.zoom += .1;
+      }
+    });
+
     Events.on('piece-added', (piece) => {
       this.board.handleTileColorChange(piece);
     });

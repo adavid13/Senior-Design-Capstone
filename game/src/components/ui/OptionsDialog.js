@@ -1,20 +1,28 @@
 import Dialog from './Dialog';
 import Label from './Label';
 import Slider from './Slider';
+import { Constants } from '../../utils/constants';
 
 export default class OptionsDialog extends Dialog {
-  constructor(scene, interfaceModel, onClickApply) {
+  constructor(scene, sounds, interfaceModel, onClickApply, onClickCancel) {
     const primaryButton = {
       text: 'Apply',
       callback: onClickApply
     };
     const secondaryButton = {
       text: 'Cancel',
-      callback: () => { this.hideDialog(); }
+      callback: () => {
+        sounds.forEach(music => {
+          music.setVolume(interfaceModel.musicLevel);
+        });
+        interfaceModel.cancelChanges();
+        onClickCancel();
+      }
     };
 
-    super(scene, 'Options', 400, [primaryButton, secondaryButton]);
+    super(scene, interfaceModel, 'Options', 400, [primaryButton, secondaryButton]);
     this.scene = scene;
+    this.sounds = sounds;
     this.changeTime = this.changeTime.bind(this);
     this.changeSoundLevel = this.changeSoundLevel.bind(this);
     this.changeMusicLevel = this.changeMusicLevel.bind(this);
@@ -35,7 +43,8 @@ export default class OptionsDialog extends Dialog {
     );
 
     contentContainer.add(
-      new Slider(this.scene, 0, 0, 280, sliderValue, (value) => { changeValueCallback(value); }),
+      new Slider(this.scene, 0, 0, 280, sliderValue, (value) => { changeValueCallback(value); })
+        .setDepth(Constants.GameObjectDepth.UI),
       { padding: { top: 15, right: 0, bottom: 30, left: 0 } }
     );
   }
@@ -43,7 +52,7 @@ export default class OptionsDialog extends Dialog {
   changeTime(value) {
     const time = Math.floor(value * this.interfaceModel.maxTime);
     const text = this.getElement('content').getElement('items')[0];
-    text.getElement('text').text = `Turn Time - ${this.formatTime(time)}`;
+    text.getElement('text').text = `Turn Time    ${this.formatTime(time)}`;
     this.interfaceModel.tempPlayerTime = value;
   }
 
@@ -76,9 +85,14 @@ export default class OptionsDialog extends Dialog {
 
   changeSoundLevel(value) {
     this.interfaceModel.tempSoundLevel = value;
+    this.hoverSound.setVolume(value);
+    this.clickSound.setVolume(value);
   }
 
   changeMusicLevel(value) {
     this.interfaceModel.tempMusicLevel = value;
+    this.sounds.forEach(music => {
+      music.setVolume(value);
+    });
   }
 }

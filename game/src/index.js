@@ -5,7 +5,6 @@ import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 import { Constants } from './utils/constants';
 import PreloadScene from './scenes/PreloadScene';
 import TitleScene from './scenes/TitleScene';
-import CreditsScene from './scenes/CreditsScene';
 import DifficultyScene from './scenes/DifficultyScene';
 import GameScene from './scenes/GameScene';
 import GameUIScene from './scenes/GameUIScene';
@@ -34,7 +33,7 @@ const config = {
       },
     ],
   },
-  scene: [PreloadScene, TitleScene, CreditsScene, DifficultyScene, GameControllerScene, GameScene, GameUIScene],
+  scene: [PreloadScene, TitleScene, DifficultyScene, GameControllerScene, GameScene, GameUIScene],
 };
 
 /*eslint no-unused-vars: "off"*/

@@ -2,7 +2,8 @@ import Command from './Command';
 import { Constants } from '../../utils/constants';
 
 const execute = function () {
-  const { selectedMarker } = this.value;
+  const { selectedMarker, moveSound } = this.value;
+  moveSound.play();
   const targetTile = selectedMarker.tileXY;
   const piece = selectedMarker.parentPiece;
   piece.moveToTile(targetTile);
@@ -11,7 +12,8 @@ const execute = function () {
 };
 
 const undo = function () {
-  const { selectedMarker, interactionModel, blockInput } = this.value;
+  const { selectedMarker, interactionModel, blockInput, moveSound } = this.value;
+  moveSound.play();
   blockInput();
   interactionModel.selectedPiece = undefined;
   const piece = selectedMarker.parentPiece;
