@@ -32,16 +32,41 @@ function convertState(board, players) {
  * if the action is invalid (throw new Error("Invalid Action Received"), and return { type: 'error' } )
  */
 function convertAction(uhpString, board, players, cards, interactionModel) {
-  // // Use functions below to help determine if the MOVE action is valid
-  // const AIPieces = getAllPiecesOfPlayer(this.board, players[1]);
-  // const validPieces = AIPieces.filter(piece => piece.getDestinationTiles().length > 0); // This will list all the pieces that are allowed to move
-  // const validTiles = validPiece.getDestinationTiles();  // use this to check which are the valid tiles the selected piece can move (validPiece must be one of the pieces in the validPieces array )
+  //uhpstring parsing
+  /**
+   * Piece name equivalents:
+   * Queen(Q) = King(K)
+   * Beetle(B) = Mage(M)
+   * Grasshopper(G) = Stealth(S)
+   * Spider(S) = Barbarian(B)
+   * Ant(A) = Knight(N)
+   * 
+   * Locations:
+   * bS1 wS1/ = Top right edge
+   * bS1 wS1- = Right hand edge
+   * bS1 wS1\ = Bottom right edge
+   * bS1 /wS1 = Bottom left edge
+   * bS1 -wS1 = Left hand edge
+   * bS1 \wS1 = Top right edge
+   */
+
+
+  // Use functions below to help determine if the MOVE action is valid
+  const AIPieces = getAllPiecesOfPlayer(this.board, players[1]);
+  const validPieces = AIPieces.filter(piece => piece.getDestinationTiles().length > 0); // This will list all the pieces that are allowed to move
+  const validTiles = validPiece.getDestinationTiles();  // use this to check which are the valid tiles the selected piece can move (validPiece must be one of the pieces in the validPieces array )
 
 
 
-  // // Use functions below to help determine if the PLACEMENT action is valid
-  // const validPlacementTiles = this.board.showInitialPlacementPositions(players[1]); // Only tiles listed here can be used to place pieces
-  // const validCards = cards; // this will list all the valid piece cards that can be played 
+  // Use functions below to help determine if the PLACEMENT action is valid
+  const validPlacementTiles = this.board.showInitialPlacementPositions(players[1]); // Only tiles listed here can be used to place pieces
+  const validCards = cards; // this will list all the valid piece cards that can be played 
 
-  return;
+
+  const convertedAction = {
+    type,
+    tileXY,
+    piece
+  }
+  return convertedAction;
 }
