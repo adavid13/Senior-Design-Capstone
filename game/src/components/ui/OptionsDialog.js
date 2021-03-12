@@ -13,7 +13,7 @@ export default class OptionsDialog extends Dialog {
       text: 'Cancel',
       callback: () => {
         sounds.forEach(music => {
-          music.setVolume(interfaceModel.musicLevel);
+          music.setVolume(interfaceModel.musicLevel * 0.5);
         });
         interfaceModel.cancelChanges();
         onClickCancel();
@@ -92,7 +92,7 @@ export default class OptionsDialog extends Dialog {
   changeMusicLevel(value) {
     this.interfaceModel.tempMusicLevel = value;
     this.sounds.forEach(music => {
-      music.setVolume(value);
+      music.setVolume(value * 0.5);
     });
   }
 }

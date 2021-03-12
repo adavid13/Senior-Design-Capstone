@@ -63,7 +63,7 @@ export default class TitleScene extends Phaser.Scene {
 
   createBackgroundMusic() {
     this.music = this.sound.add('theme');
-    this.music.setVolume(this.interfaceModel.musicLevel);
+    this.music.setVolume(this.interfaceModel.musicLevel * 0.5);
     this.music.play();
   }
 

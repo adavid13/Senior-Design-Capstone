@@ -11,10 +11,10 @@ export default class InteractionModel {
   constructor() {
     this._playerTimer = 0.5;
     this._soundLevel = 0.8;
-    this._musicLevel = 0.6;
+    this._musicLevel = 0.5;
     this._tempPlayerTime = 0.5;
     this._tempSoundLevel = 0.8;
-    this._tempMusicLevel = 0.6;
+    this._tempMusicLevel = 0.5;
     this._mute = false;
   }
 
