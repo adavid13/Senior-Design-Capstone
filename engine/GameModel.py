@@ -46,6 +46,10 @@ class GameModel:
         copyGameModel = self.deepCopy()
         if not passTurn:
             # Should check for valid move before doing this
+            # Check if correct player is playing their turn
+            if ((moveString[0] == 'w' and self.turnColor == 'Black') or (moveString[0] == 'b' and self.turnColor == 'White')):
+                print("err that piece cannot be played during the {} player's turn".format(self.turnColor))
+                raise Exception("err that piece cannot be played during the {} player's turn".format(self.turnColor))
             self.board.playMove(moveString)
             self.moves.append(moveString)
 
