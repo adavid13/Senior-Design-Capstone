@@ -1,4 +1,5 @@
 class QueenPiece:
+    # Note: the queen should not have a number in the final version as per UHP.
     def __init__(self, colour):
         self.colour = colour
         self.coordinates = None
