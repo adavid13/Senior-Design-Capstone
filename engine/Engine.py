@@ -149,6 +149,13 @@ class Engine:
 
 if __name__ == "__main__":
     ge = Engine()
-    ge.parseGameString("Base;NotStarted;Black[2];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wB1")
+    ge.parse("newgame")
+    ge.parse("play wQ1")
+    ge.parse("play bS1 -wQ1")
+    ge.parse("play wS1 wQ1\\")
+    ge.parse("play bS2 /bS1")
+    ge.parse("play wA1 /bS2")
+    ge.parse("play bS3 /wS1")
     ge.gameModel.board.printBoard()
+    print(ge.gameModel.board.getPieceFromString("wA1").validMoves(ge.gameModel))
     print("Engine Created")
