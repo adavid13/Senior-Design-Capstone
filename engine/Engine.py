@@ -155,7 +155,7 @@ if __name__ == "__main__":
     ge.parse("play wS1 wQ1\\")
     ge.parse("play bS2 /bS1")
     ge.parse("play wA1 /bS2")
-    ge.parse("play bS3 /wS1")
+    ge.parse("play wS3 /wS1")
     ge.gameModel.board.printBoard()
     print(ge.gameModel.board.getPieceFromString("wA1").validMoves(ge.gameModel))
     print("Engine Created")
