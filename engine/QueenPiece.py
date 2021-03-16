@@ -16,8 +16,7 @@ class QueenPiece:
         return self.id
     
     def validMoves(self, model):
-        model.board.printBoard()
-        print(model.moves)
+
         moves = []
         
         def wrap(j):

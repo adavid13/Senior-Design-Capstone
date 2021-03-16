@@ -108,25 +108,29 @@ class Engine:
         blackQueeninPlay = "bQ1" in [p.id for p in self.gameModel.board.pieces]
         whiteQueeninPlay = "wQ1" in [p.id for p in self.gameModel.board.pieces]
         validMovesString = ""
-        for piece in self.gameModel.board.pieces:
-            piecesInPlay.append(piece.id)
-            try:
-                if (piece.colour == 'b' and self.gameModel.turnColor == "Black" and blackQueeninPlay) or (piece.colour == 'w' and self.gameModel.turnColor == "White" and whiteQueeninPlay):
-                    validMoves = piece.validMoves(self.gameModel)
-                    for move in validMoves:
-                        moveString = self._parseMoveString(move, piece)
-                        validMovesString= validMovesString + (moveString+";")
-                else:
-                    print(piece.colour, self.gameModel.turnColor)
-            except Exception as e:
-                print(e)
-                pass
-        print("->", validMovesString)
+
+        if not ((self.gameModel.turnNum == 4 and self.gameModel.turnColor == "Black" and not blackQueeninPlay) or ((self.gameModel.turnNum == 4 and self.gameModel.turnColor == "White" and not whiteQueeninPlay))):
+            for piece in self.gameModel.board.pieces:
+                piecesInPlay.append(piece.id)
+                try:
+                    if (piece.colour == 'b' and self.gameModel.turnColor == "Black" and blackQueeninPlay) or (piece.colour == 'w' and self.gameModel.turnColor == "White" and whiteQueeninPlay):
+                        validMoves = piece.validMoves(self.gameModel)
+                        for move in validMoves:
+                            moveString = self._parseMoveString(move, piece)
+                            validMovesString= validMovesString + (moveString+";")
+                    else:
+                        print(piece.colour, self.gameModel.turnColor)
+                except Exception as e:
+                    print(e)
+                    pass
         neighbours = [[-2, 0], [-1, -1], [1, -1], [2, 0], [1, 1], [-1, 1]]
         symbols = ["{} {}-", "{} {}\\", "{} /{}", "{} -{}", "{} \\{}", "{} {}/"]
         whitePiecesNotInPlay = [p for p in whiteTotalPieces if p not in piecesInPlay]
         blackPiecesNotInPlay = [p for p in blackTotalPieces if p not in piecesInPlay]
-
+        if not whiteQueeninPlay and ge.gameModel.turnNum == 4:
+            whitePiecesNotInPlay = ["wQ1"]
+        elif not blackQueeninPlay and ge.gameModel.turnNum == 4:
+            blackPiecesNotInPlay = ["bQ1"]
         for i in range(4, self.gameModel.board.MAX_BOARD_SIZE-2):
             for j in range(4, self.gameModel.board.MAX_BOARD_SIZE-2):
                 if ((i+j) % 2) == 0:
@@ -143,7 +147,7 @@ class Engine:
                         if self.gameModel.turnColor == 'White' and len(whiteCount)>0 and len(blackCount) == 0:
                             for p in whitePiecesNotInPlay:
                                 for wp in whiteCount:
-                                    validMovesString = validMovesString + wp[1].format(wp[0].id, p) + ";"
+                                    validMovesString = validMovesString + wp[1].format(p, wp[0].id) + ";"
                         if self.gameModel.turnColor == 'Black' and len(blackCount)>0 and len(whiteCount) == 0:
                             for p in blackPiecesNotInPlay:
                                 for wp in blackCount:
@@ -216,7 +220,13 @@ if __name__ == "__main__":
     ge = Engine()
     ge.newGame()
     ge.parse("play wB1")
-    ge.parse("play bQ1 -wB1")
-    ge.parse("play wQ1 bQ1/")
+    ge.parse("play bS1 -wB1")
+    ge.parse("play wA1 bS1/")
+    ge.parse("play bB1 -bS1")
+    ge.parse("play wA2 -bB1")
+    ge.parse("play bA1 -wA2")
+    ge.parse("play wQ1 \wA1")
+    ge.parse("play bQ1 -bA1")
     ge.gameModel.board.printBoard()
     print(ge.validmoves())
+    print (ge.gameModel.turnNum)
