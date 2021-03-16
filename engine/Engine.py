@@ -96,13 +96,78 @@ class Engine:
             return "err" + str(e)
     
     def validmoves(self) -> str:
-        """
-        Asks the engine for every valid move for the current board, returned as semi-colon seperated list
 
-        > validmoves
-        < wS1;Wb1;wG1;wA1
+        piecesInPlay = []
+        whiteTotalPieces = "wQ1;wS1;wS2;wB1;wB2;wA1;wA2;wA3;wG1;wG2;wG3".split(';')
+        blackTotalPieces = "bQ1;bS1;bS2;bB1;bB2;bA1;bA2;bA3;bG1;bG2;bG3".split(';')
+        if len(self.gameModel.board.pieces) == 0:
+            if self.gameModel.turnColor == "White":
+                return "wQ1;wS1;wS2;wB1;wB2;wA1;wA2;wA3;wG1;wG2;wG3"
+            else:
+                return "bQ1;bS1;bS2;bB1;bB2;bA1;bA2;bA3;bG1;bG2;bG3"
+        blackQueeninPlay = "bQ1" in [p.id for p in self.gameModel.board.pieces]
+        whiteQueeninPlay = "wQ1" in [p.id for p in self.gameModel.board.pieces]
+        validMovesString = ""
+        for piece in self.gameModel.board.pieces:
+            piecesInPlay.append(piece.id)
+            try:
+                if (piece.colour == 'b' and self.gameModel.turnColor == "Black" and blackQueeninPlay) or (piece.colour == 'w' and self.gameModel.turnColor == "White" and whiteQueeninPlay):
+                    validMoves = piece.validMoves(self.gameModel)
+                    for move in validMoves:
+                        moveString = self._parseMoveString(move, piece)
+                        validMovesString= validMovesString + (moveString+";")
+                else:
+                    print(piece.colour, self.gameModel.turnColor)
+            except Exception as e:
+                print(e)
+                pass
+        print("->", validMovesString)
+        neighbours = [[-2, 0], [-1, -1], [1, -1], [2, 0], [1, 1], [-1, 1]]
+        symbols = ["{} {}-", "{} {}\\", "{} /{}", "{} -{}", "{} \\{}", "{} {}/"]
+        whitePiecesNotInPlay = [p for p in whiteTotalPieces if p not in piecesInPlay]
+        blackPiecesNotInPlay = [p for p in blackTotalPieces if p not in piecesInPlay]
+
+        for i in range(4, self.gameModel.board.MAX_BOARD_SIZE-2):
+            for j in range(4, self.gameModel.board.MAX_BOARD_SIZE-2):
+                if ((i+j) % 2) == 0:
+                    if self.gameModel.board.Board[i][j] is None:
+                        whiteCount = []
+                        blackCount = []
+                        for k in range(len(neighbours)):
+                            pieceAtLoc = self.gameModel.board.Board[i+neighbours[k][0]][j+neighbours[k][1]]
+                            if pieceAtLoc is not None:
+                                if pieceAtLoc.id[0] == 'w':
+                                    whiteCount.append([pieceAtLoc, symbols[k]])
+                                elif pieceAtLoc.id[0] == 'b':
+                                    blackCount.append([pieceAtLoc, symbols[k]])
+                        if self.gameModel.turnColor == 'White' and len(whiteCount)>0 and len(blackCount) == 0:
+                            for p in whitePiecesNotInPlay:
+                                for wp in whiteCount:
+                                    validMovesString = validMovesString + wp[1].format(wp[0].id, p) + ";"
+                        if self.gameModel.turnColor == 'Black' and len(blackCount)>0 and len(whiteCount) == 0:
+                            for p in blackPiecesNotInPlay:
+                                for wp in blackCount:
+                                    validMovesString = validMovesString + wp[1].format(p, wp[0].id) + ";"
+        return validMovesString
+
+
+    def _parseMoveString(self, moveArr, gamePiece):
         """
-        pass
+        _parseMoveString([17, 19], "wB1") -> "wB1 -wS1;wB1 wA1;wB1 bQ1/"
+
+        """
+        if(self.gameModel.board.Board[moveArr[0]][moveArr[1]] is not None):
+            return "{} {}".format(gamePiece.id, self.gameModel.board.Board[moveArr[0]][moveArr[1]].id)
+        collection = ""
+        neighbours = [[-2, 0], [-1, -1], [1, -1], [2, 0], [1, 1], [-1, 1]]
+        symbols = ["{} {}-", "{} {}\\", "{} /{}", "{} -{}", "{} \\{}", "{} {}/"]
+        for i in range(len(neighbours)):
+            dx, dy = neighbours[i][0], neighbours[i][1]
+            piece = self.gameModel.board.Board[moveArr[0]+dx][moveArr[1]+dy]
+            if  piece is not None and piece != gamePiece:
+                collection+=symbols[i].format(gamePiece.id, piece.id)
+        return collection
+
     def bestmove(self, maxTime=None, maxDepth=None) -> str:
         """
         Asks the engine for the AI's suggestion for the best move on the current board within certain limits
@@ -149,6 +214,9 @@ class Engine:
 
 if __name__ == "__main__":
     ge = Engine()
-    ge.parseGameString("Base;NotStarted;Black[2];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wB1")
+    ge.newGame()
+    ge.parse("play wB1")
+    ge.parse("play bQ1 -wB1")
+    ge.parse("play wQ1 bQ1/")
     ge.gameModel.board.printBoard()
-    print("Engine Created")
+    print(ge.validmoves())
