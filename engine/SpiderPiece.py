@@ -16,7 +16,6 @@ class SpiderPiece:
         return self.id
 
     def validMoves(self, model):
-        model.board.printBoard()
         print(model.moves)
 
         cpModel = model.deepCopy()
@@ -28,7 +27,6 @@ class SpiderPiece:
             return []
 
         stack = []
-        visited = set()
         moves = set()
         neighbours = [[-2, 0], [-1, -1], [1, -1], [2, 0], [1, 1], [-1, 1]]
         x = self.coordinates[0]
