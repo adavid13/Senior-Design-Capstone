@@ -49,9 +49,5 @@ class QueenPiece:
                 newNeighbourPieces = copyGameModel.board.getNeighbours(coords=[self.coordinates[0]+x,self.coordinates[1]+y])
                 commonNeighbours = [p for p in neighbourPieces if p in newNeighbourPieces]
                 if commonNeighbours:
-                    for x_3,y_3 in neighbours: #need 1 future neighbour to stay connected
-                        if (copyGameModel.board.Board[self.coordinates[0]+x+x_3][self.coordinates[1]+y+y_3] 
-                        is not None):
-                            moves += [[self.coordinates[0]+x,self.coordinates[1]+y]]
-                            break
+                    moves += [[self.coordinates[0]+x,self.coordinates[1]+y]]
         return moves
