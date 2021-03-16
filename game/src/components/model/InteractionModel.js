@@ -2,12 +2,14 @@ export default class InteractionModel {
   _currentTurn;
   _playerTurn;
   _selectedPiece;
+  _moveHistory;
   
   constructor(players) {
     this._currentTurn = 1;
     this._players = players;
     this._playerTurn = 0;
     this._commands = [];
+    this._moveHistory = new Array();
   }
 
   get playerTurn() {
@@ -56,4 +58,13 @@ export default class InteractionModel {
   selectedPieceCanMove() {
     return this.selectedPiece.getPlayer() === this.playerTurn && this.commands.length === 0;
   }
+
+  static setMoveHistory = function(move){
+    this._moveHistory = move;
+  }
+
+  static getMoveHistory() {
+    return this._moveHistory;
+  }
+
 }
