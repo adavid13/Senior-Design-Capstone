@@ -91,10 +91,15 @@ class Engine:
         > play wS1
         < Base;InProgress;Black[1];wS1
         """
+        if moveString == "pass":
+            self.passTurn()
+            return
+        if moveString not in self.gameModel.validMoves():
+            raise Exception("not a valid move!")
         try:
             return self.gameModel.playMove(moveString)
         except Exception as e:
-            return "err" + str(e)
+            return "err " + str(e)
     
     def validmoves(self) -> str:
         return self.gameModel.validMoves()
@@ -140,7 +145,6 @@ class Engine:
             raise NotImplementedError("Non-Base games not supported")
         turnColour = gameStringSplit[0:5]
         for i in range(3, len(gameStringSplit)):
-            print(gameStringSplit[i])
             #gameModel.board.playMove(gameStringSplit[i])
             gameModel.playMove(gameStringSplit[i])
 
@@ -150,10 +154,18 @@ if __name__ == "__main__":
     ge = Engine()
     ge.newGame()
     while(True):
-        move = ge.bestmove()
-        ge.parse("play {}".format(move))
-        winner = ge.gameModel.board.isGameOver()
-        if winner:
+        x = input()
+        try:
+            x = ge.parse(x)
+            if x[-2:] != "ok":
+                print(x[-2:])
+                raise Exception("err")
+            ge.parse("play {}".format(ge.bestmove()))
             ge.gameModel.board.printBoard()
-            print("WINNER: {}".format(winner))
-            break
+            result = ge.gameModel.board.isGameOver()
+            if  result is not False:
+                print("WINNER! {}".format(result))
+        except Exception as e:
+            print(str(e))
+
+        

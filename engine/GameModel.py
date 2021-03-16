@@ -75,7 +75,6 @@ class GameModel:
         return self.updateString()
 
     def validMoves(self):
-        print(self.turnNum, self.turnColor)
         piecesInPlay = []
         whiteTotalPieces = "wQ1;wS1;wS2;wB1;wB2;wA1;wA2;wA3;wG1;wG2;wG3".split(';')
         blackTotalPieces = "bQ1;bS1;bS2;bB1;bB2;bA1;bA2;bA3;bG1;bG2;bG3".split(';')
@@ -93,12 +92,12 @@ class GameModel:
                 piecesInPlay.append(piece.id)
                 try:
                     if (piece.colour == 'b' and self.turnColor == "Black" and blackQueeninPlay) or (piece.colour == 'w' and self.turnColor == "White" and whiteQueeninPlay):
-                        validMoves = piece.validMoves(self)
-                        for move in validMoves:
-                            moveString = self._parseMoveString(move, piece)
-                            validMovesString= validMovesString + (moveString+";")
-                    else:
-                        print(piece.colour, self.turnColor)
+                        if piece.beetleOnTop is None:
+                            validMoves = piece.validMoves(self)
+                            for move in validMoves:
+                                moveString = self._parseMoveString(move, piece)
+                                validMovesString= validMovesString + (moveString+";")
+
                 except Exception as e:
                     print(e)
                     pass
@@ -132,7 +131,6 @@ class GameModel:
                                 for wp in blackCount:
                                     validMovesString = validMovesString + wp[1].format(p, wp[0].id) + ";"
                         if self.turnColor == "Black" and self.turnNum==1 and len(whiteCount) > 0:
-                            print("here!")
                             for p in blackPiecesNotInPlay:
                                 for wp in whiteCount:
                                     validMovesString = validMovesString + wp[1].format(p, wp[0].id) + ";"

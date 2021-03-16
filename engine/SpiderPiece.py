@@ -16,7 +16,6 @@ class SpiderPiece:
         return self.id
 
     def validMoves(self, model):
-        print(model.moves)
 
         cpModel = model.deepCopy()
         # Remove self from the copied board

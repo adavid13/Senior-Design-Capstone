@@ -16,8 +16,7 @@ class AntPiece:
         return self.id
 
     def validMoves(self, model):
-        model.board.printBoard()
-        print(model.moves)
+
 
         cpModel = model.deepCopy()
         # Remove self from the copied board

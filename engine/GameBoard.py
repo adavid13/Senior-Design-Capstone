@@ -219,12 +219,12 @@ class GameBoard:
         whiteLost = False
         blackLost = False
 
-        whiteQueen = self.getPieceFromString("wQ")
+        whiteQueen = self.getPieceFromString("wQ1")
         if whiteQueen is not None:
             neighbours = self.getNeighbours(whiteQueen)
             whiteLost = len(neighbours) == 6
         
-        blackQueen = self.getPieceFromString("bQ")
+        blackQueen = self.getPieceFromString("bQ1")
         if blackQueen is not None:
             neighbours = self.getNeighbours(blackQueen)
             blackLost = len(neighbours) == 6

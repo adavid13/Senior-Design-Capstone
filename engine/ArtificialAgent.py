@@ -6,8 +6,12 @@ class ArtificialAgent:
 
     def bestMove(self, gameModel, maxTime=None, maxDepth=None):
         validMoves = gameModel.validMoves()[0:-1]
-        moveList = validMoves.split(";")
-        print(moveList)
+        moveList = [p for p in validMoves.split(";") if p != '']
+        if len(moveList) == 0:
+            return "pass"
+        if "" in moveList:
+            print(moveList)
+            print(validMoves)
+            input("WOWOWOWW")
         choice = random.choice(moveList)
-        print("choice, ", choice)
         return choice

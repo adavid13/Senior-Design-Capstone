@@ -24,7 +24,6 @@ class BeetlePiece:
             copyGameModel.board.pieces.remove(self)
             # Moving the piece would disconnect the hive
             if copyGameModel.board.isHiveConnected() is False:
-                print("moving would disconnect the hive!")
                 return []
 
             # Check for each 6 moves if there is a gap that is blocking it's passage
