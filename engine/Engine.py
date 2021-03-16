@@ -96,81 +96,9 @@ class Engine:
             return "err" + str(e)
     
     def validmoves(self) -> str:
-
-        piecesInPlay = []
-        whiteTotalPieces = "wQ1;wS1;wS2;wB1;wB2;wA1;wA2;wA3;wG1;wG2;wG3".split(';')
-        blackTotalPieces = "bQ1;bS1;bS2;bB1;bB2;bA1;bA2;bA3;bG1;bG2;bG3".split(';')
-        if len(self.gameModel.board.pieces) == 0:
-            if self.gameModel.turnColor == "White":
-                return "wQ1;wS1;wS2;wB1;wB2;wA1;wA2;wA3;wG1;wG2;wG3"
-            else:
-                return "bQ1;bS1;bS2;bB1;bB2;bA1;bA2;bA3;bG1;bG2;bG3"
-        blackQueeninPlay = "bQ1" in [p.id for p in self.gameModel.board.pieces]
-        whiteQueeninPlay = "wQ1" in [p.id for p in self.gameModel.board.pieces]
-        validMovesString = ""
-
-        if not ((self.gameModel.turnNum == 4 and self.gameModel.turnColor == "Black" and not blackQueeninPlay) or ((self.gameModel.turnNum == 4 and self.gameModel.turnColor == "White" and not whiteQueeninPlay))):
-            for piece in self.gameModel.board.pieces:
-                piecesInPlay.append(piece.id)
-                try:
-                    if (piece.colour == 'b' and self.gameModel.turnColor == "Black" and blackQueeninPlay) or (piece.colour == 'w' and self.gameModel.turnColor == "White" and whiteQueeninPlay):
-                        validMoves = piece.validMoves(self.gameModel)
-                        for move in validMoves:
-                            moveString = self._parseMoveString(move, piece)
-                            validMovesString= validMovesString + (moveString+";")
-                    else:
-                        print(piece.colour, self.gameModel.turnColor)
-                except Exception as e:
-                    print(e)
-                    pass
-        neighbours = [[-2, 0], [-1, -1], [1, -1], [2, 0], [1, 1], [-1, 1]]
-        symbols = ["{} {}-", "{} {}\\", "{} /{}", "{} -{}", "{} \\{}", "{} {}/"]
-        whitePiecesNotInPlay = [p for p in whiteTotalPieces if p not in piecesInPlay]
-        blackPiecesNotInPlay = [p for p in blackTotalPieces if p not in piecesInPlay]
-        if not whiteQueeninPlay and ge.gameModel.turnNum == 4:
-            whitePiecesNotInPlay = ["wQ1"]
-        elif not blackQueeninPlay and ge.gameModel.turnNum == 4:
-            blackPiecesNotInPlay = ["bQ1"]
-        for i in range(4, self.gameModel.board.MAX_BOARD_SIZE-2):
-            for j in range(4, self.gameModel.board.MAX_BOARD_SIZE-2):
-                if ((i+j) % 2) == 0:
-                    if self.gameModel.board.Board[i][j] is None:
-                        whiteCount = []
-                        blackCount = []
-                        for k in range(len(neighbours)):
-                            pieceAtLoc = self.gameModel.board.Board[i+neighbours[k][0]][j+neighbours[k][1]]
-                            if pieceAtLoc is not None:
-                                if pieceAtLoc.id[0] == 'w':
-                                    whiteCount.append([pieceAtLoc, symbols[k]])
-                                elif pieceAtLoc.id[0] == 'b':
-                                    blackCount.append([pieceAtLoc, symbols[k]])
-                        if self.gameModel.turnColor == 'White' and len(whiteCount)>0 and len(blackCount) == 0:
-                            for p in whitePiecesNotInPlay:
-                                for wp in whiteCount:
-                                    validMovesString = validMovesString + wp[1].format(p, wp[0].id) + ";"
-                        if self.gameModel.turnColor == 'Black' and len(blackCount)>0 and len(whiteCount) == 0:
-                            for p in blackPiecesNotInPlay:
-                                for wp in blackCount:
-                                    validMovesString = validMovesString + wp[1].format(p, wp[0].id) + ";"
-        return validMovesString
+        return self.gameModel.validMoves()
 
 
-    def _parseMoveString(self, moveArr, gamePiece):
-        """
-        _parseMoveString([17, 19], "wB1") -> "wB1 -wS1;wB1 wA1;wB1 bQ1/"
-
-        """
-        if(self.gameModel.board.Board[moveArr[0]][moveArr[1]] is not None):
-            return "{} {}".format(gamePiece.id, self.gameModel.board.Board[moveArr[0]][moveArr[1]].id)
-        collection = ""
-        neighbours = [[-2, 0], [-1, -1], [1, -1], [2, 0], [1, 1], [-1, 1]]
-        symbols = ["{} {}-", "{} {}\\", "{} /{}", "{} -{}", "{} \\{}", "{} {}/"]
-        for i in range(len(neighbours)):
-            dx, dy = neighbours[i][0], neighbours[i][1]
-            piece = self.gameModel.board.Board[moveArr[0]+dx][moveArr[1]+dy]
-            if  piece is not None and piece != gamePiece:
-                collection+=symbols[i].format(gamePiece.id, piece.id)
-        return collection
 
     def bestmove(self, maxTime=None, maxDepth=None) -> str:
         """
@@ -180,8 +108,8 @@ class Engine:
         > bestmove depth 2
         < wS1
         """
+        return self.artificialAgent.bestMove(self.gameModel, maxTime, maxDepth)
 
-        pass
     def undo(self, numMoves = 1) -> str:
         """
         Asks the engine to undo one or more previous moves
@@ -225,8 +153,13 @@ if __name__ == "__main__":
     ge.parse("play bB1 -bS1")
     ge.parse("play wA2 -bB1")
     ge.parse("play bA1 -wA2")
-    ge.parse("play wQ1 \wA1")
-    ge.parse("play bQ1 -bA1")
+    #ge.parse("play wQ1 \wA1")
+    #ge.parse("play bQ1 -bA1")
     ge.gameModel.board.printBoard()
     print(ge.validmoves())
-    print (ge.gameModel.turnNum)
+    print(ge.bestmove())
+    print(ge.bestmove())
+    print(ge.bestmove())
+    print(ge.bestmove())
+    print(ge.bestmove())
+    print(ge.bestmove())
