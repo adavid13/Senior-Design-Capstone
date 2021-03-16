@@ -239,9 +239,10 @@ class GameBoard:
             return False
         return False
 
-    def getNeighbours(self, piece):
-        gamePiece = piece
-        coords = gamePiece.coordinates
+    def getNeighbours(self, piece=None, coords=None):
+        if piece:
+            gamePiece = piece
+            coords = gamePiece.coordinates
         neighbours = []
         neighbours.append(self.Board[coords[0]-2][coords[1]])
         neighbours.append(self.Board[coords[0]-1][coords[1]-1])
