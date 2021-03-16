@@ -8,3 +8,4 @@ ChexyAgentenv
 ChexyAgentServer/test*
 *.ipynb
 *.log
+.vscode/*
