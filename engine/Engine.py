@@ -83,6 +83,7 @@ class Engine:
         return self.gameModel.playMove(passTurn=True)
 
     def play(self, moveString: str) -> str:
+        print("->", moveString)
         """
         Asks the engine to play the specified MoveString
         Returns updated GameString
@@ -108,7 +109,8 @@ class Engine:
         > bestmove depth 2
         < wS1
         """
-        return self.artificialAgent.bestMove(self.gameModel, maxTime, maxDepth)
+        move = self.artificialAgent.bestMove(self.gameModel, maxTime, maxDepth)
+        return move
 
     def undo(self, numMoves = 1) -> str:
         """
@@ -147,19 +149,11 @@ class Engine:
 if __name__ == "__main__":
     ge = Engine()
     ge.newGame()
-    ge.parse("play wB1")
-    ge.parse("play bS1 -wB1")
-    ge.parse("play wA1 bS1/")
-    ge.parse("play bB1 -bS1")
-    ge.parse("play wA2 -bB1")
-    ge.parse("play bA1 -wA2")
-    #ge.parse("play wQ1 \wA1")
-    #ge.parse("play bQ1 -bA1")
-    ge.gameModel.board.printBoard()
-    print(ge.validmoves())
-    print(ge.bestmove())
-    print(ge.bestmove())
-    print(ge.bestmove())
-    print(ge.bestmove())
-    print(ge.bestmove())
-    print(ge.bestmove())
+    while(True):
+        move = ge.bestmove()
+        ge.parse("play {}".format(move))
+        winner = ge.gameModel.board.isGameOver()
+        if winner:
+            ge.gameModel.board.printBoard()
+            print("WINNER: {}".format(winner))
+            break
