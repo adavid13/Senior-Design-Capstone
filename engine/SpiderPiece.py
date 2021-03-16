@@ -48,15 +48,11 @@ class SpiderPiece:
                         newNeighbourPieces = cpModel.board.getNeighbours(coords=[x+dx,y+dy])
                         commonNeighbours = [p for p in neighbourPieces if p in newNeighbourPieces]
                         if commonNeighbours:
-                            # Check that moved piece did not separate from hive
-                            for x3,y3 in neighbours:
-                                if cpModel.board.Board[x+dx+x3][y+dy+y3] is not None:
-                                    tmp = path.copy()
-                                    tmp.add((x+dx, y+dy))
-                                    stack.append([x+dx, y+dy, tmp])
-                                    if (path.__len__() == 3):
-                                        moves.add((x+dx, y+dy))
-                                    break
+                            tmp = path.copy()
+                            tmp.add((x+dx, y+dy))
+                            stack.append([x+dx, y+dy, tmp])
+                            if (path.__len__() == 3):
+                                moves.add((x+dx, y+dy))
             
             # Find the next location to check
             if stack:
