@@ -7,7 +7,6 @@ class BeetlePiece:
         self.beetleOnTop = None
         self.beetling = None
 
-# TODO: make beetle's neighbours include the piece it's beetling
     def validMoves(self, model):
         if self.beetleOnTop is not None:
             return []
