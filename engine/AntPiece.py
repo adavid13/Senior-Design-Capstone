@@ -53,6 +53,6 @@ class AntPiece:
                 x,y = stack.pop()
             else:
                 break
-
-        moves.remove((self.coordinates[0],self.coordinates[1]))
+        if len(moves) > 0:
+            moves.remove((self.coordinates[0], self.coordinates[1]))
         return list(moves)
