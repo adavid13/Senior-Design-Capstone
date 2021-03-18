@@ -83,7 +83,6 @@ class Engine:
         return self.gameModel.playMove(passTurn=True)
 
     def play(self, moveString: str) -> str:
-        print("->", moveString)
         """
         Asks the engine to play the specified MoveString
         Returns updated GameString
@@ -227,30 +226,38 @@ class Engine:
         return gameModel
 
 if __name__ == "__main__":
-    ge = Engine()
-    ge.newGame()
-    games = 10
-    wins = 0
-    total=0
+    games = 1
+    wins = []
+    turns=[]
     for i in range(games):
+        ge = Engine()
+        ge.newGame()
+        print("Playing game {} of {}...".format(i+1, games))
         while(True):
             try:
                 ge.parse("play {}".format(ge.bestmove(difficulty=1)))
-                # if x[-2:] != "ok":
-                #     print(x[-2:])
-                #     raise Exception("err")
                 ge.parse("play {}".format(ge.bestmove(difficulty=0)))
                 result = ge.gameModel.board.isGameOver()
-                if  result is not False:
-                    ge.gameModel.board.printBoard()
-                    print("WINNER! {}".format(result))
-                    #print("turns: ", ge.gameModel.turnNum)
-                    wins += 1
-                    total+= ge.gameModel.turnNum
+                ge.gameModel.board.printBoard()
+                if result or ge.gameModel.turnNum>=100:
                     break
             except Exception as e:
-                raise e
-    print("avg turns:", total/games)
-    print("white won {}%".format(wins/games*100))
+                raise(e)
+                print("ERROR")
+                result = False
+                break
+        ge.gameModel.board.printBoard()
+        print("WINNER! {}".format(result))
+        if result == 'W':
+            wins.append(1)
+        else:
+            wins.append(0)
+        turns.append(ge.gameModel.turnNum)
+        del ge.gameModel
+        del ge
+    print("wins: ", wins)
+    print("turns:", turns)
+    print("avg turns:", sum(turns)/len(turns))
+    print("white won {}%".format(sum(wins)/games*100))
 
         
