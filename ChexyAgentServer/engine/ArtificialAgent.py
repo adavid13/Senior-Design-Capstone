@@ -57,7 +57,6 @@ class ArtificialAgent:
         return [p1Coord, p2Coord]
 
     def bestMove(self, gameModel, difficulty=0, maxTime=None, maxDepth=None):
-        # print('bestMove')
         validMoves = gameModel.validMoves()[0:-1]
         moveList = [p for p in validMoves.split(";") if p != '']
         if len(moveList) == 0:
