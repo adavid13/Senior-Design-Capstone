@@ -90,17 +90,13 @@ class GameModel:
         if not ((self.turnNum == 4 and self.turnColor == "Black" and not blackQueeninPlay) or ((self.turnNum == 4 and self.turnColor == "White" and not whiteQueeninPlay))):
             for piece in self.board.pieces:
                 piecesInPlay.append(piece.id)
-                try:
-                    if (piece.colour == 'b' and self.turnColor == "Black" and blackQueeninPlay) or (piece.colour == 'w' and self.turnColor == "White" and whiteQueeninPlay):
-                        if piece.beetleOnTop is None:
-                            validMoves = piece.validMoves(self)
-                            for move in validMoves:
-                                moveString = self._parseMoveString(move, piece)
-                                validMovesString= validMovesString + (moveString+";")
+                if (piece.colour == 'b' and self.turnColor == "Black" and blackQueeninPlay) or (piece.colour == 'w' and self.turnColor == "White" and whiteQueeninPlay):
+                    if piece.beetleOnTop is None:
+                        validMoves = piece.validMoves(self)
+                        for move in validMoves:
+                            moveString = self._parseMoveString(move, piece)
+                            validMovesString= validMovesString + (moveString+";")
 
-                except Exception as e:
-                    print(e)
-                    pass
         neighbours = [[-2, 0], [-1, -1], [1, -1], [2, 0], [1, 1], [-1, 1]]
         symbols = ["{} {}-", "{} {}\\", "{} /{}", "{} -{}", "{} \\{}", "{} {}/"]
         whitePiecesNotInPlay = [p for p in whiteTotalPieces if p not in piecesInPlay]
