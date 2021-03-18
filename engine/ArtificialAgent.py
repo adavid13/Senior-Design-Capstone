@@ -56,13 +56,7 @@ class ArtificialAgent:
         p2Coord = (p2.coordinates[0]+neighbours[i][0], p2.coordinates[1]+neighbours[i][1])
         return [p1Coord, p2Coord]
 
-        # for i in range(len(neighbours)):
-        #     if sy
-        
-
-
-
-    def bestMove(self, gameModel, maxTime=None, maxDepth=None):
+    def bestMove(self, gameModel, difficulty=0, maxTime=None, maxDepth=None):
         validMoves = gameModel.validMoves()[0:-1]
         moveList = [p for p in validMoves.split(";") if p != '']
         if len(moveList) == 0:
@@ -83,19 +77,38 @@ class ArtificialAgent:
 
     def easy(self, gameModel, moveList):
         choice = random.choice(moveList)
+        # Don't play queen on turn 1
+        while gameModel.turnNum == 1 and 'Q' in choice:
+            choice = random.choice(moveList)
         return choice
 
     def medium(self, gameModel, moveList):
         q = PriorityQueue()
-
-        # Prioritize moves that surround the opponent's queen
+        
+        # Prioritize moves
         for move in moveList:
             piece, loc = move.split(' ')
             priority=0
             
-            # If turn is placing the piece on the opponent's queen
+            # Prioritize moves that surround the opponent's queen
+            # Need to make sure it doesnt move if already on the queen
             if piece[0] not in loc and 'Q' in loc:
                 priority -= 1
+
+            # Prioritize placing pieces
+            # try:
+            #     gameModel.board.getPieceFromString(piece)
+            # except:
+            #     priority -= 1
+
+            # Discourage moves that surround the active player's queen
+            if piece[0] in loc and 'Q' in loc:
+                priority += 1
+
+            # Discourage moves that leave the opponent's queen
+            # Errors out
+            # if gameModel.board.getPieceFromString(loc.translate({ord(i): None for i in '-\\/'})) in gameModel.board.getNeighbours(gameModel.board.getPieceFromString(piece)):
+            #     priority+=10
 
             q.put((priority, move))
 
@@ -103,8 +116,9 @@ class ArtificialAgent:
         high = highPriority[0][0]
         while (not q.empty and highPriority[-1][0] == high):
             highPriority.append(q.get())
-        return random.choice(highPriority)[1]
-
+        choice = random.choice(highPriority)
+        print("(priority, move): ",choice)
+        return choice[1]
 
     def hard(self, gameModel):
         pass
