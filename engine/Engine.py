@@ -106,7 +106,7 @@ class Engine:
 
 
 
-    def bestmove(self, maxTime=None, maxDepth=None) -> str:
+    def bestmove(self, difficulty=1, maxTime=None, maxDepth=None) -> str:
         """
         Asks the engine for the AI's suggestion for the best move on the current board within certain limits
 
@@ -114,7 +114,9 @@ class Engine:
         > bestmove depth 2
         < wS1
         """
-        move = self.artificialAgent.bestMove(self.gameModel, maxTime, maxDepth)
+        if self.gameModel.turnNum == 1:
+            difficulty = 0
+        move = self.artificialAgent.bestMove(self.gameModel, difficulty, maxTime, maxDepth)
         return move
 
     def undo(self, numMoves = 1) -> str:
@@ -153,19 +155,28 @@ class Engine:
 if __name__ == "__main__":
     ge = Engine()
     ge.newGame()
-    while(True):
-        x = input()
-        try:
-            x = ge.parse(x)
-            if x[-2:] != "ok":
-                print(x[-2:])
-                raise Exception("err")
-            ge.parse("play {}".format(ge.bestmove()))
-            ge.gameModel.board.printBoard()
-            result = ge.gameModel.board.isGameOver()
-            if  result is not False:
-                print("WINNER! {}".format(result))
-        except Exception as e:
-            print(str(e))
+    games = 10
+    wins = 0
+    total=0
+    for i in range(games):
+        while(True):
+            try:
+                ge.parse("play {}".format(ge.bestmove(difficulty=1)))
+                # if x[-2:] != "ok":
+                #     print(x[-2:])
+                #     raise Exception("err")
+                ge.parse("play {}".format(ge.bestmove(difficulty=0)))
+                result = ge.gameModel.board.isGameOver()
+                if  result is not False:
+                    ge.gameModel.board.printBoard()
+                    print("WINNER! {}".format(result))
+                    #print("turns: ", ge.gameModel.turnNum)
+                    wins += 1
+                    total+= ge.gameModel.turnNum
+                    break
+            except Exception as e:
+                raise e
+    print("avg turns:", total/games)
+    print("white won {}%".format(wins/games*100))
 
         
