@@ -2,6 +2,7 @@ import Command from './Command';
 import { Constants } from '../../utils/constants';
 
 const execute = function () {
+  //translatation for MoveString
   const { selectedMarker } = this.value;
   const targetTile = selectedMarker.tileXY;
   const piece = selectedMarker.parentPiece;
