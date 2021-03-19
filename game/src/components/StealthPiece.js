@@ -4,9 +4,9 @@ import { getAllNeighborsOfTileXY, getAllPiecesAtTileXY, getPieceTexture, getDisp
 import BoardPiece from './BoardPiece';
 
 export default class StealthPiece  extends BoardPiece {
-  constructor({ board, player, tileXY, faction }) {
+  constructor({ board, player, id, tileXY, faction }) {
     const type = Constants.Pieces.STEALTH;
-    super({ board, player, tileXY, texture: getPieceTexture(type, faction) });
+    super({ board, player, id, tileXY, texture: getPieceTexture(type, faction) });
     this.movingPoints = undefined;
     this.faction = faction;
     this.type = type;
