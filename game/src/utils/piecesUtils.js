@@ -133,3 +133,25 @@ export function getDisplayName(type, faction) {
   };
   return mapping[faction][type];
 }
+
+export function createPieceId(player, type, id) {
+  const mapping = {
+    [Constants.Pieces.KING]: 'Q',
+    [Constants.Pieces.STEALTH]: 'G',
+    [Constants.Pieces.KNIGHT]: 'A',
+    [Constants.Pieces.MAGE]: 'B',
+    [Constants.Pieces.BARBARIAN]: 'S',
+  };
+
+  const playerMapping = {
+    1: 'w',
+    2: 'b'
+  };
+
+  const pieceId = playerMapping[player.getNumber()] + mapping[type];
+  if (type !== Constants.Pieces.KING) {
+    return pieceId + id;
+  }
+  
+  return pieceId;
+}

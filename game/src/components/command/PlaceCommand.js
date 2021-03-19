@@ -7,7 +7,8 @@ const execute = function () {
   const type = selectedCard.getType();
   const player = selectedCard.getPlayer();
   const faction = selectedCard.getFaction();
-  const piece = createPiece(type, { board, player, tileXY, faction });
+  const id = selectedCard.getId();
+  const piece = createPiece(type, { board, player, tileXY, faction, id });
   player.removePieceFromHand(type);
   selectedCard.setVisible(false);
   placeSound.play();

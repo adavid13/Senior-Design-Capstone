@@ -1,14 +1,15 @@
 import Phaser from 'phaser';
 import { Constants } from '../../utils/constants';
-import { getPieceTexture } from '../../utils/piecesUtils';
+import { createPieceId, getPieceTexture } from '../../utils/piecesUtils';
 
 export default class Card extends Phaser.GameObjects.Container {
   background;
   pieceTexture;
 
-  constructor(scene, interfaceModel, player, x, y, type, rotated, onPieceSelected) {
+  constructor(scene, interfaceModel, player, x, y, id, type, rotated, onPieceSelected) {
     super(scene, x, y);
     this.scene = scene;
+    this.id = createPieceId(player, type, id);
     this.interfaceModel = interfaceModel;
     this.rotated = rotated;
     this.originalX = x;
@@ -57,6 +58,10 @@ export default class Card extends Phaser.GameObjects.Container {
 
   getType() {
     return this.type;
+  }
+
+  getId() {
+    return this.id;
   }
 
   getFaction() {

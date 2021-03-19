@@ -6,7 +6,7 @@ import { verifyBoardContinuityOnMove, canPieceSlideToTile } from '../utils/board
 import { getAllPiecesAtTileXY, getAllNeighborsOfTileXY } from '../utils/piecesUtils';
 
 export default class BoardPiece extends Phaser.GameObjects.Sprite {
-  constructor({ board, player, tileXY, texture, onMoveComplete }) {
+  constructor({ board, player, tileXY, id, texture, onMoveComplete }) {
     const scene = board.scene;
     const worldXY = board.tileXYToWorldXY(tileXY.x, tileXY.y);
     super(scene, worldXY.x, worldXY.y, texture);
@@ -33,6 +33,7 @@ export default class BoardPiece extends Phaser.GameObjects.Sprite {
 
     // private members
     this.scene = scene;
+    this.id = id;
     this.player = player;
     this.onMoveComplete = onMoveComplete;
     this.movingPoints = 1;
@@ -61,6 +62,10 @@ export default class BoardPiece extends Phaser.GameObjects.Sprite {
 
   getPlayer() {
     return this.player;
+  }
+
+  getId() {
+    return this.id;
   }
 
   createPathfinder(scene) {
