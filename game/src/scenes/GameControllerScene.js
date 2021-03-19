@@ -441,9 +441,15 @@ export default class GameControllerScene extends Phaser.Scene {
   getAIAction(turn) {
     const state = BoardStateAdapter.convertState(this.board, this.players);
 
-    let response=5, aiCards=6;
+    /**
+     * Testing
+     */
+    //let response=5, aiCards=6; //place holders
+    let response = null;
+    const allCardsNotPlayed = this.gameUIScene.getAllCardsNotPlayed();
+    const aiCards = allCardsNotPlayed.filter(card => card.getPlayer() === this.players[1]);
     const convr = BoardStateAdapter.convertAction(response, this.board, this.players, aiCards, this.interactionModel);
-    console.log(convr.piece);
+    console.log(convr.type, convr.piece);
 
     getMove(state)
       .then(response => {
@@ -477,6 +483,8 @@ export default class GameControllerScene extends Phaser.Scene {
         }
       });
   }
+
+  
 
   endTurnWithDelay() {
     setTimeout(() => { this.gameUIScene.handleEndTurnClick(false); }, 2000);
