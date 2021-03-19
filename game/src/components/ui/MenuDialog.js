@@ -1,7 +1,7 @@
 import Dialog from './Dialog';
 
 export default class MenuDialog extends Dialog {
-  constructor(scene, openOptions, concede, close) {
+  constructor(scene, interfaceModel, openOptions, concede, close) {
     const primaryButton = {
       text: 'Options',
       callback: openOptions
@@ -14,7 +14,7 @@ export default class MenuDialog extends Dialog {
       text: 'Close',
       callback: () => { this.hideDialog(); close(); }
     };
-    super(scene, 'Menu', 250, [], [primaryButton, secondaryButton, tertiaryButton]);
+    super(scene, interfaceModel, 'Menu', 250, [], [primaryButton, secondaryButton, tertiaryButton]);
     this.layout();
   }
 }

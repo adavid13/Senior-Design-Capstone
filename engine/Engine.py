@@ -83,6 +83,7 @@ class Engine:
         return self.gameModel.playMove(passTurn=True)
 
     def play(self, moveString: str) -> str:
+        print("->", moveString)
         """
         Asks the engine to play the specified MoveString
         Returns updated GameString
@@ -90,19 +91,21 @@ class Engine:
         > play wS1
         < Base;InProgress;Black[1];wS1
         """
+        if moveString == "pass":
+            self.passTurn()
+            return
+        if moveString not in self.gameModel.validMoves():
+            raise Exception("not a valid move!")
         try:
             return self.gameModel.playMove(moveString)
         except Exception as e:
-            return "err" + str(e)
+            return "err " + str(e)
     
     def validmoves(self) -> str:
-        """
-        Asks the engine for every valid move for the current board, returned as semi-colon seperated list
+        return self.gameModel.validMoves()
 
-        > validmoves
-        < wS1;Wb1;wG1;wA1
-        """
-        pass
+
+
     def bestmove(self, maxTime=None, maxDepth=None) -> str:
         """
         Asks the engine for the AI's suggestion for the best move on the current board within certain limits
@@ -111,8 +114,9 @@ class Engine:
         > bestmove depth 2
         < wS1
         """
+        move = self.artificialAgent.bestMove(self.gameModel, maxTime, maxDepth)
+        return move
 
-        pass
     def undo(self, numMoves = 1) -> str:
         """
         Asks the engine to undo one or more previous moves
@@ -141,7 +145,6 @@ class Engine:
             raise NotImplementedError("Non-Base games not supported")
         turnColour = gameStringSplit[0:5]
         for i in range(3, len(gameStringSplit)):
-            print(gameStringSplit[i])
             #gameModel.board.playMove(gameStringSplit[i])
             gameModel.playMove(gameStringSplit[i])
 
@@ -149,6 +152,20 @@ class Engine:
 
 if __name__ == "__main__":
     ge = Engine()
-    ge.parseGameString("Base;NotStarted;Black[2];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wB1")
-    ge.gameModel.board.printBoard()
-    print("Engine Created")
+    ge.newGame()
+    while(True):
+        x = input()
+        try:
+            x = ge.parse(x)
+            if x[-2:] != "ok":
+                print(x[-2:])
+                raise Exception("err")
+            ge.parse("play {}".format(ge.bestmove()))
+            ge.gameModel.board.printBoard()
+            result = ge.gameModel.board.isGameOver()
+            if  result is not False:
+                print("WINNER! {}".format(result))
+        except Exception as e:
+            print(str(e))
+
+        

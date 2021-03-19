@@ -13,6 +13,7 @@ export default class Overlay extends Phaser.GameObjects.Rectangle {
       transparency
     );
     scene.add.existing(this);
+    this.setDepth(Constants.GameObjectDepth.UI);
     this.setInteractive();
   }
 }

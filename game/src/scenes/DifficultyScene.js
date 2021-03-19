@@ -51,10 +51,12 @@ export default class DifficultyScene extends Phaser.Scene {
 
   createButton(x, y, text, texture, onClick) {
     return new ImageButton(this, x, y, text, 22, 'right', 180, 10,
-      Constants.Color.GREY_DARK, onClick, { iconObject: this.add.image(0, 0, texture).setDepth(Constants.GameObjectDepth.UI), orientation: 'y' });
+      Constants.Color.GREY_DARK, onClick, this.interfaceModel,
+      { iconObject: this.add.image(0, 0, texture).setDepth(Constants.GameObjectDepth.UI), orientation: 'y' });
   }
 
   startScene(targetScene, params) {
     this.scene.start(targetScene, params);
+    this.sound.removeByKey('theme');
   }
 }

@@ -1,4 +1,5 @@
 class QueenPiece:
+    # Note: the queen should not have a number in the final version as per UHP.
     def __init__(self, colour):
         self.colour = colour
         self.coordinates = None
@@ -15,8 +16,7 @@ class QueenPiece:
         return self.id
     
     def validMoves(self, model):
-        model.board.printBoard()
-        print(model.moves)
+
         moves = []
         
         def wrap(j):
@@ -33,17 +33,21 @@ class QueenPiece:
             return moves #no valid moves
         
         neighbours = [[-2, 0], [-1, -1], [1, -1], [2, 0], [1, 1], [-1, 1]]
+        neighbourPieces = copyGameModel.board.getNeighbours(piece=self)
+
         for i in range(len(neighbours)): #each potential move
             x,y = neighbours[i]
             x_1,y_1 = neighbours[wrap(i-1)]
             x_2,y_2 = neighbours[wrap(i+1)]
+            
             #check if passage is big enough to fit through:
             if(model.board.Board[self.coordinates[0]+x][self.coordinates[1]+y] is None and
             (model.board.Board[self.coordinates[0]+x_1][self.coordinates[1]+y_1] is None or
             model.board.Board[self.coordinates[0]+x_2][self.coordinates[1]+y_2] is None)):
-                for x_3,y_3 in neighbours: #need 1 future neighbour to stay connected
-                    if (copyGameModel.board.Board[self.coordinates[0]+x+x_3][self.coordinates[1]+y+y_3] 
-                    is not None):
-                        moves += [[self.coordinates[0]+x,self.coordinates[1]+y]]
-                        break
+                # If current location and next location have any common neighbours
+                # Note: Fixes gap jumping bug
+                newNeighbourPieces = copyGameModel.board.getNeighbours(coords=[self.coordinates[0]+x,self.coordinates[1]+y])
+                commonNeighbours = [p for p in neighbourPieces if p in newNeighbourPieces]
+                if commonNeighbours:
+                    moves += [[self.coordinates[0]+x,self.coordinates[1]+y]]
         return moves
