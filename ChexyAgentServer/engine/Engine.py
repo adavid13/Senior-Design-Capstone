@@ -1,6 +1,7 @@
-from ArtificialAgent import ArtificialAgent
-from GameBoard import GameBoard
-from GameModel import GameModel
+from .ArtificialAgent import ArtificialAgent
+from .GameBoard import GameBoard
+from .GameModel import GameModel
+import re
 
 class Engine:
     def __init__(self):
@@ -140,16 +141,44 @@ class Engine:
         Creates a gamestate from a gamestring
 
         """
-        gameModel = GameModel()
+        print('gs=',gameString)
+        gameModel = GameModel(moves_in=[], board=GameBoard(pieces=[]))
+        print('gm moves=',gameModel.moves)
         gameStringSplit = gameString.split(";")
         if gameStringSplit[0] != "Base":
             raise NotImplementedError("Non-Base games not supported")
         turnColour = gameStringSplit[0:5]
-        for i in range(3, len(gameStringSplit)):
-            #gameModel.board.playMove(gameStringSplit[i])
-            gameModel.playMove(gameStringSplit[i])
+        # for i in range(3, len(gameStringSplit)):
+        #     #gameModel.board.playMove(gameStringSplit[i])
+        #     print('parsing=',gameStringSplit[i])
+        #     moveStringSplit = gameStringSplit[i].split(" ")
+        #     for move in range(0, len(moveStringSplit))[::-1]:
+        #         print('playing', gameStringSplit[move])
+        #         gameModel.playMove(gameStringSplit[move])
+        
+        moves = gameStringSplit[3]
+        print('parsing=',moves)
+        moveStringSplit = moves.split(" ")
+        firstMove = moveStringSplit[-1]
+        m = re.search('[w|b].+', firstMove)
+        if m:
+            found = m.group(0)
+            print(found)
+            gameModel.playMove(found)
+        else:
+            print('bad first move=',firstMove)
+        for move in range(0,len(moveStringSplit) - 1)[::-1]:
+            moveStringSplit[move+1]
+            m = re.search('[w|b].+', moveStringSplit[move])
+            if m:
+                nxt = m.group(0)
+                print(nxt)
+                gameModel.playMove(nxt)
+            else:
+                print('bad move=',firstMove)
 
-        return gameModel
+
+        self.gameModel = gameModel
 
 if __name__ == "__main__":
     games = 1

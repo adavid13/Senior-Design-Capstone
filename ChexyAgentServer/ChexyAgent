@@ -5,6 +5,9 @@ server {
     root /var/www/html;
 
     location / {
+    }
+    
+    location /ai/ {
         #tips https://stackoverflow.com/questions/62769425/why-is-nginx-giving-504-gateway-timeout-error
         #include proxy_params;
         proxy_pass http://unix:/home/engg4000/ChexyAgent/ChexyAgent.sock;
@@ -13,7 +16,5 @@ server {
         proxy_send_timeout          700;
         proxy_read_timeout          700;
         send_timeout                700;
-    }
-    location /game/ {
     }
 }
