@@ -24,6 +24,8 @@ function convertState(board, players) {
   // const AIPieces = getAllPiecesOfPlayer(board, players[1]);
   // const playerPiecesInHand = players[0].getPiecesInHand();
   // const AiPiecesInHand = players[1].getPiecesInHand();
+
+  
   return "Base;NotStarted;Black[2];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wB1";
 }
 
@@ -54,11 +56,11 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
    * bS1 wS1\ = Bottom right edge
    * bS1 /wS1 = Bottom left edge
    * bS1 -wS1 = Left hand edge
-   * bS1 \wS1 = Top right edge
+   * bS1 \wS1 = Top left edge
    * wB1 wS1 = on top of piece
    */
 
-  var demoStr = "Base;NotStarted;Black[2];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wS1 bS2-"; //replace demoStr with uhpstring
+  var demoStr = "Base;NotStarted;Black[2];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;bA2 \\wA1"; //replace demoStr with uhpstring
   InteractionModel.setMoveHistory(demoStr); //update movesHistory array
   var action = InteractionModel.getMoveHistory();
 
@@ -93,6 +95,30 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
   var piece2;
   var direction;
 
+  function symbol2dir(sym, dir){
+    if(dir === 'R'){
+      if(sym === '-'){
+        return 0;
+      }
+      if(sym === '/'){
+        return 5;
+      }
+      if(sym === '\\'){
+        return 1;
+      }
+    }else if(dir === 'L'){
+      if(sym === '-'){
+        return 3;
+      }
+      if(sym === '/'){
+        return 2;
+      }
+      if(sym === '\\'){
+        return 4;
+      }
+    }
+  }
+
   if(pieceToMove.length === 2){ //the queen piece (no number)
     color1 = pieceToMove[0];
     piece1 = pieceToMove[1];
@@ -105,30 +131,86 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
     color2 = coordinatePiece[0];
     piece2 = coordinatePiece[1];
     direction = 'T'; //place on top
-  }else if(coordinatePiece.length === 3){ //placing besides queen (no number)
-    if(coordinatePiece[0].match(/[a-z]/i)){ //check if first character is the direction
+  }else if(coordinatePiece.length === 3){ //placing besides queen (no number) or placing beetle on piece (no symbol)
+    if(coordinatePiece[2].match(/[1-3]/i)){ //For placing the beetle on top of piece
+      color2 = coordinatePiece[0];
+      piece2 = coordinatePiece.slice(1,3);
+      direction = 'T';
+    }else if(coordinatePiece[0].match(/[a-z]/i)){ //check if first character is the direction (placing on right of queen)
       color2 = coordinatePiece[0];
       piece2 = coordinatePiece[1];
-      direction = coordinatePiece[2]+'R'; //place on right
-    }else{
+      direction = symbol2dir(coordinatePiece[2], 'R'); //place on right
+    }else{ //placing on the left of the queen
       color2 = coordinatePiece[1];
       piece2 = coordinatePiece[2];
-      direction = coordinatePiece[0]+'L'; //place on left
+      direction = symbol2dir(coordinatePiece[0], 'L'); //place on left
     }
   }else{ //anything else
     if(coordinatePiece[0].match(/[a-z]/i)){ //check if first character is the direction
       color2 = coordinatePiece[0];
       piece2 = coordinatePiece.slice(1,3);
-      direction = coordinatePiece[3]+'R';
+      direction = symbol2dir(coordinatePiece[3], 'R');
     }else{
       color2 = coordinatePiece[1];
       piece2 = coordinatePiece.slice(2,4);
-      direction = coordinatePiece[0]+'L';
+      direction = symbol2dir(coordinatePiece[0], 'L');
     }
   }
   
-  
-  
+
+  /**
+   * Finds out if it's a move or a placement action, and which card or piece it is.
+   */
+  var isCard;
+  var cardOrPiece = cards.find(card => card.getId() === color1+piece1);
+  isCard = typeof(cardOrPiece) != 'undefined'; //cards[1].getId()===color1+piece1;
+  const AIPieces = getAllPiecesOfPlayer(board, players[1]);
+  const playerPieces = getAllPiecesOfPlayer(board, players[0]);
+  if(isCard){ //it is a card
+    result.type = 'placement';
+    result.piece = cardOrPiece;
+
+  }else{ //it is a piece
+    result.type = 'move';
+    var findPiece1 = AIPieces.find(piece => piece.getId() === color1+piece1);
+    result.piece = findPiece1;
+  }
+
+  /**
+   * Finds coordinate piece
+   */
+
+   var findPiece2Player = playerPieces.find(piece => piece.getId() === color2+piece2);
+
+  if(AIPieces.length > 0){ //AI has a piece on the board
+    var findPiece2AI = AIPieces.find(piece => piece.getId() === color2+piece2);
+//    var findPiece2Player = playerPieces.find(piece => piece.getId() === color2+piece2);
+    var coordPiecePos;
+    if((typeof(findPiece2AI) === 'undefined') && (typeof(findPiece2Player) === 'undefined')){ //coordinate piece is not on the board
+      result.type = 'error';
+    }
+    if( (typeof(findPiece2AI) != 'undefined') && (typeof(findPiece2Player) === 'undefined')){ //coordinate piece is one of the AI's pieces
+      coordPiecePos = findPiece2AI.rexChess.tileXYZ;
+      if(direction === 'T'){
+        result.tileXY = board.getTileXYAtDirection(coordPiecePos, direction, 0);
+      }else{
+        result.tileXY = board.getTileXYAtDirection(coordPiecePos, direction, 1);
+      }
+      
+    }
+    if((typeof(findPiece2AI) === 'undefined') && (typeof(findPiece2Player) != 'undefined')){ //coordinate piece is one of the player's pieces
+      coordPiecePos = findPiece2Player.rexChess.tileXYZ;
+      if(direction === 'T'){
+        result.tileXY = board.getTileXYAtDirection(coordPiecePos, direction, 0);
+      }else{
+        result.tileXY = board.getTileXYAtDirection(coordPiecePos, direction, 1);
+      }
+    }
+  }else{ //first piece of the game
+    result.tileXY = {x:14, y:14};
+  }
+
+
   /**
    * helper function to extract card types
    */
@@ -140,6 +222,8 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
   /**
    * Need to add ID's to all pieces & cards references
    */
+
+  /**
   if(piece1 === 'Q'){
     arr = []; //clear array before function call
     cards.forEach(typeExtr); //call helper function on all cards
@@ -254,6 +338,7 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
     throw new Error("Invalid Action Received");
   }
     
+  */
     
     /**
      * No need to check if card or piece for destination piece (always piece, except for first move)
@@ -348,8 +433,8 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
 
 
   // Use functions below to help determine if the MOVE action is valid
-  const AIPieces = getAllPiecesOfPlayer(board, players[1]);
-  const validPieces = AIPieces.filter(piece => piece.getDestinationTiles().length > 0); // This will list all the pieces that are allowed to move
+  //const AIPieces = getAllPiecesOfPlayer(board, players[1]);
+ // const validPieces = AIPieces.filter(piece => piece.getDestinationTiles().length > 0); // This will list all the pieces that are allowed to move
   //result.piece = validPieces;
 /*  const validTiles = validPiece.getDestinationTiles();  // use this to check which are the valid tiles the selected piece can move (validPiece must be one of the pieces in the validPieces array )
 
@@ -362,6 +447,7 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
 
   const validPlacementTiles = board.showInitialPlacementPositions(players[1]);
   var pos = getAllPieces(board);
-  result.type = pos;
+
+  //result.type = direction;
   return result;
 }
