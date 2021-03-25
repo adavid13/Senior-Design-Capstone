@@ -1,5 +1,6 @@
 from flask import Flask, request
 from time import sleep
+from engine import Engine
 
 app = Flask(__name__)
 # import sys
@@ -16,19 +17,15 @@ def test():
 
 
 @app.route('/ai/play', methods=['POST'])
+#example
+# curl -X POST -H "Content-Type: text/plain" -d "Base;InProgress;Black[2];wB1;bG1 \wB1;wA1 -bG1" http://0.0.0.0:5000/ai/play
 def play():
-    from engine import Engine
     if request.method == 'POST':
-        print('data=',request.data)
+        # print('data=',request.data)
         e = Engine.Engine()
         e.parseGameString(request.data.decode('utf-8'))
         s = e.bestmove(difficulty=1)
-        del e, Engine
         return s
 
-    # works first time
-    # curl -X POST -H "Content-Type: text/plain" -d "Base;NotStarted;Black[1];wB1" http://0.0.0.0:5000/ai/play
-    # doesn't work
-    #curl -X POST -H "Content-Type: text/plain" -d "Base;NotStarted;Black[2];wA1 -bG3 \wB1" http://0.0.0.0:5000/ai/play
 if __name__ == "__main__":
     app.run(host='0.0.0.0')

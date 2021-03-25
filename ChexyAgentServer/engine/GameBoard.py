@@ -19,8 +19,8 @@ class GameBoard:
         """
         Seperates moves that place a piece and moves that move a piece from one place to another
         """
-        print('playMove')
-        print('ms=',moveString)
+        # print('playMove')
+        # print('ms=',moveString)
         splitStr = moveString.split()
         pieceStr = splitStr[0]
         if len(splitStr) > 1:
@@ -28,10 +28,10 @@ class GameBoard:
         else:
             relativeStr = None
         if self.getPieceFromString(pieceStr) is not None:
-            print('if')
+            # print('if')
             self.movePiece(pieceStr, relativeStr)
         else:
-            print('else')
+            # print('else')
             self.insertPiece(pieceStr, relativeStr)
 
     def insertPiece(self, piece, relativeLoc):
@@ -70,7 +70,7 @@ class GameBoard:
 
         No validity checking yet
         """
-        print('piece=',piece,'relLoc=',relativeLoc)
+        # print('piece=',piece,'relLoc=',relativeLoc)
 
         direction, relPieceString = self.getDirectionAndPieceString(relativeLoc)
 

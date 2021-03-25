@@ -43,7 +43,7 @@ class GameModel:
         return self.gamestring
 
     def playMove(self, moveString="", passTurn=False):
-        print('playMove')
+        # print('playMove')
         copyGameModel = self.deepCopy()
         if not passTurn:
             # Should check for valid move before doing this
@@ -150,8 +150,8 @@ class GameModel:
         return collection
 
     def deepCopy(self):
-        print('dc')
-        print('moves=',self.moves)
+        # print('dc')
+        # print('moves=',self.moves)
         newGameModel = GameModel()
         newGameModel.board = GameBoard(pieces=[])
         for move in self.moves:
@@ -173,7 +173,7 @@ class GameModel:
         return not copyGameModel.board.isHiveConnected()
 
     def _playMoveWithoutChecking(self, moveString, passTurn = False):
-        print('wo checking')
+        # print('wo checking')
         if not passTurn:
             # Should check for valid move before doing this
             self.board.playMove(moveString)
