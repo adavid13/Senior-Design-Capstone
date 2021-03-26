@@ -1,17 +1,13 @@
 import { getAllNeighborsOfTileXY, getAllPieces, getAllPiecesAtTileXY, getAllPiecesAtTileZ, getAllPiecesOfPlayer, isKingOnTheBoard } from '../utils/piecesUtils';
 import { Constants } from '../utils/constants';
 import InteractionModel from './model/InteractionModel';
-import StealthPiece from './StealthPiece';
-import MagePiece from './MagePiece';
-import KingPiece from './KingPiece';
-import BarbarianPiece from './BarbarianPiece';
-import KnightPiece from './KnightPiece';
-import BoardPiece from './BoardPiece';
 
 export const BoardStateAdapter =  {
   convertAction: convertAction,
   convertState: convertState
 };
+
+
 
 /**
  * This function converts the contents of the board to the format
@@ -21,9 +17,6 @@ export const BoardStateAdapter =  {
   */
 function convertState(board, players) {
   const playerPieces = getAllPiecesOfPlayer(board, players[0]);
-  // const AIPieces = getAllPiecesOfPlayer(board, players[1]);
-  // const playerPiecesInHand = players[0].getPiecesInHand();
-  // const AiPiecesInHand = players[1].getPiecesInHand();
 
   /**
    * This function appends direction position to a moveString
@@ -53,18 +46,28 @@ function convertState(board, players) {
   }
 
   //var gameString = InteractionModel.getMoveHistory();
-  var gameString = "Base;NotStarted;Black[2];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wA2"; //demo moveHistory after user moves
-  var lastMove;
+  var gameString = "Base;InProgress;Black[2];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wA2"; //demo moveHistory after user moves
+  //var gameString = "wA1"; //demo string for first move of game
+
+  if(gameString.length < 4){ //first move of the game
+    var out = [];
+    out[0] = "Base";
+    out[1] = "InProgress";
+    out[2] = "Black[1]";
+    out[3] = gameString;
+    return out.join(';');
+  }
+
+  var movesArr, lastMove;
   //Gets the last move from the gameString variable
   if(!(typeof(gameString) === "undefined")){
-    lastMove = gameString.split(";");
-    lastMove = lastMove[lastMove.length-1];
+    movesArr = gameString.split(";");
+    lastMove = movesArr[movesArr.length-1];
   }
   
   //find reference to the piece on the board
   const pieceRef = playerPieces.find(piece => piece.getId() === lastMove);
   var piecePosition = null;
-  var neighborPos = null;
   var neighborRef = null;
   var allNeighbors = null;
   var neighborID = null;
@@ -74,19 +77,22 @@ function convertState(board, players) {
     piecePosition = pieceRef.rexChess.tileXYZ; //get position of piece on the board
     delete piecePosition['z']; //removes the unnecessary key 'z' from the position dict
     allNeighbors = getAllNeighborsOfTileXY(board, piecePosition); //find all neighbor pieces of the piece
-    neighborID = allNeighbors[0].getId(); //get the first neighbor piece id
-    //neighborPos = allNeighbors[0].rexChess.tileXYZ; //get the first neighbor piece position
-    //delete neighborPos['z'];
-    neighborDir = board.getNeighborChessDirection(allNeighbors[0], pieceRef); //returns direction of the neighbor piece
-    neighborAppend = appendDir(neighborID, neighborDir);
+    neighborRef = allNeighbors[0]; //get reference of first neighbor
+    neighborID = neighborRef.getId(); //get the first neighbor piece id
+    neighborDir = board.getNeighborChessDirection(neighborRef, pieceRef); //returns direction of the neighbor piece
+    neighborAppend = appendDir(neighborID, neighborDir); //append UHP direction symbol
   }
 
+  const uhp_gameString = gameString + ' ' + neighborAppend;
+
   /**
-   * Need to implement checks such as first move of game, and placing piece on top of another piece (beetle).
+   * Need to implement checks and placing piece on top of another piece (beetle).
    */
 
-  return gameString + ' ' + neighborAppend;
+  return uhp_gameString;
 }
+
+
 
 /**
  * This function converts the string in UHP format to a valid action 
@@ -123,29 +129,27 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
   InteractionModel.setMoveHistory(demoStr); //update movesHistory array
   var action = InteractionModel.getMoveHistory();
 
-  if(action.slice(0,3) === "err"){
-    result = { type: 'error '};
-    throw new Error("Invalid Action Received");
+  if(action.slice(0,3) === "err"){ //if AI returns 'err'
+    return { type: 'error '};
   }
 
-  var splitStr = action.split(";");
+  var splitStr = action.split(";"); //Turn moveString into array split on the semicolon (';')
   var GameTypeString = splitStr[0];
   var GameStateString = splitStr[1];
   var TurnString = splitStr[2];
-  var movesArr = splitStr.slice(3);
-  var lastMove = movesArr[movesArr.length-1].split(" ");
+  var movesArr = splitStr.slice(3); //array with just the moves
+  var lastMove = movesArr[movesArr.length-1].split(" "); //an array of the last (AI) move: piece/card & coordinate piece
 
   var pieceToMove;
   var coordinatePiece;
-  var result = { type: null, tileXY: null , piece: null };
+  var result = { type: null, tileXY: null , piece: null }; //template of output to return
 
 
-  if(lastMove.length > 1){
+  if(lastMove.length > 1){ //containing both the piece or card to move and the coordinate piece
     pieceToMove = lastMove[0];
     coordinatePiece = lastMove[1];
   }else{ //assumes player always starts
-    result = { type: 'error '};
-    
+    return { type: 'error '};
   }
 
   var color1;
@@ -157,7 +161,7 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
   /**
    * This function converts a UHP moveCommand symbol to its equivalent Phaser board Hexagon direction
    * @param {*} sym the symbol to convert
-   * @param {*} dir the direction of the symbol (right or left)
+   * @param {*} dir the direction of the symbol (right: R or left: L)
    * @returns digit representing the direction 
    */
   function symbol2dir(sym, dir){
@@ -227,8 +231,8 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
    * Finds out if it's a move or a placement action, and which card or piece it is.
    */
   var isCard;
-  var cardOrPiece = cards.find(card => card.getId() === color1+piece1);
-  isCard = typeof(cardOrPiece) != 'undefined'; //cards[1].getId()===color1+piece1;
+  var cardOrPiece = cards.find(card => card.getId() === color1+piece1); //determine if AI tries to place one of its cards
+  isCard = typeof(cardOrPiece) != 'undefined'; //checks if cardOrPiece is undefined, which means the AI is not placing a card
   const AIPieces = getAllPiecesOfPlayer(board, players[1]);
   const playerPieces = getAllPiecesOfPlayer(board, players[0]);
   if(isCard){ //it is a card
@@ -237,24 +241,23 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
 
   }else{ //it is a piece
     result.type = 'move';
-    var findPiece1 = AIPieces.find(piece => piece.getId() === color1+piece1);
+    var findPiece1 = AIPieces.find(piece => piece.getId() === color1+piece1); //gets reference to AI piece
     result.piece = findPiece1;
   }
 
   /**
    * Finds coordinate piece
    */
-
   if(AIPieces.length > 0){ //AI has a piece on the board
-    var findPiece2AI = AIPieces.find(piece => piece.getId() === color2+piece2);
-    var findPiece2Player = playerPieces.find(piece => piece.getId() === color2+piece2);
+    var findPiece2AI = AIPieces.find(piece => piece.getId() === color2+piece2); //determines if coordinate piece belongs to AI
+    var findPiece2Player = playerPieces.find(piece => piece.getId() === color2+piece2); //determines if coordinate piece belong to player
     var coordPiecePos;
     if((typeof(findPiece2AI) === 'undefined') && (typeof(findPiece2Player) === 'undefined')){ //coordinate piece is not on the board
-      result.type = 'error';
+      return { type = 'error' };
     }
     if( (typeof(findPiece2AI) != 'undefined') && (typeof(findPiece2Player) === 'undefined')){ //coordinate piece is one of the AI's pieces
-      coordPiecePos = findPiece2AI.rexChess.tileXYZ;
-      if(direction === 'T'){
+      coordPiecePos = findPiece2AI.rexChess.tileXYZ; //get the tile (position) of the coordinate piece
+      if(direction === 'T'){ //for placing on top (beetle)
         result.tileXY = board.getTileXYAtDirection(coordPiecePos, direction, 0);
       }else{
         result.tileXY = board.getTileXYAtDirection(coordPiecePos, direction, 1);
@@ -262,8 +265,8 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
       
     }
     if((typeof(findPiece2AI) === 'undefined') && (typeof(findPiece2Player) != 'undefined')){ //coordinate piece is one of the player's pieces
-      coordPiecePos = findPiece2Player.rexChess.tileXYZ;
-      if(direction === 'T'){
+      coordPiecePos = findPiece2Player.rexChess.tileXYZ; //get the tile (position) of the coordinate piece
+      if(direction === 'T'){ //for placing on top (beetle)
         result.tileXY = board.getTileXYAtDirection(coordPiecePos, direction, 0);
       }else{
         result.tileXY = board.getTileXYAtDirection(coordPiecePos, direction, 1);
@@ -273,227 +276,21 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
     result.tileXY = {x:14, y:14};
   }
 
-
-  /**
-   * helper function to extract card types
-   */
-  var arr = [];
-  function typeExtr(item){
-    arr.push(item['type']);
-  }
-
-  /**
-   * Need to add ID's to all pieces & cards references
-   */
-
-  /**
-  if(piece1 === 'Q'){
-    arr = []; //clear array before function call
-    cards.forEach(typeExtr); //call helper function on all cards
-    if(arr.includes("KING")){ //checks the ai cards to see if it has the piece
-      result.piece = "KING";
-      result.type = 'placement';
-    }else{ // ai does not have the card, meaning it is a piece
-      result.piece = KingPiece;
-    }
-  }else if(piece1 === 'B1'){
-    arr = [];
-    cards.forEach(typeExtr);
-    if(arr.includes("MAGE")){
-      result.piece = "MAGE";
-      result.type = 'placement';
-    }else{
-      result.piece = MagePiece;
-      result.type = 'move';
-    }
-  }else if(piece1 === 'B2'){
-    arr = [];
-    cards.forEach(typeExtr);
-    if(arr.includes("MAGE")){
-      result.piece = "MAGE";
-      result.type = 'placement';
-    }else{
-      result.piece = MagePiece;
-      result.type = 'move';
-    }
-  }else if(piece1 === 'G1'){
-    arr = [];
-    cards.forEach(typeExtr);
-    if(arr.includes("STEALTH")){
-      result.piece = "STEALTH";
-      result.type = 'placement';
-    }else{
-      result.piece = StealthPiece;
-      result.type = 'move';
-    }
-  }else if(piece1 === 'G2'){
-    arr = [];
-    cards.forEach(typeExtr);
-    if(arr.includes("STEALTH")){
-      result.piece = "STEALTH";
-      result.type = 'placement';
-    }else{
-      result.piece = StealthPiece;
-      result.type = 'move';
-    }
-  }else if(piece1 === 'G3'){
-    arr = [];
-    cards.forEach(typeExtr);
-    if(arr.includes("STEALTH")){
-      result.piece = "STEALTH";
-      result.type = 'placement';
-    }else{
-      result.piece = StealthPiece;
-      result.type = 'move';
-    }
-  }else if(piece1 === 'S1'){
-    arr = [];
-    cards.forEach(typeExtr);
-    if(arr.includes("BARBARIAN")){
-      result.piece = "BARBARIAN";
-      result.type = 'placement';
-    }else{
-      result.piece = BarbarianPiece;
-      result.type = 'move';
-    }
-  }else if(piece1 === 'S2'){
-    arr = [];
-    cards.forEach(typeExtr);
-    if(arr.includes("BARBARIAN")){
-      result.piece = "BARBARIAN";
-      result.type = 'placement';
-    }else{
-      result.piece = BarbarianPiece;
-      result.type = 'move';
-    }
-  }else if(piece1 === 'A1'){
-    arr = [];
-    cards.forEach(typeExtr);
-    if(arr.includes("KNIGHT")){
-      result.piece = "KNIGHT";
-      result.type = 'placement';
-    }else{
-      result.piece = KnightPiece;
-      result.type = 'move';
-    }
-  }else if(piece1 === 'A2'){
-    arr = [];
-    cards.forEach(typeExtr);
-    if(arr.includes("KNIGHT")){
-      result.piece = "KNIGHT";
-      result.type = 'placement';
-    }else{
-      result.piece = KnightPiece;
-      result.type = 'move';
-    }
-  }else if(piece1 === 'A3'){
-    arr = [];
-    cards.forEach(typeExtr);
-    if(arr.includes("KNIGHT")){
-      result.piece = "KNIGHT";
-      result.type = 'placement';
-    }else{
-      result.piece = KnightPiece;
-      result.type = 'move';
-    }
-  }else{
-    result.type = 'error';
-    throw new Error("Invalid Action Received");
-  }
-    
-  */
-    
-    /**
-     * No need to check if card or piece for destination piece (always piece, except for first move)
-     */
-    /*
-    var secondPiece;
-
-    if(piece2 === 'Q'){
-      secondPiece = KingPiece1;
-    }else if(piece2 === 'B1'){
-      secondPiece = MagePiece1;
-    }else if(piece2 === 'B2'){
-      secondPiece = MagePiece2;
-    }else if(piece2 === 'G1'){
-      secondPiece = StealthPiece1;
-    }else if(piece2 === 'G2'){
-      secondPiece = StealthPiece2;
-    }else if(piece2 === 'G3'){
-      secondPiece = StealthPiece3;
-    }else if(piece2 === 'S1'){
-      secondPiece = BarbarianPiece1;
-    }else if(piece2 === 'S2'){
-      secondPiece = BarbarianPiece2;
-    }else if(piece2 === 'A1'){
-      secondPiece = KnightPiece1;
-    }else if(piece2 === 'A2'){
-      secondPiece = KnightPiece2;
-    }else if(piece2 === 'A3'){
-      secondPiece = KnightPiece3;
-    }else{
-      result.type = 'error';
-      throw new Error("Invalid Action Received");
-    }
-
-    //check if coordinate piece is on the board
-    const PlayerPieces;
-    if(color2 === 'w'){ //to be placed next to one of the player's pieces
-      PlayerPieces = getAllPiecesOfPlayer(board, players[0]);
-    }else{ //to be placed next to one of the AI's pieces
-      PlayerPieces = getAllPiecesOfPlayer(board, players[1]);
-    }
-    if(!PlayerPieces.includes(secondPiece)){
-      result.type = 'error';
-      throw new Error("Invalid Action Received");
-    }
-*/
-
-/**
- * Get position of coordinate piece (make sure to distinguish between player's & AI's piece)
- */
-
-
-  //might not be needed
-  var fullPieceToMove = { 'player': null, 'piece': piece1 };
-  var fullDestinationPiece = { 'player': null, 'piece': piece2 };
-  if(color1 === 'w'){
-    fullPieceToMove.player = 0;
-  }else{
-    fullPieceToMove.player = 1;
-  }
-  if(color2 === 'w'){
-    fullDestinationPiece.player = 0;
-  }else{
-    fullDestinationPiece.player = 1;
-  }
-
-  //result.piece = [fullPieceToMove, fullDestinationPiece]
-
   /**
    * Check if action is move or placement (by checking if card is part of cards that the player has --> check cards)
    */
-
-
   /**
    * Check if piece to place can be placed (not placed already)
    */
-
-
   /**
    * Check if piece to move can move
    */
-
-
   /**
    * Check if move or placement action is valid
    */
-
-
   /**
    * check if piece to move besides has a free tile
    */
-
 
   // Use functions below to help determine if the MOVE action is valid
   //const AIPieces = getAllPiecesOfPlayer(board, players[1]);
@@ -508,9 +305,5 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
   const validCards = cards; // this will list all the valid piece cards that can be played 
   */
 
-  const validPlacementTiles = board.showInitialPlacementPositions(players[1]);
-  var pos = getAllPieces(board);
-
-  //result.type = direction;
   return result;
 }
