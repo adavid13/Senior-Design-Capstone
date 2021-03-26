@@ -46,7 +46,7 @@ function convertState(board, players) {
   }
 
   //var gameString = InteractionModel.getMoveHistory();
-  var gameString = "Base;InProgress;Black[2];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wA2"; //demo moveHistory after user moves
+  var gameString = "Base;InProgress;Black[2];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wB2"; //demo moveHistory after user moves
   //var gameString = "wA1"; //demo string for first move of game
 
   if(gameString.length < 4){ //first move of the game
@@ -253,7 +253,7 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
     var findPiece2Player = playerPieces.find(piece => piece.getId() === color2+piece2); //determines if coordinate piece belong to player
     var coordPiecePos;
     if((typeof(findPiece2AI) === 'undefined') && (typeof(findPiece2Player) === 'undefined')){ //coordinate piece is not on the board
-      return { type = 'error' };
+      return { type: 'error' };
     }
     if( (typeof(findPiece2AI) != 'undefined') && (typeof(findPiece2Player) === 'undefined')){ //coordinate piece is one of the AI's pieces
       coordPiecePos = findPiece2AI.rexChess.tileXYZ; //get the tile (position) of the coordinate piece
