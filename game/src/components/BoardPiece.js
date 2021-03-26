@@ -68,6 +68,10 @@ export default class BoardPiece extends Phaser.GameObjects.Sprite {
     return this.id;
   }
 
+  getType() {
+    return this.type;
+  }
+
   createPathfinder(scene) {
     this.pathFinder = scene.rexBoard.add.pathFinder(this, {
       occupiedTest: true,

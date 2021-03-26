@@ -1,13 +1,56 @@
 import { getAllNeighborsOfTileXY, getAllPieces, getAllPiecesAtTileXY, getAllPiecesAtTileZ, getAllPiecesOfPlayer, isKingOnTheBoard } from '../utils/piecesUtils';
 import { Constants } from '../utils/constants';
-import InteractionModel from './model/InteractionModel';
 
 export const BoardStateAdapter =  {
+  actionToUHPString: actionToUHPString,
   convertAction: convertAction,
   convertState: convertState
 };
 
+function actionToUHPString(actionType, piece, destination, board, interactionModel) {
+  // First move of the game 
+  if (interactionModel.currentTurn === 1)
+    return piece.getId();
 
+  // If piece is Mage and is moving on top of another piece
+  const piecesAtDestination = getAllPiecesAtTileXY(board, destination);
+  if (actionType === 'Move' && piece.getType() === Constants.Pieces.MAGE && piecesAtDestination.length > 0) {
+    return piece.getId() + ' ' + piecesAtDestination[0].getId();
+  }
+
+  const allNeighbors = getAllNeighborsOfTileXY(board, { x: destination.x, y: destination.y });
+  const neighborRef = allNeighbors[0];
+  const neighborDir = board.directionBetween(neighborRef, destination);
+  const destinationString = appendDir(neighborRef.getId(), neighborDir);
+  return piece.getId() + ' ' + destinationString;
+}
+
+/**
+ * This function appends direction position to a moveString
+ * @param {*} moveString the moveString to append position to
+ * @param {*} dir integer indicating direction to be appended
+ * @returns the moveString with the direction appended
+ */
+  function appendDir(moveString, dir){
+  if(dir === 0){ //right
+    return moveString+'-';
+  }
+  if(dir === 1){ //down right
+      return moveString+'\\';
+  }
+  if(dir === 2){ //down left
+    return '/'+moveString;
+  }
+  if(dir === 3){ //left
+    return '-'+moveString;
+  }
+  if(dir === 4){ //up left
+    return '\\'+moveString;
+  }
+  if(dir === 5){ //up right
+    return moveString+'/';
+  }
+}
 
 /**
  * This function converts the contents of the board to the format
@@ -16,107 +59,80 @@ export const BoardStateAdapter =  {
  * @param {*} players reference to the players
   */
 function convertState(board, players, difficulty) {
-  const playerPieces = getAllPiecesOfPlayer(board, players[0]);
+  // const playerPieces = getAllPiecesOfPlayer(board, players[0]);
 
-  /**
-   * This function appends direction position to a moveString
-   * @param {*} moveString the moveString to append position to
-   * @param {*} dir integer indicating direction to be appended
-   * @returns the moveString with the direction appended
-   */
-  function appendDir(moveString, dir){
-    if(dir === 0){ //right
-      return moveString+'-';
-    }
-    if(dir === 1){ //down right
-       return moveString+'\\';
-    }
-    if(dir === 2){ //down left
-      return '/'+moveString;
-    }
-    if(dir === 3){ //left
-      return '-'+moveString;
-    }
-    if(dir === 4){ //up left
-      return '\\'+moveString;
-    }
-    if(dir === 5){ //up right
-      return moveString+'/';
-    }
-  }
+  // //var gameString = InteractionModel.getMoveHistory();
+  // var gameString = "Base;1;InProgress;White[3];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wB2"; //demo moveHistory after user moves
+  // //var gameString = "wA1"; //demo string for first move of game
 
-  //var gameString = InteractionModel.getMoveHistory();
-  var gameString = "Base;1;InProgress;White[3];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wB2"; //demo moveHistory after user moves
-  //var gameString = "wA1"; //demo string for first move of game
+  // const stateString = "InProgress";
 
-  const stateString = "InProgress";
+  // if(difficulty === "BEGINNER"){
+  //   difficulty = 1;
+  // }
+  // if(difficulty === "INTERMEDIATE"){
+  //   difficulty = 2;
+  // }
+  // if(difficulty === "ADVANCED"){
+  //   difficulty = 3;
+  // }
 
-  if(difficulty === "BEGINNER"){
-    difficulty = 1;
-  }
-  if(difficulty === "INTERMEDIATE"){
-    difficulty = 2;
-  }
-  if(difficulty === "ADVANCED"){
-    difficulty = 3;
-  }
+  // if(gameString.length < 4){ //first move of the game
+  //   var out = [];
+  //   out[0] = "Base"; //gameTypeString
+  //   out[1] = String(difficulty); //AI difficulty
+  //   out[2] = stateString; //gameStateString
+  //   out[3] = "Black[1]"; //Color and turn number
+  //   out[4] = gameString; //first move of the game
+  //   return out.join(';');
+  // }
 
-  if(gameString.length < 4){ //first move of the game
-    var out = [];
-    out[0] = "Base"; //gameTypeString
-    out[1] = String(difficulty); //AI difficulty
-    out[2] = stateString; //gameStateString
-    out[3] = "Black[1]"; //Color and turn number
-    out[4] = gameString; //first move of the game
-    return out.join(';');
-  }
-
-  var movesArr, gameType, gameState, AIdiff, color, turn, lastMove, movesOnly, newString;
-  //Gets the last move from the gameString variable
-  if(!(typeof(gameString) === "undefined")){
-    movesArr = gameString.split(";");
-    gameType = movesArr[0];
-    AIdiff = difficulty;
-    gameState = stateString;
-    color = "Black";
-    turn = movesArr[3].slice(6, 7);
-    turn = parseInt(turn)+1;
-    turn = '['+turn+']';
-    newString = [];
-    newString.push(gameType, AIdiff, gameState, color+turn);
-    newString = newString.join(';');
-    movesOnly = movesArr.slice(4);
-    movesOnly = movesOnly.join(';');
-    newString = newString+';'+movesOnly;
-    lastMove = movesArr[movesArr.length-1];
-  }
+  // var movesArr, gameType, gameState, AIdiff, color, turn, lastMove, movesOnly, newString;
+  // //Gets the last move from the gameString variable
+  // if(!(typeof(gameString) === "undefined")){
+  //   movesArr = gameString.split(";");
+  //   gameType = movesArr[0];
+  //   AIdiff = difficulty;
+  //   gameState = stateString;
+  //   color = "Black";
+  //   turn = movesArr[3].slice(6, 7);
+  //   turn = parseInt(turn)+1;
+  //   turn = '['+turn+']';
+  //   newString = [];
+  //   newString.push(gameType, AIdiff, gameState, color+turn);
+  //   newString = newString.join(';');
+  //   movesOnly = movesArr.slice(4);
+  //   movesOnly = movesOnly.join(';');
+  //   newString = newString+';'+movesOnly;
+  //   lastMove = movesArr[movesArr.length-1];
+  // }
   
-  //find reference to the piece on the board
-  const pieceRef = playerPieces.find(piece => piece.getId() === lastMove);
-  var piecePosition = null;
-  var neighborRef = null;
-  var allNeighbors = null;
-  var neighborID = null;
-  var neighborDir = null;
-  var neighborAppend = null;
-  if(!(typeof(pieceRef) === "undefined")){
-    piecePosition = pieceRef.rexChess.tileXYZ; //get position of piece on the board
-    //delete piecePosition['z']; //removes the unnecessary key 'z' from the position dict
+  // //find reference to the piece on the board
+  // const pieceRef = playerPieces.find(piece => piece.getId() === lastMove);
+  // var piecePosition = null;
+  // var neighborRef = null;
+  // var allNeighbors = null;
+  // var neighborID = null;
+  // var neighborDir = null;
+  // var neighborAppend = null;
+  // if(!(typeof(pieceRef) === "undefined")){
+  //   piecePosition = pieceRef.rexChess.tileXYZ; //get position of piece on the board
+  //   //delete piecePosition['z']; //removes the unnecessary key 'z' from the position dict
 
-    allNeighbors = getAllNeighborsOfTileXY(board, { x: piecePosition.x, y: piecePosition.y }); //find all neighbor pieces of the piece
-    neighborRef = allNeighbors[0]; //get reference of first neighbor
-    neighborID = neighborRef.getId(); //get the first neighbor piece id
-    neighborDir = board.getNeighborChessDirection(neighborRef, pieceRef); //returns direction of the neighbor piece
-    neighborAppend = appendDir(neighborID, neighborDir); //append UHP direction symbol
-  }
+  //   allNeighbors = getAllNeighborsOfTileXY(board, { x: piecePosition.x, y: piecePosition.y }); //find all neighbor pieces of the piece
+  //   neighborRef = allNeighbors[0]; //get reference of first neighbor
+  //   neighborID = neighborRef.getId(); //get the first neighbor piece id
+  //   neighborDir = board.getNeighborChessDirection(neighborRef, pieceRef); //returns direction of the neighbor piece
+  //   neighborAppend = appendDir(neighborID, neighborDir); //append UHP direction symbol
+  // }
 
-  const uhp_gameString = newString + ' ' + neighborAppend;
+  // const uhp_gameString = newString + ' ' + neighborAppend;
 
-  /**
-   * Need to implement checks and placing piece on top of another piece (beetle).
-   */
+  // /**
+  //  * Need to implement checks and placing piece on top of another piece (beetle).
+  //  */
 
-  return uhp_gameString;
+  // return uhp_gameString;
 }
 
 
@@ -153,8 +169,8 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
    */
 
   var demoStr = "Base;NotStarted;Black[2];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;bA2 \\wA1"; //replace demoStr with uhpstring
-  InteractionModel.setMoveHistory(demoStr); //update movesHistory array
-  var action = InteractionModel.getMoveHistory();
+  // interactionModel.setMoveHistory(demoStr); //update movesHistory array
+  var action = demoStr;
 
   if(action.slice(0,3) === "err"){ //if AI returns 'err'
     return { type: 'error '};
