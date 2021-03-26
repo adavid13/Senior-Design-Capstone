@@ -23,9 +23,11 @@ def play():
     if request.method == 'POST':
         # print('data=',request.data)
         e = Engine.Engine()
-        e.parseGameString(request.data.decode('utf-8'))
+        gs = request.data.decode('utf-8')
+        e.parseGameString(gs)
         s = e.bestmove(difficulty=1)
-        return s
+        gameStringSplit = gs.split(";")
+        return str(';'.join(gameStringSplit+[s]))
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', debug=True)

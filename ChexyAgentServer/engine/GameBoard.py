@@ -136,7 +136,7 @@ class GameBoard:
         """
         Gets the piece the piece to be moved will be adjacent to, as well as the edge it will connect on.
         """
-        print("getDirectionAndPieceString")
+        # print("getDirectionAndPieceString")
         if relativeLoc.startswith('-'):
             direction = 'left'
             relPieceString = relativeLoc[1:]
