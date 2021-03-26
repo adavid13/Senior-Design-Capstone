@@ -430,16 +430,16 @@ export default class GameControllerScene extends Phaser.Scene {
 
   getAIAction(turn) {
     const state = BoardStateAdapter.convertState(this.board, this.players);
+    console.log(state);
 
     /**
      * Testing
      */
-    //let response=5, aiCards=6; //place holders
     let response = null;
     const allCardsNotPlayed = this.gameUIScene.getAllCardsNotPlayed();
     const aiCards = allCardsNotPlayed.filter(card => card.getPlayer() === this.players[1]);
     const convr = BoardStateAdapter.convertAction(response, this.board, this.players, aiCards, this.interactionModel);
-    console.log(convr.type, convr.piece);
+    console.log(convr.type, convr.piece, convr.tileXY);
 
     getMove(state)
       .then(response => {
