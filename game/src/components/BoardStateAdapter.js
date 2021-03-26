@@ -15,7 +15,7 @@ export const BoardStateAdapter =  {
  * @param {*} board board object used in the game
  * @param {*} players reference to the players
   */
-function convertState(board, players) {
+function convertState(board, players, difficulty) {
   const playerPieces = getAllPiecesOfPlayer(board, players[0]);
 
   /**
@@ -46,22 +46,48 @@ function convertState(board, players) {
   }
 
   //var gameString = InteractionModel.getMoveHistory();
-  var gameString = "Base;InProgress;Black[2];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wB2"; //demo moveHistory after user moves
+  var gameString = "Base;1;InProgress;White[3];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wB2"; //demo moveHistory after user moves
   //var gameString = "wA1"; //demo string for first move of game
+
+  const stateString = "InProgress";
+
+  if(difficulty === "BEGINNER"){
+    difficulty = 1;
+  }
+  if(difficulty === "INTERMEDIATE"){
+    difficulty = 2;
+  }
+  if(difficulty === "ADVANCED"){
+    difficulty = 3;
+  }
 
   if(gameString.length < 4){ //first move of the game
     var out = [];
-    out[0] = "Base";
-    out[1] = "InProgress";
-    out[2] = "Black[1]";
-    out[3] = gameString;
+    out[0] = "Base"; //gameTypeString
+    out[1] = String(difficulty); //AI difficulty
+    out[2] = stateString; //gameStateString
+    out[3] = "Black[1]"; //Color and turn number
+    out[4] = gameString; //first move of the game
     return out.join(';');
   }
 
-  var movesArr, lastMove;
+  var movesArr, gameType, gameState, AIdiff, color, turn, lastMove, movesOnly, newString;
   //Gets the last move from the gameString variable
   if(!(typeof(gameString) === "undefined")){
     movesArr = gameString.split(";");
+    gameType = movesArr[0];
+    AIdiff = difficulty;
+    gameState = stateString;
+    color = "Black";
+    turn = movesArr[3].slice(6, 7);
+    turn = parseInt(turn)+1;
+    turn = '['+turn+']';
+    newString = [];
+    newString.push(gameType, AIdiff, gameState, color+turn);
+    newString = newString.join(';');
+    movesOnly = movesArr.slice(4);
+    movesOnly = movesOnly.join(';');
+    newString = newString+';'+movesOnly;
     lastMove = movesArr[movesArr.length-1];
   }
   
@@ -75,15 +101,16 @@ function convertState(board, players) {
   var neighborAppend = null;
   if(!(typeof(pieceRef) === "undefined")){
     piecePosition = pieceRef.rexChess.tileXYZ; //get position of piece on the board
-    delete piecePosition['z']; //removes the unnecessary key 'z' from the position dict
-    allNeighbors = getAllNeighborsOfTileXY(board, piecePosition); //find all neighbor pieces of the piece
+    //delete piecePosition['z']; //removes the unnecessary key 'z' from the position dict
+
+    allNeighbors = getAllNeighborsOfTileXY(board, { x: piecePosition.x, y: piecePosition.y }); //find all neighbor pieces of the piece
     neighborRef = allNeighbors[0]; //get reference of first neighbor
     neighborID = neighborRef.getId(); //get the first neighbor piece id
     neighborDir = board.getNeighborChessDirection(neighborRef, pieceRef); //returns direction of the neighbor piece
     neighborAppend = appendDir(neighborID, neighborDir); //append UHP direction symbol
   }
 
-  const uhp_gameString = gameString + ' ' + neighborAppend;
+  const uhp_gameString = newString + ' ' + neighborAppend;
 
   /**
    * Need to implement checks and placing piece on top of another piece (beetle).

@@ -429,7 +429,7 @@ export default class GameControllerScene extends Phaser.Scene {
   }
 
   getAIAction(turn) {
-    const state = BoardStateAdapter.convertState(this.board, this.players);
+    const state = BoardStateAdapter.convertState(this.board, this.players, this.difficulty);
     console.log(state);
 
     /**
@@ -451,7 +451,13 @@ export default class GameControllerScene extends Phaser.Scene {
         this.thudSound.setVolume(this.interfaceModel.soundLevel);
         // check if the response from the server returned in the correct turn. Ignore otherwise.
         if (turn === currentTurn) {
-          if (action?.type === 'move') {
+          if (action?.type === 'error') {
+            const { currentTurn } = this.interactionModel;
+            if (turn === currentTurn) {
+              this.randomAction(this.gameUIScene.getAllCardsNotPlayed());
+              this.endTurnWithDelay();
+            }
+          } else if (action?.type === 'move') {
             this.execute(new MoveCommand({
               interactionModel: this.interactionModel,
               selectedMarker: { tileXY: action.tileXY, parentPiece: action.piece },
