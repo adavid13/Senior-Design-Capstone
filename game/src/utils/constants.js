@@ -86,6 +86,7 @@ export const Constants = {
     SKIP_TURN: 'SKIP_TURN',
     NEED_KING: 'NEED_KING',
     VICTORY: 'VICTORY',
+    DRAW: 'DRAW',
     DEFEAT: 'DEFEAT'
   }
 };

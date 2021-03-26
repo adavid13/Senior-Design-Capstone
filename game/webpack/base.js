@@ -27,7 +27,7 @@ module.exports = {
       CANVAS_RENDERER: JSON.stringify(true),
       WEBGL_RENDERER: JSON.stringify(true),
       'process.env.NODE_ENV': JSON.stringify('development'),
-      'process.env.API_URL': JSON.stringify("http://localhost:5000")
+      'process.env.API_URL': JSON.stringify("http://localhost:5000/ai")
     }),
     new HtmlWebpackPlugin({
       template: './index.html',

@@ -1,6 +1,7 @@
 import { Constants } from '../../utils/constants';
 
 const MAX_TIME = 600; // 10 minutes
+const MIN_TIME = 20; // 20 seconds
 
 export default class InteractionModel {
   _playerTimer;
@@ -31,7 +32,7 @@ export default class InteractionModel {
   }
 
   getPlayerTimerinSec() {
-    return Math.floor(this._playerTimer * MAX_TIME);
+    return Math.floor(this._playerTimer * (MAX_TIME - MIN_TIME) + MIN_TIME);
   }
 
   getAiTimer(difficulty) {
@@ -45,6 +46,10 @@ export default class InteractionModel {
 
   get maxTime() {
     return MAX_TIME;
+  }
+
+  get minTime() {
+    return MIN_TIME;
   }
 
   get soundLevel() {
