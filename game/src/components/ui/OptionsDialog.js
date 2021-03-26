@@ -50,7 +50,8 @@ export default class OptionsDialog extends Dialog {
   }
 
   changeTime(value) {
-    const time = Math.floor(value * this.interfaceModel.maxTime);
+    const { maxTime, minTime } = this.interfaceModel;
+    const time = Math.floor(value * (maxTime - minTime) + minTime);
     const text = this.getElement('content').getElement('items')[0];
     text.getElement('text').text = `Turn Time    ${this.formatTime(time)}`;
     this.interfaceModel.tempPlayerTime = value;

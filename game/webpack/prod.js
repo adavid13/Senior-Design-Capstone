@@ -32,7 +32,7 @@ module.exports = mergeWithCustomize({
       CANVAS_RENDERER: JSON.stringify(true),
       WEBGL_RENDERER: JSON.stringify(true),
       'process.env.NODE_ENV': JSON.stringify('production'),
-      'process.env.API_URL': JSON.stringify('https://chexy.tk')
+      'process.env.API_URL': JSON.stringify('https://chexy.tk/ai')
     }),
     new CopyPlugin({
       patterns: [

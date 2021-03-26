@@ -261,7 +261,7 @@ export default class GameUIScene extends Phaser.Scene {
     }
     this.alert('Time\'s up! Your turn is going to be skipped.');
     this.enableButtons(false);
-    this.endTurnWithDelay();   
+    this.handleEndTurnClick(false);   
   }
 
   getPlayerTimer() {
@@ -358,6 +358,14 @@ export default class GameUIScene extends Phaser.Scene {
       case Constants.Turn.NEED_KING:
         this.alert('You must play the king in this turn.\nUndo your previous action.');
         break;
+      case Constants.Turn.DRAW:
+        this.stopTimer();
+        this.openEndGameDialog('draw');
+        this.defeatSound.setVolume(this.interfaceModel.musicLevel);
+        this.defeatSound.play();
+        this.enableButtons(false);
+        this.btnMenu.setButtonEnable(false);
+        break;
       case Constants.Turn.VICTORY:
         this.stopTimer();
         this.openEndGameDialog('victory');
@@ -452,9 +460,5 @@ export default class GameUIScene extends Phaser.Scene {
         }
       });
     }
-  }
-
-  endTurnWithDelay() {
-    setTimeout(() => { this.handleEndTurnClick(false); }, 2000);
   }
 }
