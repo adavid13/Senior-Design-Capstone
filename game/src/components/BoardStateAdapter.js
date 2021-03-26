@@ -1,4 +1,4 @@
-import { getAllPieces, getAllPiecesAtTileXY, getAllPiecesAtTileZ, getAllPiecesOfPlayer, isKingOnTheBoard } from '../utils/piecesUtils';
+import { getAllNeighborsOfTileXY, getAllPieces, getAllPiecesAtTileXY, getAllPiecesAtTileZ, getAllPiecesOfPlayer, isKingOnTheBoard } from '../utils/piecesUtils';
 import { Constants } from '../utils/constants';
 import InteractionModel from './model/InteractionModel';
 import StealthPiece from './StealthPiece';
@@ -20,13 +20,72 @@ export const BoardStateAdapter =  {
  * @param {*} players reference to the players
   */
 function convertState(board, players) {
-  // const playerPieces = getAllPiecesOfPlayer(board, players[0]);
+  const playerPieces = getAllPiecesOfPlayer(board, players[0]);
   // const AIPieces = getAllPiecesOfPlayer(board, players[1]);
   // const playerPiecesInHand = players[0].getPiecesInHand();
   // const AiPiecesInHand = players[1].getPiecesInHand();
 
+  /**
+   * This function appends direction position to a moveString
+   * @param {*} moveString the moveString to append position to
+   * @param {*} dir integer indicating direction to be appended
+   * @returns the moveString with the direction appended
+   */
+  function appendDir(moveString, dir){
+    if(dir === 0){ //right
+      return moveString+'-';
+    }
+    if(dir === 1){ //down right
+       return moveString+'\\';
+    }
+    if(dir === 2){ //down left
+      return '/'+moveString;
+    }
+    if(dir === 3){ //left
+      return '-'+moveString;
+    }
+    if(dir === 4){ //up left
+      return '\\'+moveString;
+    }
+    if(dir === 5){ //up right
+      return moveString+'/';
+    }
+  }
+
+  //var gameString = InteractionModel.getMoveHistory();
+  var gameString = "Base;NotStarted;Black[2];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wA2"; //demo moveHistory after user moves
+  var lastMove;
+  //Gets the last move from the gameString variable
+  if(!(typeof(gameString) === "undefined")){
+    lastMove = gameString.split(";");
+    lastMove = lastMove[lastMove.length-1];
+  }
   
-  return "Base;NotStarted;Black[2];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wB1";
+  //find reference to the piece on the board
+  const pieceRef = playerPieces.find(piece => piece.getId() === lastMove);
+  var piecePosition = null;
+  var neighborPos = null;
+  var neighborRef = null;
+  var allNeighbors = null;
+  var neighborID = null;
+  var neighborDir = null;
+  var neighborAppend = null;
+  if(!(typeof(pieceRef) === "undefined")){
+    piecePosition = pieceRef.rexChess.tileXYZ; //get position of piece on the board
+    delete piecePosition['z']; //removes the unnecessary key 'z' from the position dict
+    allNeighbors = getAllNeighborsOfTileXY(board, piecePosition); //find all neighbor pieces of the piece
+    neighborID = allNeighbors[0].getId(); //get the first neighbor piece id
+    //neighborPos = allNeighbors[0].rexChess.tileXYZ; //get the first neighbor piece position
+    //delete neighborPos['z'];
+    neighborDir = board.getNeighborChessDirection(allNeighbors[0], pieceRef); //returns direction of the neighbor piece
+    neighborAppend = appendDir(neighborID, neighborDir);
+  }
+
+  /**
+   * Need to implement checks such as first move of game, and placing piece on top of another piece (beetle).
+   */
+
+  return gameString + ' ' + neighborAppend;
 }
 
 /**
@@ -95,6 +154,12 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
   var piece2;
   var direction;
 
+  /**
+   * This function converts a UHP moveCommand symbol to its equivalent Phaser board Hexagon direction
+   * @param {*} sym the symbol to convert
+   * @param {*} dir the direction of the symbol (right or left)
+   * @returns digit representing the direction 
+   */
   function symbol2dir(sym, dir){
     if(dir === 'R'){
       if(sym === '-'){
@@ -180,11 +245,9 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
    * Finds coordinate piece
    */
 
-   var findPiece2Player = playerPieces.find(piece => piece.getId() === color2+piece2);
-
   if(AIPieces.length > 0){ //AI has a piece on the board
     var findPiece2AI = AIPieces.find(piece => piece.getId() === color2+piece2);
-//    var findPiece2Player = playerPieces.find(piece => piece.getId() === color2+piece2);
+    var findPiece2Player = playerPieces.find(piece => piece.getId() === color2+piece2);
     var coordPiecePos;
     if((typeof(findPiece2AI) === 'undefined') && (typeof(findPiece2Player) === 'undefined')){ //coordinate piece is not on the board
       result.type = 'error';
