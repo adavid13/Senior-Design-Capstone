@@ -107,8 +107,9 @@ class ArtificialAgent:
 
             # Discourage moves that leave the opponent's queen
             # Errors out
-            # if gameModel.board.getPieceFromString(loc.translate({ord(i): None for i in '-\\/'})) in gameModel.board.getNeighbours(gameModel.board.getPieceFromString(piece)):
-            #     priority+=10
+            if piece in [p.id for p in gameModel.board.pieces]:
+                if gameModel.board.getPieceFromString(loc.translate({ord(i): None for i in '-\\/'})) in gameModel.board.getNeighbours(gameModel.board.getPieceFromString(piece)):
+                    priority+=10
 
             q.put((priority, move))
 
