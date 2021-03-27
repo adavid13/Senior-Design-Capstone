@@ -12,7 +12,10 @@ sudo systemctl enable ChexyAgent
 sudo cp ChexyAgent /etc/nginx/sites-available/ChexyAgent
 sudo mv /etc/nginx/sites-enabled/ChexyAgent ~/ChexyAgent/oldChexyAgent
 sudo ln -s /etc/nginx/sites-available/ChexyAgent /etc/nginx/sites-enabled
-sudo ln -s ~/dist /var/www/html/game
+cd ../dist
+sudo cp bundle.min.js  bundle.min.js.LICENSE  index.css  index.html rules.html /var/www/html
+sudo cp -r assets /var/www/html
+cd -
 sudo rm /etc/nginx/sites-enabled/default
 sudo systemctl daemon-reload
 sudo systemctl restart nginx

@@ -1,4 +1,4 @@
-import GameBoard as gb
+from .GameBoard import GameBoard
 
 class GameModel:
     '''
@@ -21,13 +21,13 @@ class GameModel:
 
     '''
 
-    def __init__(self, state='NotStarted', turnColor='White', turnNum=1, moves=[], board=gb.GameBoard()):
+    def __init__(self, state='NotStarted', turnColor='White', turnNum=1, moves_in=[], board=GameBoard()):
         '''Create model for new game'''
         self.gameType = "Base"          # Creates a game without expansion pieces
         self.gameState = state
         self.turnColor = turnColor
         self.turnNum = turnNum
-        self.moves = moves
+        self.moves = moves_in
         self.board = board
         self.previousState = None
         self.updateString()
@@ -43,6 +43,7 @@ class GameModel:
         return self.gamestring
 
     def playMove(self, moveString="", passTurn=False):
+        # print('playMove')
         copyGameModel = self.deepCopy()
         if not passTurn:
             # Should check for valid move before doing this
@@ -149,8 +150,10 @@ class GameModel:
         return collection
 
     def deepCopy(self):
+        # print('dc')
+        # print('moves=',self.moves)
         newGameModel = GameModel()
-        newGameModel.board = gb.GameBoard()
+        newGameModel.board = GameBoard(pieces=[])
         for move in self.moves:
             newGameModel._playMoveWithoutChecking(move)
 
@@ -170,6 +173,7 @@ class GameModel:
         return not copyGameModel.board.isHiveConnected()
 
     def _playMoveWithoutChecking(self, moveString, passTurn = False):
+        # print('wo checking')
         if not passTurn:
             # Should check for valid move before doing this
             self.board.playMove(moveString)

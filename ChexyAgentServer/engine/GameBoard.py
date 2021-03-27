@@ -1,24 +1,26 @@
-from AntPiece import AntPiece
-from BeetlePiece import BeetlePiece
-from GrasshopperPiece import GrasshopperPiece
-from QueenPiece import QueenPiece
-from SpiderPiece import SpiderPiece
+from .AntPiece import AntPiece
+from .BeetlePiece import BeetlePiece
+from .GrasshopperPiece import GrasshopperPiece
+from .QueenPiece import QueenPiece
+from .SpiderPiece import SpiderPiece
 
 class GameBoard:
 # Game board holds a list of pieces
 # https://www.redblobgames.com/grids/hexagons/
 # Doubled Coordinates
-    def __init__(self, gameString=False):
+    def __init__(self, gameString=False, pieces=[]):
         # Due to doubled offsets being used, MAX_BOARD SIZE needs to be twice the size of 
         # the actual amount of tiles that can be placed end-to-end
         self.MAX_BOARD_SIZE = 40
         self.Board = [[None for _ in range(self.MAX_BOARD_SIZE)] for __ in range(self.MAX_BOARD_SIZE)]
-        self.pieces = []
+        self.pieces = pieces
 
     def playMove(self, moveString):
         """
         Seperates moves that place a piece and moves that move a piece from one place to another
         """
+        # print('playMove')
+        # print('ms=',moveString)
         splitStr = moveString.split()
         pieceStr = splitStr[0]
         if len(splitStr) > 1:
@@ -26,8 +28,10 @@ class GameBoard:
         else:
             relativeStr = None
         if self.getPieceFromString(pieceStr) is not None:
+            # print('if')
             self.movePiece(pieceStr, relativeStr)
         else:
+            # print('else')
             self.insertPiece(pieceStr, relativeStr)
 
     def insertPiece(self, piece, relativeLoc):
@@ -66,6 +70,7 @@ class GameBoard:
 
         No validity checking yet
         """
+        # print('piece=',piece,'relLoc=',relativeLoc)
 
         direction, relPieceString = self.getDirectionAndPieceString(relativeLoc)
 
@@ -131,6 +136,7 @@ class GameBoard:
         """
         Gets the piece the piece to be moved will be adjacent to, as well as the edge it will connect on.
         """
+        # print("getDirectionAndPieceString")
         if relativeLoc.startswith('-'):
             direction = 'left'
             relPieceString = relativeLoc[1:]

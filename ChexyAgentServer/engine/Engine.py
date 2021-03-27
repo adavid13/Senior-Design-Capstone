@@ -1,6 +1,7 @@
-from ArtificialAgent import ArtificialAgent
-from GameBoard import GameBoard
-from GameModel import GameModel
+from .ArtificialAgent import ArtificialAgent
+from .GameBoard import GameBoard
+from .GameModel import GameModel
+import re
 
 class Engine:
     def __init__(self):
@@ -214,16 +215,18 @@ class Engine:
         Creates a gamestate from a gamestring
 
         """
-        gameModel = GameModel()
+        # print('gs=',gameString)
+        gameModel = GameModel(moves_in=[], board=GameBoard(pieces=[]))
+        # print('gm moves=',gameModel.moves)
         gameStringSplit = gameString.split(";")
         if gameStringSplit[0] != "Base":
             raise NotImplementedError("Non-Base games not supported")
         turnColour = gameStringSplit[0:5]
         for i in range(3, len(gameStringSplit)):
-            #gameModel.board.playMove(gameStringSplit[i])
+            # print('parsing=',gameStringSplit[i])
             gameModel.playMove(gameStringSplit[i])
 
-        return gameModel
+        self.gameModel = gameModel
 
 if __name__ == "__main__":
     games = 1
