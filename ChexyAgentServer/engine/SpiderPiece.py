@@ -1,9 +1,9 @@
-class AntPiece:
+class SpiderPiece:
     def __init__(self, colour, pieceNum):
         self.colour = colour
         self.pieceNum = pieceNum
         self.coordinates = None
-        self.id = "{}A{}".format(self.colour, self.pieceNum)
+        self.id = "{}S{}".format(self.colour, self.pieceNum)
         self.beetleOnTop = None
 
     def __eq__(self, other):
@@ -16,7 +16,7 @@ class AntPiece:
         return self.id
 
     def validMoves(self, model):
-
+        print(model.moves)
 
         cpModel = model.deepCopy()
         # Remove self from the copied board
@@ -31,28 +31,33 @@ class AntPiece:
         neighbours = [[-2, 0], [-1, -1], [1, -1], [2, 0], [1, 1], [-1, 1]]
         x = self.coordinates[0]
         y = self.coordinates[1]
+        path = {(x,y)}
         while (True):
             for i in range(len(neighbours)):
-                dx, dy = neighbours[i]
-                x1, y1 = neighbours[(i-1)%6]
-                x2, y2 = neighbours[(i+1)%6]
-
+                dx,dy = neighbours[i]
+                x1,y1 = neighbours[(i-1)%6]
+                x2,y2 = neighbours[(i+1)%6]
+                
                 # If space is empty and slide rule allows movement to it
                 if (cpModel.board.Board[x+dx][y+dy] is None and (cpModel.board.Board[x+x1][y+y1] is None or cpModel.board.Board[x+x2][y+y2] is None)):
                     # if move has not already been added to movelist
-                    if ((x+dx,y+dy) not in moves):
-                        # Check that moved piece did not separate from hive
-                        for x3,y3 in neighbours:
-                            if cpModel.board.Board[x+dx+x3][y+dy+y3] is not None:
-                                stack.append([x+dx, y+dy])
+                    if ((x+dx,y+dy) not in path and path.__len__() < 4):
+                        # If current location and next location have any common neighbours
+                        # Note: Fixes gap jumping bug
+                        neighbourPieces = cpModel.board.getNeighbours(coords=[x,y])
+                        newNeighbourPieces = cpModel.board.getNeighbours(coords=[x+dx,y+dy])
+                        commonNeighbours = [p for p in neighbourPieces if p in newNeighbourPieces]
+                        if commonNeighbours:
+                            tmp = path.copy()
+                            tmp.add((x+dx, y+dy))
+                            stack.append([x+dx, y+dy, tmp])
+                            if (path.__len__() == 3):
                                 moves.add((x+dx, y+dy))
-                                break
             
             # Find the next location to check
             if stack:
-                x,y = stack.pop()
+                x,y,path = stack.pop()
             else:
                 break
 
-        moves.remove((self.coordinates[0],self.coordinates[1]))
         return list(moves)
