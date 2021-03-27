@@ -57,8 +57,11 @@ class ArtificialAgent:
         return [p1Coord, p2Coord]
 
     def bestMove(self, gameModel, difficulty=0, maxTime=None, maxDepth=None):
+        if gameModel.turnColor == "Black" and difficulty > 0:
+            print(gameModel.gamestring)
+            raise Exception("RIP")
         # print('bestMove')
-        validMoves = gameModel.validMoves()[0:-1]
+        validMoves = gameModel.validMoves()
         moveList = [p for p in validMoves.split(";") if p != '']
         if len(moveList) == 0:
             return "pass"

@@ -1,6 +1,6 @@
-from .ArtificialAgent import ArtificialAgent
-from .GameBoard import GameBoard
-from .GameModel import GameModel
+from ArtificialAgent import ArtificialAgent
+from GameBoard import GameBoard
+from GameModel import GameModel
 import re
 
 class Engine:
@@ -99,6 +99,9 @@ class Engine:
         try:
             return self.gameModel.playMove(moveString)
         except Exception as e:
+            self.gameModel.board.printBoard()
+            print(self.gameModel.validMoves(), moveString)
+            raise Exception("REEEEEE {}".format(moveString))
             return "err " + str(e)
     
     def validmoves(self) -> str:
@@ -242,7 +245,7 @@ if __name__ == "__main__":
                 ge.parse("play {}".format(ge.bestmove(difficulty=0)))
                 result = ge.gameModel.board.isGameOver()
                 ge.gameModel.board.printBoard()
-                if result or ge.gameModel.turnNum>=100:
+                if result or ge.gameModel.turnNum>=10:
                     break
             except Exception as e:
                 raise(e)
