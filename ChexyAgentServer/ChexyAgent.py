@@ -24,10 +24,15 @@ def play():
         # print('data=',request.data)
         e = Engine.Engine()
         gs = request.data.decode('utf-8')
-        e.parseGameString(gs)
-        s = e.bestmove(difficulty=1)
         gameStringSplit = gs.split(";")
-        return str(';'.join(gameStringSplit+[s]))
+        difficulty = int(gameStringSplit[1])
+
+        gameString = str(';'.join([gameStringSplit[0]]+gameStringSplit[2:]))
+        e.parseGameString(gameString)
+        nextString = e.parse("play {}".format(e.bestmove(difficulty=difficulty)))
+        nextSplit = nextString.split(";")
+        retString = ';'.join([nextSplit[0]]+[str(difficulty)]+nextSplit[1:])
+        return retString
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
