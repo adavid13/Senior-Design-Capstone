@@ -66,9 +66,6 @@ class ArtificialAgent:
         
 
     def bestMove(self, gameModel, difficulty=0, maxTime=None, maxDepth=None):
-        if gameModel.turnColor == "Black" and difficulty > 0:
-            print(gameModel.gamestring)
-            raise Exception("RIP")
         # print('bestMove')
         validMoves = gameModel.validMoves()
         moveList = [p for p in validMoves.split(";") if p != '']
@@ -96,6 +93,7 @@ class ArtificialAgent:
         return choice
 
     def medium(self, gameModel, moveList):
+        # TODO: Beetles think sitting on the queen is better than surrounding it
         q = PriorityQueue()
 
         # If one of the queens hasn't been played yet, play a random move
@@ -115,15 +113,20 @@ class ArtificialAgent:
         else:
             return self.easy(gameModel, moveList)
 
-        
         # Prioritize moves
         for move in moveList:
             piece, loc = move.split(' ')
             priority=0
             model = gameModel.deepCopy()
 
-            # Get distance from opponent queen
-            
+            # Prioritize placing pieces
+            try:
+                p = model.board.getPieceFromString(piece)
+                beforeDistance = model.board.getDistance(bQ, p)
+            except:
+                priority -= 1
+                # Get distance from opponent queen
+                beforeDistance = 5
 
             #print("DEBUG: playing a move while prioritizing... ", end="")
             model.playMove(move)
@@ -135,17 +138,13 @@ class ArtificialAgent:
             afterScore = whiteNeighbours - blackNeighbours
 
             # Should be a value between -2 and 2
-            priority = (afterScore - beforeScore)*2
+            priority += (afterScore - beforeScore)*2
 
-            ### Other rules
-            # Prioritize placing pieces
-            try:
-                gameModel.board.getPieceFromString(piece)
-            except:
-                priority -= 1
-
-            # Prioritize getting closer to the queen
-            
+            #Prioritize getting closer to the queen
+            afterDistance = model.board.getDistance(bQ, model.board.getPieceFromString(piece))
+            delta_dist = afterDistance-beforeDistance
+            priority += delta_dist  # This will influence the priority too much I think
+        
 
             q.put((priority, move))
 
@@ -154,7 +153,7 @@ class ArtificialAgent:
         while (not q.empty() and highPriority[-1][0] == high):
             highPriority.append(q.get())
         choice = random.choice(highPriority)
-        #print("(priority, move): {}, options: {}".format(choice, highPriority))
+        print("(priority, move): {}".format(choice))
         return choice[1]
 
     def hard(self, gameModel):

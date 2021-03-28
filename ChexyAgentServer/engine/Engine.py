@@ -243,7 +243,7 @@ if __name__ == "__main__":
         while(True):
             try:
                 ge.parse("play {}".format(ge.bestmove(difficulty=1)))
-                ge.parse("play {}".format(ge.bestmove(difficulty=0)))
+                ge.parse("play {}".format(ge.bestmove(difficulty=1)))
                 result = ge.gameModel.board.isGameOver()
                 #ge.gameModel.board.printBoard()
                 if result or ge.gameModel.turnNum>=100:

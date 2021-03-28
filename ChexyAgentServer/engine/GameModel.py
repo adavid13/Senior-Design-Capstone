@@ -53,7 +53,9 @@ class GameModel:
             # Check if correct player is playing their turn
             if ((moveString[0] == 'w' and self.turnColor == 'Black') or (moveString[0] == 'b' and self.turnColor == 'White')):
                 print("err {} cannot be played during the {} player's turn".format(moveString[0:3],self.turnColor))
+                board.printBoard()
                 raise Exception("err {} cannot be played during the {} player's turn".format(moveString, self.turnColor))
+                
             self.board.playMove(moveString)
             self.moves.append(moveString)
 

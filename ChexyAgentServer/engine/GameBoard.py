@@ -261,6 +261,17 @@ class GameBoard:
         neighbours = [n for n in neighbours if n is not None]
         return neighbours
 
+    def getDistance(self, p1, p2):
+        """
+        Returns RELATIVE distance between 2 pieces. Not actual distance. 
+        Does not calculate the root of sum of squares to save on computation time. 
+        This function is only useful when comparing its output to its own output.
+        """
+        # Distance between p1 and p2
+        a_squared = (p1.coordinates[0]-p2.coordinates[0])**2
+        b_squared = (p1.coordinates[1]-p2.coordinates[1])**2
+        return (a_squared + b_squared)**0.5
+
 
     def isHiveConnected(self):
         """
