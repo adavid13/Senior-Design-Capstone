@@ -88,41 +88,64 @@ class ArtificialAgent:
 
     def medium(self, gameModel, moveList):
         q = PriorityQueue()
+
+        # If one of the queens hasn't been played yet, play a random move
+        pieces = [p.id for p in gameModel.board.pieces]
+        if "wQ1" in pieces and "bQ1" in pieces:
+            wQ = gameModel.board.getPieceFromString("wQ1")
+            bQ = gameModel.board.getPieceFromString("bQ1")
+            # If it's black's turn, these variables are swapped
+            # We always optimize for wQ
+            if moveList[0][0] == 'b':
+                wQ, bQ = bQ, wQ
+
+            whiteNeighbours = len(gameModel.board.getNeighbours(wQ))
+            blackNeighbours = len(gameModel.board.getNeighbours(bQ))
+            # Should be a value between -5 and 5
+            beforeScore = whiteNeighbours - blackNeighbours
+        else:
+            return self.easy(gameModel, moveList)
+
         
         # Prioritize moves
         for move in moveList:
             piece, loc = move.split(' ')
             priority=0
+            model = gameModel.deepCopy()
+
+            # Get distance from opponent queen
             
-            # Prioritize moves that surround the opponent's queen
-            # Need to make sure it doesnt move if already on the queen
-            if piece[0] not in loc and 'Q' in loc:
+
+            #print("DEBUG: playing a move while prioritizing... ", end="")
+            model.playMove(move)
+            #print("Done.")
+
+            whiteNeighbours = len(model.board.getNeighbours(wQ))
+            blackNeighbours = len(model.board.getNeighbours(bQ))
+            # Should be a value between -5 and 5
+            afterScore = whiteNeighbours - blackNeighbours
+
+            # Should be a value between -2 and 2
+            priority = (afterScore - beforeScore)*2
+
+            ### Other rules
+            # Prioritize placing pieces
+            try:
+                gameModel.board.getPieceFromString(piece)
+            except:
                 priority -= 1
 
-            # Prioritize placing pieces
-            # try:
-            #     gameModel.board.getPieceFromString(piece)
-            # except:
-            #     priority -= 1
-
-            # Discourage moves that surround the active player's queen
-            if piece[0] in loc and 'Q' in loc:
-                priority += 1
-
-            # Discourage moves that leave the opponent's queen
-            # Errors out
-            if piece in [p.id for p in gameModel.board.pieces]:
-                if gameModel.board.getPieceFromString(loc.translate({ord(i): None for i in '-\\/'})) in gameModel.board.getNeighbours(gameModel.board.getPieceFromString(piece)):
-                    priority+=10
+            # Prioritize getting closer to the queen
+            
 
             q.put((priority, move))
 
         highPriority = [q.get()]
         high = highPriority[0][0]
-        while (not q.empty and highPriority[-1][0] == high):
+        while (not q.empty() and highPriority[-1][0] == high):
             highPriority.append(q.get())
         choice = random.choice(highPriority)
-        print("(priority, move): ",choice)
+        #print("(priority, move): {}, options: {}".format(choice, highPriority))
         return choice[1]
 
     def hard(self, gameModel):

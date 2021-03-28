@@ -21,14 +21,17 @@ class GameModel:
 
     '''
 
-    def __init__(self, state='NotStarted', turnColor='White', turnNum=1, moves_in=[], board=GameBoard()):
+    def __init__(self, board, state='NotStarted', turnColor='White', turnNum=1):
         '''Create model for new game'''
         self.gameType = "Base"          # Creates a game without expansion pieces
         self.gameState = state
         self.turnColor = turnColor
         self.turnNum = turnNum
-        self.moves = moves_in
-        self.board = board
+        self.moves = []
+        if board is None:
+            self.board = GameBoard()
+        else:
+            self.board = board
         self.previousState = None
         self.updateString()
     
@@ -49,8 +52,8 @@ class GameModel:
             # Should check for valid move before doing this
             # Check if correct player is playing their turn
             if ((moveString[0] == 'w' and self.turnColor == 'Black') or (moveString[0] == 'b' and self.turnColor == 'White')):
-                print("err that piece cannot be played during the {} player's turn".format(self.turnColor))
-                raise Exception("err that piece cannot be played during the {} player's turn".format(self.turnColor))
+                print("err {} cannot be played during the {} player's turn".format(moveString[0:3],self.turnColor))
+                raise Exception("err {} cannot be played during the {} player's turn".format(moveString, self.turnColor))
             self.board.playMove(moveString)
             self.moves.append(moveString)
 
@@ -152,8 +155,8 @@ class GameModel:
     def deepCopy(self):
         # print('dc')
         # print('moves=',self.moves)
-        newGameModel = GameModel()
-        newGameModel.board = GameBoard(pieces=[])
+        newGameModel = GameModel(board=None)
+        #newGameModel.board = GameBoard(pieces=[])
         for move in self.moves:
             newGameModel._playMoveWithoutChecking(move)
 

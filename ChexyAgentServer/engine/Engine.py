@@ -8,7 +8,7 @@ class Engine:
         self.INFO_STRING = "id ENGG 4000 Chexy Development Version"
         self.artificialAgent = ArtificialAgent()
         #self.gameBoard = GameBoard() # GameModel contains a board object
-        self.gameModel = GameModel()
+        self.gameModel = GameModel(board=None)
 
     def parse(self, string):
         '''
@@ -71,7 +71,7 @@ class Engine:
         > newgame
         > Base;NotStarted;White[1]
         """
-        self.gameModel = GameModel()
+        self.gameModel = GameModel(board=None)
         return str(self.gameModel)
 
     def passTurn(self) -> str:
@@ -219,7 +219,8 @@ class Engine:
 
         """
         # print('gs=',gameString)
-        gameModel = GameModel(moves_in=[], board=GameBoard(pieces=[]))
+        #gameModel = GameModel(moves_in=[], board=GameBoard(pieces=[]))
+        gameModel = GameModel()
         # print('gm moves=',gameModel.moves)
         gameStringSplit = gameString.split(";")
         if gameStringSplit[0] != "Base":
@@ -232,7 +233,7 @@ class Engine:
         self.gameModel = gameModel
 
 if __name__ == "__main__":
-    games = 1
+    games = 30
     wins = []
     turns=[]
     for i in range(games):
@@ -244,8 +245,8 @@ if __name__ == "__main__":
                 ge.parse("play {}".format(ge.bestmove(difficulty=1)))
                 ge.parse("play {}".format(ge.bestmove(difficulty=0)))
                 result = ge.gameModel.board.isGameOver()
-                ge.gameModel.board.printBoard()
-                if result or ge.gameModel.turnNum>=10:
+                #ge.gameModel.board.printBoard()
+                if result or ge.gameModel.turnNum>=100:
                     break
             except Exception as e:
                 raise(e)
@@ -254,6 +255,7 @@ if __name__ == "__main__":
                 break
         ge.gameModel.board.printBoard()
         print("WINNER! {}".format(result))
+        print(ge.gameModel.moves)
         if result == 'W':
             wins.append(1)
         else:

@@ -8,12 +8,12 @@ class GameBoard:
 # Game board holds a list of pieces
 # https://www.redblobgames.com/grids/hexagons/
 # Doubled Coordinates
-    def __init__(self, gameString=False, pieces=[]):
+    def __init__(self, gameString=False):
         # Due to doubled offsets being used, MAX_BOARD SIZE needs to be twice the size of 
         # the actual amount of tiles that can be placed end-to-end
         self.MAX_BOARD_SIZE = 40
         self.Board = [[None for _ in range(self.MAX_BOARD_SIZE)] for __ in range(self.MAX_BOARD_SIZE)]
-        self.pieces = pieces
+        self.pieces = []
 
     def playMove(self, moveString):
         """
