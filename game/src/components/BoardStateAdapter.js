@@ -3,8 +3,7 @@ import { Constants } from '../utils/constants';
 
 export const BoardStateAdapter =  {
   actionToUHPString: actionToUHPString,
-  convertAction: convertAction,
-  convertState: convertState
+  convertAction: convertAction
 };
 
 function actionToUHPString(actionType, piece, destination, board, interactionModel) {
@@ -52,90 +51,6 @@ function actionToUHPString(actionType, piece, destination, board, interactionMod
   }
 }
 
-/**
- * This function converts the contents of the board to the format
- * required by the server
- * @param {*} board board object used in the game
- * @param {*} players reference to the players
-  */
-function convertState(board, players, difficulty) {
-  // const playerPieces = getAllPiecesOfPlayer(board, players[0]);
-
-  // //var gameString = InteractionModel.getMoveHistory();
-  // var gameString = "Base;1;InProgress;White[3];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;wB2"; //demo moveHistory after user moves
-  // //var gameString = "wA1"; //demo string for first move of game
-
-  // const stateString = "InProgress";
-
-  // if(difficulty === "BEGINNER"){
-  //   difficulty = 1;
-  // }
-  // if(difficulty === "INTERMEDIATE"){
-  //   difficulty = 2;
-  // }
-  // if(difficulty === "ADVANCED"){
-  //   difficulty = 3;
-  // }
-
-  // if(gameString.length < 4){ //first move of the game
-  //   var out = [];
-  //   out[0] = "Base"; //gameTypeString
-  //   out[1] = String(difficulty); //AI difficulty
-  //   out[2] = stateString; //gameStateString
-  //   out[3] = "Black[1]"; //Color and turn number
-  //   out[4] = gameString; //first move of the game
-  //   return out.join(';');
-  // }
-
-  // var movesArr, gameType, gameState, AIdiff, color, turn, lastMove, movesOnly, newString;
-  // //Gets the last move from the gameString variable
-  // if(!(typeof(gameString) === "undefined")){
-  //   movesArr = gameString.split(";");
-  //   gameType = movesArr[0];
-  //   AIdiff = difficulty;
-  //   gameState = stateString;
-  //   color = "Black";
-  //   turn = movesArr[3].slice(6, 7);
-  //   turn = parseInt(turn)+1;
-  //   turn = '['+turn+']';
-  //   newString = [];
-  //   newString.push(gameType, AIdiff, gameState, color+turn);
-  //   newString = newString.join(';');
-  //   movesOnly = movesArr.slice(4);
-  //   movesOnly = movesOnly.join(';');
-  //   newString = newString+';'+movesOnly;
-  //   lastMove = movesArr[movesArr.length-1];
-  // }
-  
-  // //find reference to the piece on the board
-  // const pieceRef = playerPieces.find(piece => piece.getId() === lastMove);
-  // var piecePosition = null;
-  // var neighborRef = null;
-  // var allNeighbors = null;
-  // var neighborID = null;
-  // var neighborDir = null;
-  // var neighborAppend = null;
-  // if(!(typeof(pieceRef) === "undefined")){
-  //   piecePosition = pieceRef.rexChess.tileXYZ; //get position of piece on the board
-  //   //delete piecePosition['z']; //removes the unnecessary key 'z' from the position dict
-
-  //   allNeighbors = getAllNeighborsOfTileXY(board, { x: piecePosition.x, y: piecePosition.y }); //find all neighbor pieces of the piece
-  //   neighborRef = allNeighbors[0]; //get reference of first neighbor
-  //   neighborID = neighborRef.getId(); //get the first neighbor piece id
-  //   neighborDir = board.getNeighborChessDirection(neighborRef, pieceRef); //returns direction of the neighbor piece
-  //   neighborAppend = appendDir(neighborID, neighborDir); //append UHP direction symbol
-  // }
-
-  // const uhp_gameString = newString + ' ' + neighborAppend;
-
-  // /**
-  //  * Need to implement checks and placing piece on top of another piece (beetle).
-  //  */
-
-  // return uhp_gameString;
-}
-
-
 
 /**
  * This function converts the string in UHP format to a valid action 
@@ -148,7 +63,7 @@ function convertState(board, players, difficulty) {
  * if the uhpString represents a move action return { type: 'move', tileXY: destination tile of piece, piece: BoardPiece object reference }
  * if the action is invalid (throw new Error("Invalid Action Received"), and return { type: 'error' } )
  */
-function convertAction(uhpString, board, players, cards, interactionModel) {
+function convertAction(uhpString, board, players, cards) {
   //uhpstring parsing
   /**
    * Piece name equivalents:
@@ -168,19 +83,21 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
    * wB1 wS1 = on top of piece
    */
 
-  var demoStr = "Base;NotStarted;Black[2];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;bA2 \\wA1"; //replace demoStr with uhpstring
-  // interactionModel.setMoveHistory(demoStr); //update movesHistory array
+  var demoStr = "Base;1;InProgress;White[3];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;bQ \\wA1"; //replace demoStr with uhpstring
+  //var action = uhpString;
   var action = demoStr;
 
+
   if(action.slice(0,3) === "err"){ //if AI returns 'err'
-    return { type: 'error '};
+    return { type: 'error' };
   }
 
   var splitStr = action.split(";"); //Turn moveString into array split on the semicolon (';')
   var GameTypeString = splitStr[0];
-  var GameStateString = splitStr[1];
-  var TurnString = splitStr[2];
-  var movesArr = splitStr.slice(3); //array with just the moves
+  var aiDifficulty = splitStr[1];
+  var GameStateString = splitStr[2];
+  var TurnString = splitStr[3];
+  var movesArr = splitStr.slice(4); //array with just the moves
   var lastMove = movesArr[movesArr.length-1].split(" "); //an array of the last (AI) move: piece/card & coordinate piece
 
   var pieceToMove;
@@ -271,21 +188,21 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
   
 
   /**
-   * Finds out if it's a move or a placement action, and which card or piece it is.
+   * Logic to determine if AI is trying to move a piece or place a card
    */
   var isCard;
   var cardOrPiece = cards.find(card => card.getId() === color1+piece1); //determine if AI tries to place one of its cards
-  isCard = typeof(cardOrPiece) != 'undefined'; //checks if cardOrPiece is undefined, which means the AI is not placing a card
+  isCard = typeof(cardOrPiece) != 'undefined'; //checks if cardOrPiece is not undefined, which means the AI is placing a card
   const AIPieces = getAllPiecesOfPlayer(board, players[1]);
   const playerPieces = getAllPiecesOfPlayer(board, players[0]);
   if(isCard){ //it is a card
     result.type = 'placement';
     result.piece = cardOrPiece;
-
   }else{ //it is a piece
     result.type = 'move';
     var findPiece1 = AIPieces.find(piece => piece.getId() === color1+piece1); //gets reference to AI piece
     result.piece = findPiece1;
+    
   }
 
   /**
@@ -316,37 +233,61 @@ function convertAction(uhpString, board, players, cards, interactionModel) {
       }
     }
   }else{ //first piece of the game
-    result.tileXY = {x:14, y:14};
+    var findPiece2Player = playerPieces.find(piece => piece.getId() === color2+piece2); //determines if coordinate piece belong to player
+    if((typeof(findPiece2Player) === 'undefined')){ //coordinate piece is not on the board
+      return { type: 'error' };
+    }else{
+      coordPiecePos = findPiece2Player.rexChess.tileXYZ; //get the tile (position) of the coordinate piece
+      if(direction === 'T'){ //for placing on top (beetle)
+        result.tileXY = board.getTileXYAtDirection(coordPiecePos, direction, 0);
+      }else{
+        result.tileXY = board.getTileXYAtDirection(coordPiecePos, direction, 1);
+      }
+    }
+  }
+
+
+  /**
+   * check if card/piece can move to the destination tile (tile is free)
+   */
+  var pieceAtTile = board.tileXYToChessArray(result.tileXY.x, result.tileXY.y); //get piece at destination tile
+  if((pieceAtTile.length != 0) && (result.piece.getId().slice(1,2) != 'B')){ //if destination tile is not empty, and piece/card to move is not Beetle
+    return { type: 'error' };
   }
 
   /**
-   * Check if action is move or placement (by checking if card is part of cards that the player has --> check cards)
+   * Check if placement action is valid
    */
-  /**
-   * Check if piece to place can be placed (not placed already)
-   */
-  /**
-   * Check if piece to move can move
-   */
-  /**
-   * Check if move or placement action is valid
-   */
-  /**
-   * check if piece to move besides has a free tile
-   */
+  if(result.type === 'placement'){
+    const validPlacementTiles = board.showInitialPlacementPositions(players[1]); // Only tiles listed here can be used to place pieces
+    var isDestXValid = validPlacementTiles.find(tile => tile.x === result.tileXY.x); //compares all destination tiles' x value with TileXY's x value
+    var isDestYValid = validPlacementTiles.find(tile => tile.y === result.tileXY.y); //compares all destination tiles' y value with TileXY's y value
+    if( !((typeof(isDestXValid) != 'undefined') && (typeof(isDestYValid) != 'undefined')) ){ //if no valid placement tile exists
+      return { type: 'error' };
+    }
+  }
 
-  // Use functions below to help determine if the MOVE action is valid
-  //const AIPieces = getAllPiecesOfPlayer(board, players[1]);
- // const validPieces = AIPieces.filter(piece => piece.getDestinationTiles().length > 0); // This will list all the pieces that are allowed to move
-  //result.piece = validPieces;
-/*  const validTiles = validPiece.getDestinationTiles();  // use this to check which are the valid tiles the selected piece can move (validPiece must be one of the pieces in the validPieces array )
+  /**
+   * Check if piece to move is allowd to move
+   */
+  const validPieces = AIPieces.filter(piece => piece.getDestinationTiles().length > 0); // This will list all the pieces that are allowed to move
+  var isAllowed = validPieces.find(piece => piece.getId() === color1+piece1); //check if piece to move is in the validPieces list
+  if((result.type === 'move') && (typeof(isAllowed) === 'undefined')){ //if it's a move action but piece is not allowed to move
+    return { type: 'error' };
+  }
 
+  /**
+   * Check if move action is valid (destionation)
+   */
+  if(result.type === 'move'){
+    const validTiles = result.piece.getDestinationTiles(); //check which are the valid tiles the selected piece can move to
+    var isXValid = validTiles.find(tile => tile.x === result.tileXY.x); //Check if TileXY's x-coordinate is part of ValidTiles
+    var isYvalid = validTiles.find(tile => tile.y === result.tileXY.y); //Check if TileXY's y-coordinate is part of ValidTiles
+    if( !((typeof(isXValid) != 'undefined') && (typeof(isYvalid) != 'undefined')) ){ //if no valid destination tile exists
+      return { type: 'error' };
+    }
+  }
 
-
-  // Use functions below to help determine if the PLACEMENT action is valid
-  const validPlacementTiles = this.board.showInitialPlacementPositions(players[1]); // Only tiles listed here can be used to place pieces
-  const validCards = cards; // this will list all the valid piece cards that can be played 
-  */
 
   return result;
 }

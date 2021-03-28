@@ -453,7 +453,7 @@ export default class GameControllerScene extends Phaser.Scene {
     let response = null;
     const allCardsNotPlayed = this.gameUIScene.getAllCardsNotPlayed();
     const aiCards = allCardsNotPlayed.filter(card => card.getPlayer() === this.players[1]);
-    const convr = BoardStateAdapter.convertAction(response, this.board, this.players, aiCards, this.interactionModel);
+    const convr = BoardStateAdapter.convertAction(response, this.board, this.players, aiCards);
     console.log(convr.type, convr.piece, convr.tileXY);
 
     getMove(state)
