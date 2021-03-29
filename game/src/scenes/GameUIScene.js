@@ -352,7 +352,8 @@ export default class GameUIScene extends Phaser.Scene {
         this.animateEndTurn();
         this.swapOverlay(this.interactionModel.playerTurn.getNumber());
         this.resetTimer();
-        this.alert('You can\'t make any moves this turn.\nYou turn was skipped.');
+        if (this.interactionModel.playerTurn === this.players[0])
+          this.alert('You can\'t make any moves this turn.\nYou turn was skipped.');
         setTimeout(this.handleEndTurnClick, 3000);
         break;
       case Constants.Turn.NEED_KING:

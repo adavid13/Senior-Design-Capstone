@@ -16,8 +16,8 @@ export const Constants = {
   },
 
   World: {
-    WIDTH: 3000,
-    HEIGHT: 2800,
+    WIDTH: 3500,
+    HEIGHT: 3200,
   },
 
   Window: {

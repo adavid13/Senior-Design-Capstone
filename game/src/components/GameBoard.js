@@ -10,7 +10,7 @@ export default class GameBoard extends Board {
     super(scene, model.getGridConfig());
     this.scene = scene;
     this.model = model;
-    this.hexScaleFactor = 0.9;
+    this.hexScaleFactor = 0.915;
   }
 
   inititialize() {
@@ -36,7 +36,7 @@ export default class GameBoard extends Board {
           tileKeys[Math.floor(Math.random() * tileKeys.length)],
           Math.floor(Math.random() * 10)
         )
-        .setScale(0.55);
+        .setScale(0.625);
       // this.scene.add.text(worldXY.x, worldXY.y, `${tileXY.x},${tileXY.y}`).setOrigin(0.5);
     }
 

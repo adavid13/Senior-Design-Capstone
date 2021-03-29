@@ -7,7 +7,7 @@ export default class GameBoardModel {
         gridType: 'hexagonGrid',
         x: 300,
         y: 300,
-        size: 50,
+        size: 60,
         staggeraxis: 'x',
         staggerindex: 'odd',
       },
