@@ -83,9 +83,10 @@ function convertAction(uhpString, board, players, cards) {
    * wB1 wS1 = on top of piece
    */
 
-  var demoStr = "Base;1;InProgress;White[3];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;bQ \\wA1"; //replace demoStr with uhpstring
-  //var action = uhpString;
-  var action = demoStr;
+  //var demoStr = "Base;1;InProgress;White[3];wA1;bS1 -wA1;wB1 \\bS1;wB1 bS1;bQ \\wA1"; //replace demoStr with uhpstring
+  //var action = demoStr;
+  var action = uhpString;
+  
 
 
   if(action.slice(0,3) === "err"){ //if AI returns 'err'
