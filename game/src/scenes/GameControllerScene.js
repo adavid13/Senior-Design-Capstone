@@ -37,7 +37,7 @@ export default class GameControllerScene extends Phaser.Scene {
     this.state = Constants.GameState.READY;
 
     this.players = this.createPlayers();
-    this.interactionModel = new InteractionModel(this.players);
+    this.interactionModel = new InteractionModel(this.players, this.difficulty);
     this.board = this.createBoard(this.players);
     this.placementMarkers = [];
 
@@ -214,6 +214,7 @@ export default class GameControllerScene extends Phaser.Scene {
       this.thudSound.setVolume(this.interfaceModel.soundLevel);
       this.execute(new MoveCommand({
         interactionModel: this.interactionModel,
+        board: this.board,
         selectedMarker,
         blockInput: () => this.state = Constants.GameState.PIECE_MOVING,
         moveSound: this.thudSound
@@ -225,7 +226,7 @@ export default class GameControllerScene extends Phaser.Scene {
 
   handlePiecePlacement(selectedCard, tileXY) {
     this.thudSound.setVolume(this.interfaceModel.soundLevel);
-    this.execute(new PlaceCommand({ board: this.board, selectedCard, tileXY, placeSound: this.thudSound }));
+    this.execute(new PlaceCommand({ board: this.board, selectedCard, tileXY, placeSound: this.thudSound, interactionModel: this. interactionModel }));
     this.clearSelection();
   }
 
@@ -280,12 +281,16 @@ export default class GameControllerScene extends Phaser.Scene {
     this.clearSelection();
 
     if (!this.playerHasValidAction()) {
+      this.interactionModel.addToHistory('pass');
       return Constants.Turn.SKIP_TURN;
     }
 
     if (playerTurn.getPlayerType() === Constants.PlayerType.HUMAN) {
-      setTimeout(() => { this.getAIAction(currentTurn + 1); }, 1000 );
+      setTimeout(() => { this.getAIAction(currentTurn + 1); }, 2000 );
     }
+    
+    const state = this.interactionModel.getMoveHistory().join(';');
+    console.log("History: ", state);
 
     return Constants.Turn.NEXT_TURN;
   }
@@ -414,7 +419,7 @@ export default class GameControllerScene extends Phaser.Scene {
       selectedCard = playerPieces[random];
     }
     this.thudSound.setVolume(this.interfaceModel.soundLevel);
-    this.execute(new PlaceCommand({ board: this.board, tileXY, selectedCard, placeSound: this.thudSound }));
+    this.execute(new PlaceCommand({ board: this.board, tileXY, selectedCard, placeSound: this.thudSound, interactionModel: this. interactionModel }));
   }
 
   randomMove() {
@@ -432,6 +437,7 @@ export default class GameControllerScene extends Phaser.Scene {
     this.thudSound.setVolume(this.interfaceModel.soundLevel);
     this.execute(new MoveCommand({
       interactionModel: this.interactionModel,
+      board: this.board,
       selectedMarker: { tileXY: selectedTile, parentPiece: selectedPiece },
       blockInput: () => this.state = Constants.GameState.PIECE_MOVING,
       moveSound: this.thudSound
@@ -439,20 +445,27 @@ export default class GameControllerScene extends Phaser.Scene {
   }
 
   getAIAction(turn) {
-    const state = BoardStateAdapter.convertState(this.board, this.players);
-    getMove(state)
+    const history = this.interactionModel.getMoveHistory().join(';');
+
+    getMove(history)
       .then(response => {
         const { currentTurn } = this.interactionModel;
         const allCardsNotPlayed = this.gameUIScene.getAllCardsNotPlayed();
         const aiCards = allCardsNotPlayed.filter(card => card.getPlayer() === this.players[1]);
         const action = BoardStateAdapter.convertAction(response, this.board, this.players, aiCards, this.interactionModel);
-        
         this.thudSound.setVolume(this.interfaceModel.soundLevel);
         // check if the response from the server returned in the correct turn. Ignore otherwise.
         if (turn === currentTurn) {
-          if (action?.type === 'move') {
+          if (action?.type === 'error') {
+            const { currentTurn } = this.interactionModel;
+            if (turn === currentTurn) {
+              this.randomAction(this.gameUIScene.getAllCardsNotPlayed());
+              this.endTurnWithDelay();
+            }
+          } else if (action?.type === 'move') {
             this.execute(new MoveCommand({
               interactionModel: this.interactionModel,
+              board: this.board,
               selectedMarker: { tileXY: action.tileXY, parentPiece: action.piece },
               blockInput: () => this.state = Constants.GameState.PIECE_MOVING,
               moveSound: this.thudSound
@@ -462,7 +475,8 @@ export default class GameControllerScene extends Phaser.Scene {
               board: this.board,
               tileXY: action.tileXY,
               selectedCard: action.piece,
-              placeSound: this.thudSound
+              placeSound: this.thudSound,
+              interactionModel: this. interactionModel
             }));
           } else {
             this.randomAction(this.gameUIScene.getAllCardsNotPlayed());
@@ -478,6 +492,8 @@ export default class GameControllerScene extends Phaser.Scene {
         }
       });
   }
+
+  
 
   endTurnWithDelay() {
     setTimeout(() => { this.gameUIScene.handleEndTurnClick(false); }, 2000);

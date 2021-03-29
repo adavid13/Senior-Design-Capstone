@@ -401,20 +401,20 @@ export default class GameUIScene extends Phaser.Scene {
       const playerPieces = player.getPiecesInHand();
       Object.entries(playerPieces).forEach(([type, value]) => {
         for (let i = 0; i < value; i++) {
-          this.pieces.push(this.createPiece(player, x, type));
+          this.pieces.push(this.createPiece(player, x, i + 1, type));
           x += 45;
         }
       });
     }
   }
 
-  createPiece(player, x, type) {
+  createPiece(player, x, id, type) {
     const { height } = this.sys.game.canvas;
     if (player.getNumber() === 1) {
-      return new Card(this, this.interfaceModel, player, x, height - 10, type, false, this.onPieceSelection).setEnabled();
+      return new Card(this, this.interfaceModel, player, x, height - 10, id, type, false, this.onPieceSelection).setEnabled();
     }
     if (player.getNumber() === 2) {
-      return new Card(this, this.interfaceModel, player, x, 10, type, true, this.onPieceSelection).setDisabled();
+      return new Card(this, this.interfaceModel, player, x, 10, id, type, true, this.onPieceSelection).setDisabled();
     }
   }
 

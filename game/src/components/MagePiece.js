@@ -3,9 +3,9 @@ import { getPieceTexture, getDisplayName } from '../utils/piecesUtils';
 import BoardPiece from './BoardPiece';
 
 export default class MagePiece  extends BoardPiece {
-  constructor({ board, player, tileXY, faction }) {
+  constructor({ board, player, id, tileXY, faction }) {
     const type = Constants.Pieces.MAGE;
-    super({ board, player, tileXY, texture: getPieceTexture(type, faction) });
+    super({ board, player, id, tileXY, texture: getPieceTexture(type, faction) });
     this.setDepth(Constants.GameObjectDepth.PIECE_BACK);
     this.movingPoints = 1;
     this.faction = faction;
