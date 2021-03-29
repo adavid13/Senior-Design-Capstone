@@ -46,6 +46,11 @@ const assetManifest = {
       loadOnStart: true,
     },
     {
+      name: 'draw',
+      path: './assets/images/draw.png',
+      loadOnStart: true,
+    },
+    {
       name: 'defeat',
       path: './assets/images/defeat.png',
       loadOnStart: true,

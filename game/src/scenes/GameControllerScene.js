@@ -15,7 +15,7 @@ import PlaceCommand from '../components/command/PlaceCommand';
 import Card from '../components/ui/Card';
 import Tooltip from '../components/ui/Tooltip';
 import KingPiece from '../components/KingPiece';
-import { BoardStateAdapter } from '../components/BoardStateAdapter';  
+import { BoardStateAdapter } from '../components/BoardStateAdapter';
 
 const sceneConfig = {
   key: Constants.Scenes.CONTROLLER,
@@ -332,16 +332,26 @@ export default class GameControllerScene extends Phaser.Scene {
   }
 
   isGameWon() {
-    const pieces = getAllPieces(this.board).filter(piece => piece instanceof KingPiece);
-    for (const piece of pieces) {
-      if (isPieceSurrounded(this.board, piece)) {
-        if (piece.getPlayer().getNumber() === 1) {
-          return Constants.Turn.DEFEAT;
-        } else {
-          return Constants.Turn.VICTORY;
-        }
+    const kings = getAllPieces(this.board).filter(piece => piece instanceof KingPiece);
+    const surroundedKings = [];
+    for (const king of kings) {
+      if (isPieceSurrounded(this.board, king)) {
+        surroundedKings.push(king);
       }
     }
+
+    if (surroundedKings.length > 1) {
+      return Constants.Turn.DRAW;
+    }
+
+    if (surroundedKings.length === 1) {
+      if (surroundedKings[0].getPlayer().getNumber() === 1) {
+        return Constants.Turn.DEFEAT;
+      } else {
+        return Constants.Turn.VICTORY;
+      }
+    }
+    
     return false;
   }
 
@@ -437,22 +447,12 @@ export default class GameControllerScene extends Phaser.Scene {
   getAIAction(turn) {
     const state = this.interactionModel.getMoveHistory().join(';');
 
-    /**
-     * Testing
-     */
-    let response = null;
-    const allCardsNotPlayed = this.gameUIScene.getAllCardsNotPlayed();
-    const aiCards = allCardsNotPlayed.filter(card => card.getPlayer() === this.players[1]);
-    const convr = BoardStateAdapter.convertAction(response, this.board, this.players, aiCards, this.interactionModel);
-    console.log(convr.type, convr.piece, convr.tileXY);
-
     getMove(state)
       .then(response => {
         const { currentTurn } = this.interactionModel;
         const allCardsNotPlayed = this.gameUIScene.getAllCardsNotPlayed();
         const aiCards = allCardsNotPlayed.filter(card => card.getPlayer() === this.players[1]);
         const action = BoardStateAdapter.convertAction(response, this.board, this.players, aiCards, this.interactionModel);
-        
         this.thudSound.setVolume(this.interfaceModel.soundLevel);
         // check if the response from the server returned in the correct turn. Ignore otherwise.
         if (turn === currentTurn) {
