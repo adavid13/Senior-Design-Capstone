@@ -440,20 +440,19 @@ export default class GameControllerScene extends Phaser.Scene {
 
   getAIAction(turn) {
     const state = BoardStateAdapter.convertState(this.board, this.players);
+
+    let response=5, aiCards=6;
+    const convr = BoardStateAdapter.convertAction(response, this.board, this.players, aiCards, this.interactionModel);
+    console.log(convr.piece);
+
     getMove(state)
       .then(response => {
         const { currentTurn } = this.interactionModel;
         const allCardsNotPlayed = this.gameUIScene.getAllCardsNotPlayed();
         const aiCards = allCardsNotPlayed.filter(card => card.getPlayer() === this.players[1]);
         const action = BoardStateAdapter.convertAction(response, this.board, this.players, aiCards, this.interactionModel);
-        
         this.thudSound.setVolume(this.interfaceModel.soundLevel);
         // check if the response from the server returned in the correct turn. Ignore otherwise.
-        if (turn === currentTurn) {
-          if (action?.type === 'move') {
-            this.execute(new MoveCommand({
-              interactionModel: this.interactionModel,
-              selectedMarker: { tileXY: action.tileXY, parentPiece: action.piece },
               blockInput: () => this.state = Constants.GameState.PIECE_MOVING,
               moveSound: this.thudSound
             }));
