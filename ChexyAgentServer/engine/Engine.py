@@ -220,14 +220,15 @@ class Engine:
         """
         # print('gs=',gameString)
         #gameModel = GameModel(moves_in=[], board=GameBoard(pieces=[]))
-        gameModel = GameModel()
+        gameModel = GameModel(board=None)
         # print('gm moves=',gameModel.moves)
         gameStringSplit = gameString.split(";")
         if gameStringSplit[0] != "Base":
             raise NotImplementedError("Non-Base games not supported")
-        turnColour = gameStringSplit[0:5]
+        turnColour = gameStringSplit[2][0:5]
         for i in range(3, len(gameStringSplit)):
             # print('parsing=',gameStringSplit[i])
+            print(gameStringSplit[i])
             gameModel.playMove(gameStringSplit[i])
 
         self.gameModel = gameModel

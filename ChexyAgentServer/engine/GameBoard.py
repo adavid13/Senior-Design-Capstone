@@ -95,19 +95,23 @@ class GameBoard:
                 #beetle moved off piece
                 if movingPiece.beetling is not None:
                     beetledPiece = movingPiece.beetling
-                    self.Board[oldCoords[0]][oldCoords[1]] = beetledPiece
+                    #self.Board[oldCoords[0]][oldCoords[1]] = beetledPiece
                     movingPiece.beetling = None
                     beetledPiece.beetleOnTop = None
         else:
             beetledPiece = movingPiece.beetling
-            movingPiece.beetling = self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]]
+            relpiece = self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]]
+            while relpiece.beetleOnTop:
+                relpiece = relpiece.beetleOnTop
+            movingPiece.beetling = relpiece
+            relpiece.beetleOnTop = movingPiece
 
             if beetledPiece is not None:
-                self.Board[oldCoords[0]][oldCoords[1]] = beetledPiece #redundant b/c already the case?
+                #self.Board[oldCoords[0]][oldCoords[1]] = beetledPiece #redundant b/c already the case?
                 beetledPiece.beetleOnTop = None
             else:
                 self.Board[oldCoords[0]][oldCoords[1]] = None
-            self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]].beetleOnTop = movingPiece
+            #self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]].beetleOnTop = movingPiece
 
 
 
