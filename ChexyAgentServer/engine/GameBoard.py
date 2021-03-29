@@ -1,8 +1,8 @@
-from AntPiece import AntPiece
-from BeetlePiece import BeetlePiece
-from GrasshopperPiece import GrasshopperPiece
-from QueenPiece import QueenPiece
-from SpiderPiece import SpiderPiece
+from .AntPiece import AntPiece
+from .BeetlePiece import BeetlePiece
+from .GrasshopperPiece import GrasshopperPiece
+from .QueenPiece import QueenPiece
+from .SpiderPiece import SpiderPiece
 
 class GameBoard:
 # Game board holds a list of pieces

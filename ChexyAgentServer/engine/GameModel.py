@@ -1,4 +1,4 @@
-from GameBoard import GameBoard
+from .GameBoard import GameBoard
 
 class GameModel:
     '''

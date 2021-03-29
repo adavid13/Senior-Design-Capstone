@@ -1,6 +1,6 @@
-from ArtificialAgent import ArtificialAgent
-from GameBoard import GameBoard
-from GameModel import GameModel
+from .ArtificialAgent import ArtificialAgent
+from .GameBoard import GameBoard
+from .GameModel import GameModel
 import re
 
 class Engine:

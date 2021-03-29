@@ -157,4 +157,9 @@ class ArtificialAgent:
         return choice[1]
 
     def hard(self, gameModel):
+        """
+        build a depth 3 tree
+        evaluate all the leaf nodes
+        minimax it
+        """
         pass
