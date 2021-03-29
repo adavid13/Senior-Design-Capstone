@@ -93,6 +93,17 @@ class ArtificialAgent:
         return choice
 
     def medium(self, gameModel, moveList):
+        return self.getPriorityMove(gameModel, moveList)[1]
+
+    def hard(self, gameModel):
+        """
+        build a depth 3 tree
+        evaluate all the leaf nodes
+        minimax it
+        """
+        pass
+
+    def getPriorityMove(self, gameModel, moveList):
         # TODO: Beetles think sitting on the queen is better than surrounding it
         q = PriorityQueue()
 
@@ -111,7 +122,7 @@ class ArtificialAgent:
             # Should be a value between -5 and 5
             beforeScore = whiteNeighbours - blackNeighbours
         else:
-            return self.easy(gameModel, moveList)
+            return (0, self.easy(gameModel, moveList))
 
         # Prioritize moves
         for move in moveList:
@@ -145,7 +156,6 @@ class ArtificialAgent:
             delta_dist = afterDistance-beforeDistance
             priority += delta_dist  # This will influence the priority too much I think
         
-
             q.put((priority, move))
 
         highPriority = [q.get()]
@@ -154,12 +164,4 @@ class ArtificialAgent:
             highPriority.append(q.get())
         choice = random.choice(highPriority)
         print("(priority, move): {}".format(choice))
-        return choice[1]
-
-    def hard(self, gameModel):
-        """
-        build a depth 3 tree
-        evaluate all the leaf nodes
-        minimax it
-        """
-        pass
+        return choice
