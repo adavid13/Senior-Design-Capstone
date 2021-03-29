@@ -286,7 +286,7 @@ export default class GameControllerScene extends Phaser.Scene {
     }
 
     if (playerTurn.getPlayerType() === Constants.PlayerType.HUMAN) {
-      setTimeout(() => { this.getAIAction(currentTurn + 1); }, 1000 );
+      setTimeout(() => { this.getAIAction(currentTurn + 1); }, 2000 );
     }
     
     const state = this.interactionModel.getMoveHistory().join(';');
@@ -445,9 +445,9 @@ export default class GameControllerScene extends Phaser.Scene {
   }
 
   getAIAction(turn) {
-    const state = this.interactionModel.getMoveHistory().join(';');
+    const history = this.interactionModel.getMoveHistory().join(';');
 
-    getMove(state)
+    getMove(history)
       .then(response => {
         const { currentTurn } = this.interactionModel;
         const allCardsNotPlayed = this.gameUIScene.getAllCardsNotPlayed();

@@ -1,10 +1,10 @@
 const baseUrl = process.env.API_URL + "/play";
 
-export async function getMove() {
+export async function getMove(history) {
   return fetch(baseUrl, {
     method: "POST",
     mode: 'cors',
-    body: "King to G1",
+    body: history,
     headers: { "content-type": "text/plain" }
   })
     .then(handleResponse)
