@@ -1,6 +1,6 @@
 from engine import Engine
 if __name__ == "__main__":
-    games = 1
+    games = 50
     wins = []
     turns=[]
     for i in range(games):
@@ -10,9 +10,8 @@ if __name__ == "__main__":
         while(True):
             try:
                 ge.parse("play {}".format(ge.bestmove(difficulty=1)))
-                ge.parse("play {}".format(ge.bestmove(difficulty=0)))
                 result = ge.gameModel.board.isGameOver()
-                ge.gameModel.board.printBoard()
+                #ge.gameModel.board.printBoard()
                 if result or ge.gameModel.turnNum>=100:
                     break
             except Exception as e:

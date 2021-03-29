@@ -136,26 +136,34 @@ class ArtificialAgent:
                 beforeDistance = model.board.getDistance(bQ, p)
             except:
                 priority -= 1
-                # Get distance from opponent queen
+                # Default distance from opponent's queen is 5
                 beforeDistance = 5
 
-            #print("DEBUG: playing a move while prioritizing... ", end="")
             model.playMove(move)
-            #print("Done.")
 
-            whiteNeighbours = len(model.board.getNeighbours(wQ))
-            blackNeighbours = len(model.board.getNeighbours(bQ))
-            # Should be a value between -5 and 5
-            afterScore = whiteNeighbours - blackNeighbours
+            gameover = model.board.isGameOver()
+            if gameover:
+                if (gameover == 'W' and gameModel.turnColor == "White") or (gameover == 'B' and gameModel.turnColor == "Black"):
+                    priority = -100
+                elif gameover == 'D':
+                    priority = 0
+                else:
+                    # Win for opponent
+                    priority = 100
+            else:
+                whiteNeighbours = len(model.board.getNeighbours(wQ))
+                blackNeighbours = len(model.board.getNeighbours(bQ))
+                # Should be a value between -5 and 5
+                afterScore = whiteNeighbours - blackNeighbours
 
-            # Should be a value between -2 and 2
-            priority += (afterScore - beforeScore)*2
+                # Should be a value between -2 and 2
+                priority += (afterScore - beforeScore)*2
 
-            #Prioritize getting closer to the queen
-            afterDistance = model.board.getDistance(bQ, model.board.getPieceFromString(piece))
-            delta_dist = afterDistance-beforeDistance
-            priority += delta_dist  # This will influence the priority too much I think
-        
+                #Prioritize getting closer to the queen
+                afterDistance = model.board.getDistance(bQ, model.board.getPieceFromString(piece))
+                delta_dist = afterDistance-beforeDistance
+                priority += delta_dist  # This will influence the priority too much I think
+            
             q.put((priority, move))
 
         highPriority = [q.get()]
