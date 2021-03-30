@@ -8,12 +8,12 @@ class GameBoard:
 # Game board holds a list of pieces
 # https://www.redblobgames.com/grids/hexagons/
 # Doubled Coordinates
-    def __init__(self, gameString=False, pieces=[]):
+    def __init__(self, gameString=False):
         # Due to doubled offsets being used, MAX_BOARD SIZE needs to be twice the size of 
         # the actual amount of tiles that can be placed end-to-end
         self.MAX_BOARD_SIZE = 40
         self.Board = [[None for _ in range(self.MAX_BOARD_SIZE)] for __ in range(self.MAX_BOARD_SIZE)]
-        self.pieces = pieces
+        self.pieces = []
 
     def playMove(self, moveString):
         """
@@ -94,20 +94,31 @@ class GameBoard:
             if piece[1] == 'B':
                 #beetle moved off piece
                 if movingPiece.beetling is not None:
+                    p2 = movingPiece.beetling
                     beetledPiece = movingPiece.beetling
-                    self.Board[oldCoords[0]][oldCoords[1]] = beetledPiece
+                    while p2.id[1] == "B" and p2.beetling:
+                        p2 = p2.beetling
+
+                    self.Board[oldCoords[0]][oldCoords[1]] = p2
+                    beetledPiece = movingPiece.beetling
+
                     movingPiece.beetling = None
+
                     beetledPiece.beetleOnTop = None
         else:
             beetledPiece = movingPiece.beetling
-            movingPiece.beetling = self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]]
+            relpiece = self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]]
+            while relpiece.beetleOnTop:
+                relpiece = relpiece.beetleOnTop
+            movingPiece.beetling = relpiece
+            relpiece.beetleOnTop = movingPiece
 
             if beetledPiece is not None:
-                self.Board[oldCoords[0]][oldCoords[1]] = beetledPiece #redundant b/c already the case?
+                #self.Board[oldCoords[0]][oldCoords[1]] = beetledPiece #redundant b/c already the case?
                 beetledPiece.beetleOnTop = None
             else:
                 self.Board[oldCoords[0]][oldCoords[1]] = None
-            self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]].beetleOnTop = movingPiece
+            #self.Board[relativePieceCoordinates[0]][relativePieceCoordinates[1]].beetleOnTop = movingPiece
 
 
 
@@ -260,6 +271,17 @@ class GameBoard:
         #print(neighbours)
         neighbours = [n for n in neighbours if n is not None]
         return neighbours
+
+    def getDistance(self, p1, p2):
+        """
+        Returns RELATIVE distance between 2 pieces. Not actual distance. 
+        Does not calculate the root of sum of squares to save on computation time. 
+        This function is only useful when comparing its output to its own output.
+        """
+        # Distance between p1 and p2
+        a_squared = (p1.coordinates[0]-p2.coordinates[0])**2
+        b_squared = (p1.coordinates[1]-p2.coordinates[1])**2
+        return (a_squared + b_squared)**0.5
 
 
     def isHiveConnected(self):

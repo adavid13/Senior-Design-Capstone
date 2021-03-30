@@ -21,14 +21,17 @@ class GameModel:
 
     '''
 
-    def __init__(self, state='NotStarted', turnColor='White', turnNum=1, moves_in=[], board=GameBoard()):
+    def __init__(self, board, state='NotStarted', turnColor='White', turnNum=1):
         '''Create model for new game'''
         self.gameType = "Base"          # Creates a game without expansion pieces
         self.gameState = state
         self.turnColor = turnColor
         self.turnNum = turnNum
-        self.moves = moves_in
-        self.board = board
+        self.moves = []
+        if board is None:
+            self.board = GameBoard()
+        else:
+            self.board = board
         self.previousState = None
         self.updateString()
     
@@ -49,8 +52,10 @@ class GameModel:
             # Should check for valid move before doing this
             # Check if correct player is playing their turn
             if ((moveString[0] == 'w' and self.turnColor == 'Black') or (moveString[0] == 'b' and self.turnColor == 'White')):
-                print("err that piece cannot be played during the {} player's turn".format(self.turnColor))
-                raise Exception("err that piece cannot be played during the {} player's turn".format(self.turnColor))
+                print("err {} cannot be played during the {} player's turn".format(moveString[0:3],self.turnColor))
+                self.board.printBoard()
+                raise Exception("err {} cannot be played during the {} player's turn".format(moveString, self.turnColor))
+                
             self.board.playMove(moveString)
             self.moves.append(moveString)
 
@@ -115,6 +120,8 @@ class GameModel:
                         for k in range(len(neighbours)):
                             pieceAtLoc = self.board.Board[i+neighbours[k][0]][j+neighbours[k][1]]
                             if pieceAtLoc is not None:
+                                while pieceAtLoc.beetleOnTop:
+                                    pieceAtLoc = pieceAtLoc.beetleOnTop
                                 if pieceAtLoc.id[0] == 'w':
                                     whiteCount.append([pieceAtLoc, symbols[k]])
                                 elif pieceAtLoc.id[0] == 'b':
@@ -137,8 +144,13 @@ class GameModel:
         _parseMoveString([17, 19], "wB1") -> "wB1 -wS1;wB1 wA1;wB1 bQ1/"
 
         """
+
+
         if(self.board.Board[moveArr[0]][moveArr[1]] is not None):
-            return "{} {}".format(gamePiece.id, self.board.Board[moveArr[0]][moveArr[1]].id)
+            p2 = self.board.Board[moveArr[0]][moveArr[1]]
+            while p2.beetleOnTop:
+                p2 = p2.beetleOnTop
+            return "{} {}".format(gamePiece.id, p2.id)
         collection = ""
         neighbours = [[-2, 0], [-1, -1], [1, -1], [2, 0], [1, 1], [-1, 1]]
         symbols = ["{} {}-", "{} {}\\", "{} /{}", "{} -{}", "{} \\{}", "{} {}/"]
@@ -146,14 +158,17 @@ class GameModel:
             dx, dy = neighbours[i][0], neighbours[i][1]
             piece = self.board.Board[moveArr[0]+dx][moveArr[1]+dy]
             if  piece is not None and piece != gamePiece:
+                while piece.beetleOnTop:
+                    piece = piece.beetleOnTop
                 collection+=symbols[i].format(gamePiece.id, piece.id)+";"
+
         return collection
 
     def deepCopy(self):
         # print('dc')
         # print('moves=',self.moves)
-        newGameModel = GameModel()
-        newGameModel.board = GameBoard(pieces=[])
+        newGameModel = GameModel(board=None)
+        #newGameModel.board = GameBoard(pieces=[])
         for move in self.moves:
             newGameModel._playMoveWithoutChecking(move)
 

@@ -8,7 +8,7 @@ class Engine:
         self.INFO_STRING = "id ENGG 4000 Chexy Development Version"
         self.artificialAgent = ArtificialAgent()
         #self.gameBoard = GameBoard() # GameModel contains a board object
-        self.gameModel = GameModel()
+        self.gameModel = GameModel(board=None)
 
     def parse(self, string):
         '''
@@ -71,7 +71,7 @@ class Engine:
         > newgame
         > Base;NotStarted;White[1]
         """
-        self.gameModel = GameModel()
+        self.gameModel = GameModel(board=None)
         return str(self.gameModel)
 
     def passTurn(self) -> str:
@@ -99,6 +99,9 @@ class Engine:
         try:
             return self.gameModel.playMove(moveString)
         except Exception as e:
+            self.gameModel.board.printBoard()
+            print(self.gameModel.validMoves(), moveString)
+            raise Exception("REEEEEE {}".format(moveString))
             return "err " + str(e)
     
     def validmoves(self) -> str:
@@ -216,20 +219,22 @@ class Engine:
 
         """
         # print('gs=',gameString)
-        gameModel = GameModel(moves_in=[], board=GameBoard(pieces=[]))
+        #gameModel = GameModel(moves_in=[], board=GameBoard(pieces=[]))
+        gameModel = GameModel(board=None)
         # print('gm moves=',gameModel.moves)
         gameStringSplit = gameString.split(";")
         if gameStringSplit[0] != "Base":
             raise NotImplementedError("Non-Base games not supported")
-        turnColour = gameStringSplit[0:5]
+        turnColour = gameStringSplit[2][0:5]
         for i in range(3, len(gameStringSplit)):
             # print('parsing=',gameStringSplit[i])
+            print(gameStringSplit[i])
             gameModel.playMove(gameStringSplit[i])
 
         self.gameModel = gameModel
 
 if __name__ == "__main__":
-    games = 1
+    games = 30
     wins = []
     turns=[]
     for i in range(games):
@@ -239,9 +244,9 @@ if __name__ == "__main__":
         while(True):
             try:
                 ge.parse("play {}".format(ge.bestmove(difficulty=1)))
-                ge.parse("play {}".format(ge.bestmove(difficulty=0)))
+                ge.parse("play {}".format(ge.bestmove(difficulty=1)))
                 result = ge.gameModel.board.isGameOver()
-                ge.gameModel.board.printBoard()
+                #ge.gameModel.board.printBoard()
                 if result or ge.gameModel.turnNum>=100:
                     break
             except Exception as e:
@@ -251,6 +256,7 @@ if __name__ == "__main__":
                 break
         ge.gameModel.board.printBoard()
         print("WINNER! {}".format(result))
+        print(ge.gameModel.moves)
         if result == 'W':
             wins.append(1)
         else:
