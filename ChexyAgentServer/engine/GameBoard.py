@@ -94,9 +94,16 @@ class GameBoard:
             if piece[1] == 'B':
                 #beetle moved off piece
                 if movingPiece.beetling is not None:
+                    p2 = movingPiece.beetling
                     beetledPiece = movingPiece.beetling
-                    #self.Board[oldCoords[0]][oldCoords[1]] = beetledPiece
+                    while p2.id[1] == "B" and p2.beetling:
+                        p2 = p2.beetling
+
+                    self.Board[oldCoords[0]][oldCoords[1]] = p2
+                    beetledPiece = movingPiece.beetling
+
                     movingPiece.beetling = None
+
                     beetledPiece.beetleOnTop = None
         else:
             beetledPiece = movingPiece.beetling
