@@ -90,6 +90,7 @@ class ArtificialAgent:
         # Don't play queen on turn 1
         while gameModel.turnNum == 1 and 'Q' in choice:
             choice = random.choice(moveList)
+        print(choice)
         return choice
 
     def medium(self, gameModel, moveList):
@@ -171,5 +172,5 @@ class ArtificialAgent:
         while (not q.empty() and highPriority[-1][0] == high):
             highPriority.append(q.get())
         choice = random.choice(highPriority)
-        print("(priority, move): {}".format(choice))
+        print("{:.2f}, {}".format(choice[0], choice[1]))
         return choice
