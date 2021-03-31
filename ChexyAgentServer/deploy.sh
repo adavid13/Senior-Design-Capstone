@@ -13,6 +13,8 @@ sudo cp ChexyAgent /etc/nginx/sites-available/ChexyAgent
 sudo mv /etc/nginx/sites-enabled/ChexyAgent ~/ChexyAgent/oldChexyAgent
 sudo ln -s /etc/nginx/sites-available/ChexyAgent /etc/nginx/sites-enabled
 cd ../dist
+sudo rm -rf /var/www/html
+sudo mkdir /var/www/html
 sudo cp bundle.min.js  bundle.min.js.LICENSE  index.css  index.html rules.html /var/www/html
 sudo cp -r assets /var/www/html
 cd -
