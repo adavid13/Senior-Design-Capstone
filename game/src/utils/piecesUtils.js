@@ -148,10 +148,5 @@ export function createPieceId(player, type, id) {
     2: 'b'
   };
 
-  const pieceId = playerMapping[player.getNumber()] + mapping[type];
-  if (type !== Constants.Pieces.KING) {
-    return pieceId + id;
-  }
-  
-  return pieceId;
+  return playerMapping[player.getNumber()] + mapping[type] + id;
 }

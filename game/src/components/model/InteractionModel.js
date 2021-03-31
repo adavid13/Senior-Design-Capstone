@@ -47,7 +47,7 @@ export default class InteractionModel {
 
   incrementTurn() {
     this._currentTurn += 1;
-    this._moveHistory[3] = this._playerTurn === 0 ? 'White[' + this._currentTurn + ']' : 'Black[' + this._currentTurn + ']';
+    this._moveHistory[3] = this._playerTurn === 0 ? 'White[' + Math.ceil(this._currentTurn / 2) + ']' : 'Black[' + Math.ceil(this._currentTurn / 2) + ']';
   }
 
   get commands() {
