@@ -177,8 +177,15 @@ export default class GameControllerScene extends Phaser.Scene {
   handlePieceSelection(selectedPiece) {
     this.clearSelection();
 
+    // const pieces = getAllPiecesAtTileXY(this.board, selectedPiece.rexChess.tileXYZ);
+    // for (let i = 0; i < pieces.length; i++) {
+    //   const piece = pieces[i];
+    //   const tiles = piece.getDestinationTiles();
+    //   console.log("Tiles", tiles);
+    // }
+
     const { playerTurn, commands } = this.interactionModel;
-    if (playerTurn === this.players[0]) {
+    if (playerTurn.getPlayerType() === Constants.PlayerType.HUMAN) {
       if (isKingOnTheBoard(playerTurn) || commands.length > 0 || playerTurn !== selectedPiece.getPlayer()) {
         this.interactionModel.selectedPiece = selectedPiece;
         selectedPiece.setTint(Constants.Color.YELLOW_HIGHLIGHT);
@@ -195,7 +202,7 @@ export default class GameControllerScene extends Phaser.Scene {
         this.clearSelection();
         // Check if selected card belongs to the player that has the turn.
         const { playerTurn } = this.interactionModel;
-        if (playerTurn === this.players[0] && pieceInHand && this.interactionModel.pieceCanBeAdded(pieceInHand)) {
+        if (playerTurn.getPlayerType() === Constants.PlayerType.HUMAN && pieceInHand && this.interactionModel.pieceCanBeAdded(pieceInHand)) {
           pieceInHand.setSelected(true);
           this.interactionModel.selectedPiece = pieceInHand;
           const allowedTiles = this.board.showInitialPlacementPositions(pieceInHand.getPlayer());
@@ -284,7 +291,7 @@ export default class GameControllerScene extends Phaser.Scene {
       this.interactionModel.addToHistory('pass');
       return Constants.Turn.SKIP_TURN;
     }
-
+    // fix this
     if (playerTurn.getPlayerType() === Constants.PlayerType.HUMAN) {
       setTimeout(() => { this.getAIAction(currentTurn + 1); }, 2000 );
     }

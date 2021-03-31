@@ -119,8 +119,10 @@ export default class BoardPiece extends Phaser.GameObjects.Sprite {
     const curNeighbors = getAllNeighborsOfTileXY(board, curTile)
       .filter(neighbor => neighbor !== piece);
   
-    // Piece is currently in overlaping position, any movement is allowed
-    if (piece.canOverlap && piece.rexChess.tileXYZ.z !== 'pathfinderLayer') {
+    // Piece is currently in overlaping position and is at the top of the stack, any movement is allowed
+    const allPiecesInCurrentTitle = getAllPiecesAtTileXY(board, preTile);
+    const isTopOfStack = allPiecesInCurrentTitle[allPiecesInCurrentTitle.length - 1] === piece;
+    if (piece.canOverlap && isTopOfStack && piece.rexChess.tileXYZ.z !== 'pathfinderLayer') {
       return true;
     }
   

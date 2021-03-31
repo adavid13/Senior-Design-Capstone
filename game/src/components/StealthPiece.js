@@ -34,16 +34,21 @@ export default class StealthPiece  extends BoardPiece {
   getDestinationTiles() {
     const { board, tileXYZ } = this.rexChess;
     const tileXYArray = [];
-    const neighbors = getAllNeighborsOfTileXY(board, tileXYZ)
-      .filter(piece => piece.rexChess.tileXYZ.z === 'pathfinderLayer');
 
-    for (const neighbor of neighbors) {
-      const direction = board.directionBetween(this, neighbor);
-      const destinationTile = findFreeTileAtDirection(board, tileXYZ, direction);
-      if (verifyBoardContinuityOnMove(this, destinationTile)) {
-        // Keep duplicates out of the array
-        if (!tileXYArray.find(tileXY => tileXY.x === destinationTile.x && tileXY.y === destinationTile.y)) {
-          tileXYArray.push({ ...destinationTile, cost: 1 });
+    const allPiecesInCurrentTitle = getAllPiecesAtTileXY(board, tileXYZ);
+    const isTopOfStack = allPiecesInCurrentTitle[allPiecesInCurrentTitle.length - 1] === this;
+    if (isTopOfStack) {
+      const neighbors = getAllNeighborsOfTileXY(board, tileXYZ)
+        .filter(piece => piece.rexChess.tileXYZ.z === 'pathfinderLayer');
+
+      for (const neighbor of neighbors) {
+        const direction = board.directionBetween(this, neighbor);
+        const destinationTile = findFreeTileAtDirection(board, tileXYZ, direction);
+        if (verifyBoardContinuityOnMove(this, destinationTile)) {
+          // Keep duplicates out of the array
+          if (!tileXYArray.find(tileXY => tileXY.x === destinationTile.x && tileXY.y === destinationTile.y)) {
+            tileXYArray.push({ ...destinationTile, cost: 1 });
+          }
         }
       }
     }

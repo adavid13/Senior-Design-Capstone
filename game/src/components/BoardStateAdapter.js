@@ -12,13 +12,24 @@ function actionToUHPString(actionType, piece, destination, board, interactionMod
     return piece.getId();
 
   // If piece is Mage and is moving on top of another piece
-  const piecesAtDestination = getAllPiecesAtTileXY(board, destination);
+  const piecesAtDestination = getAllPiecesAtTileXY(board, destination)
+    .filter(pieceAtTile => pieceAtTile !== piece);
   if (actionType === 'Move' && piece.getType() === Constants.Pieces.MAGE && piecesAtDestination.length > 0) {
-    return piece.getId() + ' ' + piecesAtDestination[0].getId();
+    return piece.getId() + ' ' + piecesAtDestination[piecesAtDestination.length - 1].getId();
   }
 
+  // Select a piece that is neighbour to the destination as reference
   const allNeighbors = getAllNeighborsOfTileXY(board, { x: destination.x, y: destination.y });
-  const neighborRef = allNeighbors[0];
+  let neighborRef = allNeighbors[0];
+
+  // Verify if the selected neighbour is a part of a stack of piece. Change reference to the top one if it is.
+  const pieceAtNeighborRefTile = getAllPiecesAtTileXY(board, neighborRef.rexChess.tileXYZ)
+    .filter(pieceAtTile => pieceAtTile !== piece);
+  const isStacked = pieceAtNeighborRefTile.length > 1;
+  if (isStacked) {
+    neighborRef = pieceAtNeighborRefTile[pieceAtNeighborRefTile.length - 1];
+  }
+
   const neighborDir = board.directionBetween(neighborRef, destination);
   const destinationString = appendDir(neighborRef.getId(), neighborDir);
   return piece.getId() + ' ' + destinationString;
