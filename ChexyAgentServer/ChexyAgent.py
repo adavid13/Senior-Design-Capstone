@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, Response
 from time import sleep
 from engine import Engine
 
@@ -22,17 +22,24 @@ def test():
 def play():
     if request.method == 'POST':
         # print('data=',request.data)
-        e = Engine.Engine()
-        gs = request.data.decode('utf-8')
-        gameStringSplit = gs.split(";")
-        difficulty = int(gameStringSplit[1])
+        try:
+            e = Engine.Engine()
+            gs = request.data.decode('utf-8')
+            gameStringSplit = gs.split(";")
+            difficulty = int(gameStringSplit[1])
 
-        gameString = str(';'.join([gameStringSplit[0]]+gameStringSplit[2:]))
-        e.parseGameString(gameString)
-        nextString = e.parse("play {}".format(e.bestmove(difficulty=difficulty)))
-        nextSplit = nextString.split(";")
-        retString = ';'.join([nextSplit[0]]+[str(difficulty)]+nextSplit[1:])
-        return retString
+            gameString = str(';'.join([gameStringSplit[0]]+gameStringSplit[2:]))
+            e.parseGameString(gameString)
+            nextString = e.parse("play {}".format(e.bestmove(difficulty=difficulty)))
+            nextSplit = nextString.split(";")
+            retString = ';'.join([nextSplit[0]]+[str(difficulty)]+nextSplit[1:])
+            status = '200'
+        except Exception as e:
+            retString = str(e)
+            status = '500'
+            
+        r = Response(response=retString,status=status)
+        return r
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
