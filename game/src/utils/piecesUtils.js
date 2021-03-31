@@ -54,7 +54,14 @@ export function getAllNeighborsOfTileXY(board, tileXY) {
  */
 export function tileTouchesOpponentPiece(board, player, tile) {
   const neighbors = getAllNeighborsOfTileXY(board, tile);
-  return neighbors.some(neighbor => neighbor.getPlayer() !== player);
+  return neighbors.some(neighbor => {
+    if (neighbor.getPlayer() !== player) {
+      const allPiecesAtTile = getAllPiecesAtTileXY(board, neighbor.rexChess.tileXYZ);
+      const pieceAtTopOfStack = allPiecesAtTile[allPiecesAtTile.length - 1];
+      return pieceAtTopOfStack.getPlayer() !== player;
+    }
+    return false;
+  });
 }
 
 /**
