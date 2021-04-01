@@ -88,7 +88,7 @@ class ArtificialAgent:
     def easy(self, gameModel, moveList):
         choice = random.choice(moveList)
         # Don't play queen on turn 1
-        while gameModel.turnNum == 1 and 'Q' in choice:
+        while gameModel.turnNum == 1 and 'Q' in choice[:3]:
             choice = random.choice(moveList)
         print(choice)
         return choice
