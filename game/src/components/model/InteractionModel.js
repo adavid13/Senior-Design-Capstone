@@ -14,11 +14,11 @@ export default class InteractionModel {
 
     let aiDifficulty;
     if (difficulty === Constants.Difficulty.INTERMEDIATE) {
-      aiDifficulty = 2;
-    } else if (difficulty === Constants.Difficulty.ADVANCED) {
-      aiDifficulty = 3;
-    } else {
       aiDifficulty = 1;
+    } else if (difficulty === Constants.Difficulty.ADVANCED) {
+      aiDifficulty = 2;
+    } else {
+      aiDifficulty = 0;
     }
 
     this._moveHistory = ['Base', aiDifficulty.toString(), 'InProgress', 'White[1]'];
