@@ -9,3 +9,4 @@ ChexyAgentServer/test*
 *.ipynb
 *.log
 .vscode/*
+game/package-lock.json
