@@ -50,6 +50,7 @@ export default class GameControllerScene extends Phaser.Scene {
     this.handlePieceInHandSelection = this.handlePieceInHandSelection.bind(this);
     this.handlePiecePlacement = this.handlePiecePlacement.bind(this);
     this.randomAction = this.randomAction.bind(this);
+    this.getAIAction = this.getAIAction.bind(this);
 
     this.toolTip = new Tooltip(this.gameUIScene, 0, 0, '').layout();
     this.toolTip.setVisible(false);
@@ -70,6 +71,7 @@ export default class GameControllerScene extends Phaser.Scene {
         onEndTurnClick: this.handleEndTurnClick,
         onPieceSelection: this.handlePieceInHandSelection,
         randomAction: this.randomAction,
+        getAIAction: this.getAIAction,
         interfaceModel: this.interfaceModel,
         difficulty: this.difficulty,
       }
@@ -291,11 +293,7 @@ export default class GameControllerScene extends Phaser.Scene {
       this.interactionModel.addToHistory('pass');
       return Constants.Turn.SKIP_TURN;
     }
-    // fix this
-    if (playerTurn.getPlayerType() === Constants.PlayerType.HUMAN) {
-      setTimeout(() => { this.getAIAction(currentTurn + 1); }, 2000 );
-    }
-    
+
     const state = this.interactionModel.getMoveHistory().join(';');
     console.log("History: ", state);
 
@@ -499,9 +497,7 @@ export default class GameControllerScene extends Phaser.Scene {
         }
       });
   }
-
-  
-
+ 
   endTurnWithDelay() {
     setTimeout(() => { this.gameUIScene.handleEndTurnClick(false); }, 2000);
   }

@@ -33,6 +33,7 @@ export default class GameUIScene extends Phaser.Scene {
     this.onEndTurnClick = initParams.onEndTurnClick;
     this.onPieceSelection = initParams.onPieceSelection;
     this.randomAction = initParams.randomAction;
+    this.getAIAction = initParams.getAIAction;
     this.interfaceModel = initParams.interfaceModel;
     this.difficulty = initParams.difficulty;
   }
@@ -44,6 +45,7 @@ export default class GameUIScene extends Phaser.Scene {
     this.handleEndTurnClick = this.handleEndTurnClick.bind(this);
     this.openOptionsDialog = this.openOptionsDialog.bind(this);
     this.openMenuDialog = this.openMenuDialog.bind(this);
+    this.playWooshSound = this.playWooshSound.bind(this);
     this.concede = this.concede.bind(this);
     
     this.createSounds();
@@ -256,10 +258,12 @@ export default class GameUIScene extends Phaser.Scene {
   }
 
   timeIsUp() {
+    if (this.interactionModel.playerTurn === this.players[0]) {
+      this.alert('Time\'s up! Your turn is going to be skipped.');
+    }
     if (this.interactionModel.commands.length === 0) {
       this.randomAction(this.getAllCardsNotPlayed());
     }
-    this.alert('Time\'s up! Your turn is going to be skipped.');
     this.enableButtons(false);
     this.handleEndTurnClick(false);   
   }
@@ -290,66 +294,70 @@ export default class GameUIScene extends Phaser.Scene {
     this.timedEvent.remove(false);
   }
 
-  animateEndTurn() {
-    if (this.interactionModel.playerTurn.getNumber() === 1) {
-      this.turnText.setText('Your Turn');
-    } else {
-      this.turnText.setText("Opponent's Turn");
-    }
-    
-    this.turnText.setX(-500);
-    const timeline = this.tweens.createTimeline();
-    timeline.add({
-      targets: this.turnText,
-      x: Constants.Window.WIDTH / 2,
-      duration: 600,
-      ease: 'Quint.easeOut',
-      delay: 400
-    });
-    timeline.add({
-      targets: this.turnText,
-      x: Constants.Window.WIDTH + 300,
-      duration: 600,
-      ease: 'Quint.easeOut',
-      delay: 400
-    });
-    timeline.play();
-
-    const backgroundTimeLine = this.tweens.createTimeline();
-    backgroundTimeLine.add({
-      targets: this.textBackground,
-      alpha: 0.9,
-      duration: 600,
-      ease: 'Quint.easeOut',
-      yoyo: true,
-      delay: 400
-    });
-    backgroundTimeLine.play();
-
-    setTimeout(() => { 
-      this.whooshSound.setVolume(this.interfaceModel.soundLevel);
-      this.whooshSound.play();
-    }, 400);
-    setTimeout(() => { 
-      this.whooshSound.setVolume(this.interfaceModel.soundLevel);
-      this.whooshSound.play();
-    }, 1400);
+  playWooshSound() {
+    this.whooshSound.setVolume(this.interfaceModel.soundLevel);
+    this.whooshSound.play();
   }
 
-  handleEndTurnClick() {
+  animateEndTurn() {
+    return new Promise((resolve, reject) => {
+      if (this.interactionModel.playerTurn.getNumber() === 1) {
+        this.turnText.setText('Your Turn');
+      } else {
+        this.turnText.setText("Opponent's Turn");
+      }
+      
+      this.turnText.setX(-500);
+      const timeline = this.tweens.createTimeline();
+      timeline.add({
+        targets: this.turnText,
+        x: Constants.Window.WIDTH / 2,
+        duration: 600,
+        ease: 'Quint.easeOut',
+        delay: 400,
+        onStart: this.playWooshSound
+      });
+      timeline.add({
+        targets: this.turnText,
+        x: Constants.Window.WIDTH + 300,
+        duration: 600,
+        ease: 'Quint.easeOut',
+        delay: 400,
+        onStart: this.playWooshSound,
+        onComplete: () => resolve('animationEnded')
+      });
+      timeline.play();
+  
+      const backgroundTimeLine = this.tweens.createTimeline();
+      backgroundTimeLine.add({
+        targets: this.textBackground,
+        alpha: 0.9,
+        duration: 600,
+        ease: 'Quint.easeOut',
+        yoyo: true,
+        delay: 400
+      });
+      backgroundTimeLine.play();
+    });
+  }
+
+  async handleEndTurnClick() {
     const turnResult = this.onEndTurnClick(false);
     switch (turnResult) {
       case Constants.Turn.NEXT_TURN:
         this.stopTimer();
         this.enableButtons(false);
-        this.animateEndTurn();
+        await this.animateEndTurn();
         this.swapOverlay(this.interactionModel.playerTurn.getNumber());
         this.resetTimer();
+        if (this.interactionModel.playerTurn.getPlayerType() === Constants.PlayerType.AI) {
+          this.getAIAction(this.interactionModel.currentTurn);
+        }
         break;
       case Constants.Turn.SKIP_TURN:
         this.stopTimer();
         this.enableButtons(false);
-        this.animateEndTurn();
+        await this.animateEndTurn();
         this.swapOverlay(this.interactionModel.playerTurn.getNumber());
         this.resetTimer();
         if (this.interactionModel.playerTurn === this.players[0])
