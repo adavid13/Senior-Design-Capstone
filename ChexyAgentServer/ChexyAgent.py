@@ -1,6 +1,7 @@
 from flask import Flask, request, Response
 from time import sleep
 from engine import Engine
+import traceback
 
 app = Flask(__name__)
 # import sys
@@ -26,8 +27,11 @@ def play():
             e = Engine.Engine()
             gs = request.data.decode('utf-8')
             gameStringSplit = gs.split(";")
-            difficulty = int(gameStringSplit[1])
-
+            try:
+                difficulty = int(gameStringSplit[1])
+            except ValueError:
+                print('invalid difficulty')
+                difficulty = '0'
             gameString = str(';'.join([gameStringSplit[0]]+gameStringSplit[2:]))
             e.parseGameString(gameString)
             nextString = e.parse("play {}".format(e.bestmove(difficulty=difficulty)))
@@ -35,6 +39,8 @@ def play():
             retString = ';'.join([nextSplit[0]]+[str(difficulty)]+nextSplit[1:])
             status = '200'
         except Exception as e:
+            print('\nException!',str(e),'\n')
+            traceback.print_exception(type(e), e, e.__traceback__)
             retString = str(e)
             status = '500'
             
