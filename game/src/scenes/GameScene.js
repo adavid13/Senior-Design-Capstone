@@ -42,6 +42,17 @@ export default class GameScene extends Phaser.Scene {
       }
     });
 
+    this.pinch = this.rexGestures.add.pinch({ enable: true });
+    this.pinch.on('pinch', function (dragScale) {
+      const cam = this.cameras.main;
+      const scaleFactor = dragScale.scaleFactor;
+      if (cam.zoom >= 0.35 && cam.zoom <= 3) {
+        cam.zoom = cam.zoom * scaleFactor > 3
+          ? 3 : cam.zoom * scaleFactor < 0.35 
+          ? 0.35 : cam.zoom * scaleFactor;
+      }
+    }, this);
+
     Events.on('piece-added', (piece) => {
       this.board.handleTileColorChange(piece);
     });

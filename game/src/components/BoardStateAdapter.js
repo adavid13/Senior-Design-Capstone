@@ -19,7 +19,8 @@ function actionToUHPString(actionType, piece, destination, board, interactionMod
   }
 
   // Select a piece that is neighbour to the destination as reference
-  const allNeighbors = getAllNeighborsOfTileXY(board, { x: destination.x, y: destination.y });
+  const allNeighbors = getAllNeighborsOfTileXY(board, { x: destination.x, y: destination.y })
+    .filter(neighbor => neighbor !== piece);
   let neighborRef = allNeighbors[0];
 
   // Verify if the selected neighbour is a part of a stack of piece. Change reference to the top one if it is.
@@ -225,7 +226,7 @@ function convertAction(uhpString, board, players, cards) {
     var findPiece2Player = playerPieces.find(piece => piece.getId() === color2+piece2); //determines if coordinate piece belong to player
     var coordPiecePos;
     if((typeof(findPiece2AI) === 'undefined') && (typeof(findPiece2Player) === 'undefined')){ //coordinate piece is not on the board
-      return { type: 'error' };
+      return { type: 'error', content: 'attempting to use a piece as coordinate that is not on the board' };
     }
     if( (typeof(findPiece2AI) != 'undefined') && (typeof(findPiece2Player) === 'undefined')){ //coordinate piece is one of the AI's pieces
       coordPiecePos = findPiece2AI.rexChess.tileXYZ; //get the tile (position) of the coordinate piece
@@ -247,7 +248,7 @@ function convertAction(uhpString, board, players, cards) {
   }else{ //first piece of the game
     var findPiece2Player = playerPieces.find(piece => piece.getId() === color2+piece2); //determines if coordinate piece belong to player
     if((typeof(findPiece2Player) === 'undefined')){ //coordinate piece is not on the board
-      return { type: 'error' };
+      return { type: 'error', content: 'attempting to use a piece as coordinate that is not on the board' };
     }else{
       coordPiecePos = findPiece2Player.rexChess.tileXYZ; //get the tile (position) of the coordinate piece
       if(direction === 'T'){ //for placing on top (beetle)
@@ -264,7 +265,7 @@ function convertAction(uhpString, board, players, cards) {
    */
   var pieceAtTile = board.tileXYToChessArray(result.tileXY.x, result.tileXY.y); //get piece at destination tile
   if((pieceAtTile.length != 0) && (result.piece.getId().slice(1,2) != 'B')){ //if destination tile is not empty, and piece/card to move is not Beetle
-    return { type: 'error' };
+    return { type: 'error', content: 'attempting to move a piece to an occupied tile' };
   }
 
   /**
@@ -275,7 +276,7 @@ function convertAction(uhpString, board, players, cards) {
     var isDestXValid = validPlacementTiles.find(tile => tile.x === result.tileXY.x); //compares all destination tiles' x value with TileXY's x value
     var isDestYValid = validPlacementTiles.find(tile => tile.y === result.tileXY.y); //compares all destination tiles' y value with TileXY's y value
     if( !((typeof(isDestXValid) != 'undefined') && (typeof(isDestYValid) != 'undefined')) ){ //if no valid placement tile exists
-      return { type: 'error' };
+      return { type: 'error', content: 'attempting to place a piece to an invalid tile' };
     }
   }
 
@@ -285,7 +286,7 @@ function convertAction(uhpString, board, players, cards) {
   const validPieces = AIPieces.filter(piece => piece.getDestinationTiles().length > 0); // This will list all the pieces that are allowed to move
   var isAllowed = validPieces.find(piece => piece.getId() === color1+piece1); //check if piece to move is in the validPieces list
   if((result.type === 'move') && (typeof(isAllowed) === 'undefined')){ //if it's a move action but piece is not allowed to move
-    return { type: 'error' };
+    return { type: 'error', content: 'attempting to move a blocked piece' };
   }
 
   /**
@@ -296,7 +297,7 @@ function convertAction(uhpString, board, players, cards) {
     var isXValid = validTiles.find(tile => tile.x === result.tileXY.x); //Check if TileXY's x-coordinate is part of ValidTiles
     var isYvalid = validTiles.find(tile => tile.y === result.tileXY.y); //Check if TileXY's y-coordinate is part of ValidTiles
     if( !((typeof(isXValid) != 'undefined') && (typeof(isYvalid) != 'undefined')) ){ //if no valid destination tile exists
-      return { type: 'error' };
+      return { type: 'error', content: 'attempting to move a piece to an invalid location' };
     }
   }
 

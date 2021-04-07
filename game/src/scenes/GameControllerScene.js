@@ -462,10 +462,13 @@ export default class GameControllerScene extends Phaser.Scene {
         // check if the response from the server returned in the correct turn. Ignore otherwise.
         if (turn === currentTurn) {
           if (action?.type === 'error') {
+            console.error('Received an invalid action from the server. Move: ', response.split(';')[response.split(';').length - 1]);
+            console.error('Error: ', action.content);
             const { currentTurn } = this.interactionModel;
             if (turn === currentTurn) {
               this.randomAction(this.gameUIScene.getAllCardsNotPlayed());
               this.endTurnWithDelay();
+              return;
             }
           } else if (action?.type === 'move') {
             this.execute(new MoveCommand({
