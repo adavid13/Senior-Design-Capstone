@@ -51,7 +51,7 @@ class Engine:
         else:
             return "err Invalid command. Try 'help' to see a list of valid commands."
         
-        returnStr += "\nok"
+        #returnStr += "\nok"
         return returnStr
 
     def info(self):
