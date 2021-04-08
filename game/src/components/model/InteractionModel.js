@@ -16,7 +16,7 @@ export default class InteractionModel {
     if (difficulty === Constants.Difficulty.INTERMEDIATE) {
       aiDifficulty = 1;
     } else if (difficulty === Constants.Difficulty.ADVANCED) {
-      aiDifficulty = 2;
+      aiDifficulty = 1;
     } else {
       aiDifficulty = 0;
     }
