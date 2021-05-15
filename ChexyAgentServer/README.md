@@ -57,6 +57,14 @@ click gear icon
 
 scroll down to network and activate 'Disable cache'
 
+### Local Server
+
+python ChexyAgent.py
+
+or
+
+gunicorn --bind 0.0.0.0:5000 wsgi:app
+
 ## Communicate from server
 
 example methods:
@@ -102,3 +110,9 @@ There are no known timeouts with development server. Timeouts are set to 700s in
 debug workflow: https://askubuntu.com/questions/1187751/django-guncorn-nginx-111-connection-refused-bad-gateway-502
 
 print statements from python will show up here: journalctl -u ChexyAgent.service
+
+## Debuging
+
+curl -X POST -H "Content-Type: text/plain" -d "Base;1;InProgress;Black[2];wB1;bG1 \wB1;wA1 -bG1" https://chexy.tk/ai/play
+
+sudo tail -30 /var/log/nginx/error.log
