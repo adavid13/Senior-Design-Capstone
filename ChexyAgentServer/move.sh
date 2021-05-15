@@ -2,14 +2,14 @@
 #before running move.sh build the game:
 #sudo run npm install
 #sudo npm run build
-IP="52.233.37.124"
+IP="52.138.36.161"
 mkdir ../ChexyAgent
-cp ChexyAgent ChexyAgent.service deploy.sh build.sh ChexyAgent.py https_certification.sh wsgi.py ../ChexyAgent
+cp ChexyAgent ChexyAgent.service deploy.sh build.sh ChexyAgent.py https_certification.sh wsgi.py access.log chexy_error.log ../ChexyAgent
 cp -r engine ../ChexyAgent
-scp -i ../../ChexyAIHost_key.pem -r ../ChexyAgent engg4000@$IP:~ 
-scp -i ../../ChexyAIHost_key.pem -r ../game/dist/ engg4000@$IP:~
+scp -i ../../ChexyAIHost_key.pem -r ../ChexyAgent azureuser@$IP:~ 
+scp -i ../../ChexyAIHost_key.pem -r ../game/dist/ azureuser@$IP:~
 rm -r ../ChexyAgent
-ssh -i ../../ChexyAIHost_key.pem engg4000@$IP
+ssh -i ../../ChexyAIHost_key.pem azureuser@$IP
 
 # then on server: cd ChexyAgent
 # chmod +x build.sh deploy.sh http_certification.sh

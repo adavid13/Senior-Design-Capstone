@@ -10,3 +10,4 @@ ChexyAgentServer/test*
 *.log
 .vscode/*
 game/package-lock.json
+yarn.lock

@@ -3,11 +3,14 @@ Description=Gunicorn instance to serve ChexyAgent
 After=network.target
 
 [Service]
-User=engg4000
+User=azureuser
 Group=www-data
-WorkingDirectory=/home/engg4000/ChexyAgent
-Environment="PATH=/home/engg4000/ChexyAgent/ChexyAgentenv/bin"
-ExecStart=/home/engg4000/ChexyAgent/ChexyAgentenv/bin/gunicorn --timeout 15 --workers 3 --bind unix:ChexyAgent.sock -m 007 wsgi:app
+WorkingDirectory=/home/azureuser/ChexyAgent
+Environment="PATH=/home/azureuser/ChexyAgent/ChexyAgentenv/bin"
+ExecStart=/home/azureuser/ChexyAgent/ChexyAgentenv/bin/gunicorn \
+--error-logfile /home/azureuser/ChexyAgent/chexy_error.log \
+--access-logfile /home/azureuser/ChexyAgent/access.log \
+--timeout 15 --workers 3 --bind unix:ChexyAgent.sock -m 007 wsgi:app
 
 [Install]
 WantedBy=multi-user.target

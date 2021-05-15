@@ -19,7 +19,7 @@ def test():
 
 @app.route('/ai/play', methods=['POST'])
 #example
-# curl -X POST -H "Content-Type: text/plain" -d "Base;InProgress;Black[2];wB1;bG1 \wB1;wA1 -bG1" http://0.0.0.0:5000/ai/play
+# curl -X POST -H "Content-Type: text/plain" -d "Base;1;InProgress;Black[2];wB1;bG1 \wB1;wA1 -bG1" http://0.0.0.0:5000/ai/play
 def play():
     if request.method == 'POST':
         # print('data=',request.data)
